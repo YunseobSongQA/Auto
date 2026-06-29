@@ -46,6 +46,8 @@ export async function runFlow(driver, opts = {}) {
     }
   }
 
+  // Playwright 차이 ②: Playwright 는 액션마다 가시성/안정성을 auto-wait 하지만,
+  //   Selenium 은 기본이 즉시 실행이라 모든 대기를 driver.wait(until...) 으로 명시해야 합니다.
   const visible = (css) => driver.wait(until.elementIsVisible(driver.findElement(By.css(css))), T);
 
   await step('open_landing', async () => {
@@ -89,8 +91,15 @@ export async function runFlow(driver, opts = {}) {
   });
 
   await step('enter_room', async () => {
-    await driver.findElement(By.css('#enter-room-password')).sendKeys(TEST_ROOM_PASSWORD);
-    await driver.findElement(By.css('#enter-uploader-name')).sendKeys(name);
+    // Playwright 차이 ①: page.fill() 은 기존 값을 비우고 입력하지만,
+    //   Selenium sendKeys() 는 "덧붙입니다". QASS 는 테스트 방의 비밀번호/이름을
+    //   프리필하므로(main.js) 반드시 clear() 후 입력해야 인증이 통과합니다.
+    const pw = await driver.findElement(By.css('#enter-room-password'));
+    const uploader = await driver.findElement(By.css('#enter-uploader-name'));
+    await pw.clear();
+    await pw.sendKeys(TEST_ROOM_PASSWORD);
+    await uploader.clear();
+    await uploader.sendKeys(name);
     await driver.findElement(By.css('#btn-enter-room-submit')).click();
     await visible('#room-screen');
   });

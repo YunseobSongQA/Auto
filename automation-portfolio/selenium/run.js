@@ -16,12 +16,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ARTIFACTS = path.join(__dirname, 'artifacts');
 
 const options = new chrome.Options()
-  .addArguments('--headless=new', '--no-sandbox', '--disable-dev-shm-usage')
+  .addArguments('--no-sandbox', '--disable-dev-shm-usage')
   .windowSize({ width: 1280, height: 800 });
 
-// TODO(video): Selenium 은 video 녹화가 기본 제공되지 않습니다.
-//   녹화가 필요하면 Selenium Grid + RecordVideo, 또는 ffmpeg 화면 캡처를 붙이세요.
-//   쇼케이스 데모 영상은 Playwright 산출물(playwright/artifacts/*.webm)을 재사용합니다.
+// 녹화(record.sh)는 Xvfb 가상 디스플레이에서 headed 로 띄워 ffmpeg x11grab 으로 캡처합니다.
+// 평소엔 headless. HEADED=1 이면 headed(녹화용), CHROME_BIN 으로 크롬 바이너리 지정 가능.
+if (!process.env.HEADED) options.addArguments('--headless=new');
+if (process.env.CHROME_BIN) options.setChromeBinaryPath(process.env.CHROME_BIN);
 
 const driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
 

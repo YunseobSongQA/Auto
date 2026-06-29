@@ -13,7 +13,7 @@
 automation-portfolio/
   web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상)
   playwright/   # ✅ 레퍼런스 완전 구현 (헤드리스 + video 녹화)
-  selenium/     # 🟡 동일 플로우 골격(stub) + TODO
+  selenium/     # ✅ 동일 플로우 실제 실행 + Xvfb/ffmpeg 녹화 (selenium.webm)
   appium/       # 🟡 모바일 크롬 골격(stub) — 실행은 PC에서
   api/          # ✅ Supabase REST 읽기 플로우 (순수 함수)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
@@ -25,7 +25,7 @@ automation-portfolio/
 | 도구 | 대상 | 상태 | 비고 |
 |------|------|------|------|
 | Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | 핵심 플로우 + video 녹화 |
-| Selenium | QASS 웹 (동일 플로우) | 골격 | Playwright 비교용 |
+| Selenium | QASS 웹 (동일 플로우) | 완전 구현 | 실제 실행 + Xvfb/ffmpeg 녹화 |
 | Appium | QASS 모바일 크롬 (안드로이드) | 골격 | 실행은 PC에서 |
 | API | QASS 백엔드 (Supabase REST) | 완전 구현 | 실제 공개 anon API 읽기 |
 
@@ -38,8 +38,9 @@ cd playwright && npm i && npx playwright install chromium && npm test
 # 2) API 읽기 플로우 (브라우저/드라이버 불필요)
 cd api && npm i && npm start
 
-# 3) Selenium (골격 — TODO 채운 뒤)
-cd selenium && npm i && npm test
+# 3) Selenium (헤드리스 실행, 또는 ./record.sh 로 화면 녹화)
+cd selenium && npm i && npm test          # 헤드리스 실행
+#   화면 녹화(Xvfb+ffmpeg) → web/assets/selenium.webm:  ./record.sh
 
 # 4) Appium 은 PC에서 (안드로이드 에뮬레이터/실기기 필요)
 cd appium && npm i   # 실행법은 appium/README.md 참고
