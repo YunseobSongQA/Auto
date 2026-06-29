@@ -50,5 +50,12 @@ kill -INT "$FF_PID" 2>/dev/null || true
 wait "$FF_PID" 2>/dev/null || true
 FF_PID=""
 
+# 5) 앞부분 검은 화면(Xvfb·크롬 시작) 제거 — 쇼케이스에 바로 화면이 보이게.
+TRIM_SEC=3
+if ffmpeg -y -loglevel error -ss "$TRIM_SEC" -i "$OUT" -c:v libvpx-vp9 -b:v 1M -an \
+     -pix_fmt yuv420p "${OUT}.trim.webm" 2>/dev/null; then
+  mv "${OUT}.trim.webm" "$OUT"
+fi
+
 echo "saved: $OUT (run.js rc=$RUN_RC)"
 exit "$RUN_RC"
