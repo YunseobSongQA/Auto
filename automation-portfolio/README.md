@@ -59,7 +59,18 @@ cd web && python3 -m http.server 8080   # http://localhost:8080
 - **API mock 불필요**: QASS 가 클라이언트에 공개 anon 키를 노출하므로, 그 키로
   `rooms`/`captures` 를 실제로 읽을 수 있음을 확인했습니다. 따라서 API 도구는 mock 이 아닌
   **실제 REST 읽기**로 구현했습니다. (쓰기/삭제는 하지 않음 — 읽기 전용 플로우)
-- **데모 영상 자리**: 실제 GIF/webm 은 Playwright 실행으로 생성됩니다.
-  쇼케이스는 `web/config.js` 의 `demo` 경로만 가리키며, 파일이 없으면 플레이스홀더를 보여줍니다.
-- **Selenium/Appium 미실행**: 이번 산출물은 동일 계약 골격까지. 드라이버 설치가 필요한
-  실행은 README 의 절차로 PC/Codespaces 에서 수행합니다.
+- **데모 산출물**: 쇼케이스는 `web/config.js` 의 `demoType` 으로 분기합니다 — Playwright/
+  Selenium 은 `video`(webm), API 는 `json`(FlowResult), Appium 은 `pending`. 파일이 없으면
+  플레이스홀더를 보여줍니다.
+- **Appium 미실행**: 안드로이드 에뮬레이터가 필요해 이번 산출물은 동일 계약 골격까지.
+  PC 에서 `appium/README.md` 절차로 실행·녹화 후 `web/assets/appium.webm` 을 추가하고
+  `config.js` 의 appium 항목만 `pending → video` 로 바꾸면 됩니다.
+
+## 검증 상태 (이 저장소에서 실제로 실행한 결과)
+
+| 도구 | 실행 환경 | 결과 | 데모 산출물 |
+|------|-----------|------|-------------|
+| Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
+| Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
+| API | Node fetch (라이브 REST) | 4/4 스텝 pass · 단위 5/5 | `web/assets/api-result.json` |
+| Appium | (PC 전용, 미실행) | 골격 | `pending` |
