@@ -1,0 +1,35 @@
+{
+  "tool": "api",
+  "flowId": "qass-core-evidence-flow",
+  "target": "https://qass1.pages.dev/",
+  "startedAt": "2026-06-29T05:07:20.984Z",
+  "finishedAt": "2026-06-29T05:07:21.880Z",
+  "durationMs": 896,
+  "status": "pass",
+  "steps": [
+    {
+      "id": "list_rooms",
+      "status": "pass",
+      "ms": 774,
+      "note": "4 room(s)"
+    },
+    {
+      "id": "find_test_room",
+      "status": "pass",
+      "ms": 0,
+      "note": "room_id=75b87e93-230d-40f0-8b03-6224ccd3857a"
+    },
+    {
+      "id": "list_captures",
+      "status": "pass",
+      "ms": 122,
+      "note": "15 capture(s)"
+    },
+    {
+      "id": "search",
+      "status": "pass",
+      "ms": 0,
+      "note": "\"google\" → 3/15 hit(s)"
+    }
+  ]
+}
