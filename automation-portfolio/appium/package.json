@@ -1,0 +1,17 @@
+{
+  "name": "qass-appium",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QASS 핵심 플로우 — Appium 모바일 크롬(안드로이드) 구현 (골격, 실행은 PC)",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node run.js",
+    "start": "node run.js"
+  },
+  "dependencies": {
+    "webdriverio": "^9.0.0"
+  }
+}

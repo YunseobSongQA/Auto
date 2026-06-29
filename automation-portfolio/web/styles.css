@@ -1,0 +1,100 @@
+/* styles.css — 스타일 계층 (자주 바뀜). 로직/데이터와 분리. */
+:root {
+  --bg: #0b0f17;
+  --panel: #131a26;
+  --panel-2: #1a2434;
+  --line: #243044;
+  --text: #e6edf6;
+  --muted: #9fb0c4;
+  --brand: #5b8cff;
+  --brand-2: #8b5cff;
+  --done: #1f9d57;
+  --stub: #c8951b;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  background: radial-gradient(1200px 600px at 50% -10%, #18233a 0%, var(--bg) 60%);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* 히어로 */
+.hero { max-width: 980px; margin: 0 auto; padding: 64px 20px 28px; text-align: center; }
+.badge {
+  display: inline-block; padding: 6px 14px; border: 1px solid var(--line);
+  border-radius: 999px; color: var(--brand); font-size: 13px; font-weight: 600;
+  background: rgba(91, 140, 255, .08);
+}
+.hero h1 { font-size: clamp(28px, 5vw, 46px); margin: 18px 0 10px; letter-spacing: -.02em; }
+.grad {
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lede { color: var(--muted); max-width: 680px; margin: 0 auto 14px; font-size: 16px; }
+.flow { color: var(--muted); font-size: 14px; }
+.flow b { color: var(--text); }
+.flow a { color: var(--brand); text-decoration: none; margin-left: 10px; white-space: nowrap; }
+.flow a:hover { text-decoration: underline; }
+
+/* 카드 그리드 — 반응형 (PC: 2열, 모바일: 1열) */
+.grid {
+  max-width: 980px; margin: 0 auto; padding: 24px 20px 48px;
+  display: grid; gap: 20px; grid-template-columns: repeat(2, 1fr);
+}
+.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); }
+
+.card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 22px; display: flex; flex-direction: column; gap: 12px;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.card:hover { transform: translateY(-3px); border-color: var(--brand); }
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.tool { font-weight: 700; font-size: 18px; }
+.chip {
+  font-size: 12px; color: var(--muted); border: 1px solid var(--line);
+  padding: 3px 10px; border-radius: 999px;
+}
+.card h2 { font-size: 17px; margin: 0; }
+.desc { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* 데모 영상 자리 */
+.demo {
+  aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden;
+  border: 1px dashed var(--line); background: #0c121d;
+  display: flex; align-items: center; justify-content: center;
+}
+.demo video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.demo-ph { text-align: center; color: var(--muted); font-size: 13px; }
+.demo-ph small { color: #6b7c93; }
+
+.points { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.points li {
+  font-size: 12px; color: var(--muted);
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line);
+  padding: 3px 9px; border-radius: 8px;
+}
+
+.card-foot {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: auto; padding-top: 6px;
+}
+.target { font-size: 13px; color: var(--muted); }
+.status { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+.st-done { color: #b8f3cf; background: rgba(31, 157, 87, .16); border: 1px solid var(--done); }
+.st-stub { color: #f5dca0; background: rgba(200, 149, 27, .14); border: 1px solid var(--stub); }
+.repo { margin-left: auto; color: var(--brand); text-decoration: none; font-size: 13px; font-weight: 600; }
+.repo:hover { text-decoration: underline; }
+
+.foot { text-align: center; color: #6b7c93; font-size: 13px; padding: 0 20px 48px; }
+
+/* 반응형 */
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+  .hero { padding-top: 44px; }
+  .flow a { display: inline-block; margin: 6px 0 0; }
+}

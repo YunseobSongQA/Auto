@@ -1,0 +1,15 @@
+# 의존성
+node_modules/
+
+# 실행 산출물 (재생성됨)
+artifacts/
+playwright-report/
+test-results/
+
+# 데모 영상 (Playwright 실행으로 생성, 용량 큼)
+web/assets/*.webm
+web/assets/*.gif
+
+# OS / 에디터
+.DS_Store
+*.log

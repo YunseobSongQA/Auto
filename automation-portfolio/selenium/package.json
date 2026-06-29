@@ -1,0 +1,17 @@
+{
+  "name": "qass-selenium",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QASS 핵심 플로우 — Selenium WebDriver 구현 (Playwright 비교용 골격)",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node run.js",
+    "start": "node run.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.25.0"
+  }
+}
