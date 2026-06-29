@@ -1,28 +1,33 @@
 /**
- * loadtest.js — Postman 컬렉션을 Newman 으로 반복 실행해 QASS 백엔드 읽기 경로의
- * 성능·부하를 측정합니다. (Postman GUI 의 Collection Runner / 부하 테스트와 같은 목적,
- * CLI 라 Codespaces·CI 에서 헤드리스로 돌아갑니다.)
+ * loadtest.js — QASS 백엔드 읽기 API 성능·부하 검증 (Postman 컬렉션 × Newman).
  *
- *   node loadtest.js [iterations]      # 기본 40회 반복(= 요청 80건)
+ * 무엇을: rooms·captures 읽기 API 의 응답속도·가용성.
+ * 왜:     동시 사용자 부하에서 운영 기준(SLO)을 만족하는지 — "호출 되나" 가 아니라
+ *         "기준 안에서 빠르고 안정적인가" 를 통과/실패로 판정.
+ * 어떻게: 가상 사용자(VU) N명이 각자 M회 반복을 "동시에" 호출(= N 동시성, 총 N×M×2 요청),
+ *         지연 분포(p50/p95/p99)·성공률·처리량을 측정해 SLO 대비 PASS/FAIL.
  *
- * 산출: web/assets/api-perf.json (요청별 지연 분포·성공률·처리량 → 쇼케이스가 그래프로)
+ *   node loadtest.js [vus] [iterationsPerVu]     # 기본 10 × 50 = 요청 1000건, 동시성 10
+ *
+ * 산출: web/assets/api-perf.json (판정·기준·수치·엔드포인트별 시계열 → 쇼케이스 그래프)
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import newman from 'newman';
-import { summarize, GOAL } from './qass-perf.js';
+import { summarize, evaluate, SLO, GOAL } from './qass-perf.js';
 import { TARGET } from './qass-api.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const COLLECTION = path.join(__dirname, 'postman', 'qass.postman_collection.json');
 const WEB_ASSETS = path.join(__dirname, '..', 'web', 'assets');
 
-const iterations = Number(process.argv[2]) || 40;
+const vus = Number(process.argv[2]) || 10;
+const iterationsPerVu = Number(process.argv[3]) || 50;
 const round1 = (n) => Math.round(n * 10) / 10;
 
-// Newman 을 프라미스로 감싸 실행 요약(run summary)을 받는다.
-function runNewman(iterationCount) {
+// 가상 사용자 1명 = 컬렉션을 iterationCount 회 반복하는 Newman 실행 1개.
+function runVU(iterationCount) {
   return new Promise((resolve, reject) => {
     newman.run(
       { collection: COLLECTION, iterationCount, reporters: [], bail: false },
@@ -31,69 +36,90 @@ function runNewman(iterationCount) {
   });
 }
 
+// VU 들을 동시에 실행 → 동시성 부하.
 const wall0 = performance.now();
-const summary = await runNewman(iterations);
+const runs = await Promise.all(Array.from({ length: vus }, () => runVU(iterationsPerVu)));
 const wallMs = performance.now() - wall0;
 
-// 요청 이름별로 응답시간(ms)·성공여부를 모은다.
+// 모든 실행 결과를 요청 이름별로 집계.
 const byName = new Map();
-for (const ex of summary.run.executions) {
-  const name = ex.item.name;
-  const ms = ex.response ? ex.response.responseTime : NaN;
-  const ok = !!ex.response && ex.response.code === 200 && (ex.assertions || []).every((a) => !a.error);
-  if (!byName.has(name)) byName.set(name, { series: [], ok: 0, n: 0 });
-  const b = byName.get(name);
-  b.series.push(round1(ms));
-  b.ok += ok ? 1 : 0;
-  b.n += 1;
+let failures = 0;
+let totalReq = 0;
+for (const run of runs) {
+  failures += run.run.failures.length;
+  totalReq += run.run.stats.requests.total;
+  for (const ex of run.run.executions) {
+    const name = ex.item.name;
+    const ms = ex.response ? ex.response.responseTime : NaN;
+    const ok = !!ex.response && ex.response.code === 200 && (ex.assertions || []).every((a) => !a.error);
+    if (!byName.has(name)) byName.set(name, { series: [], ok: 0, n: 0 });
+    const b = byName.get(name);
+    b.series.push(round1(ms));
+    b.ok += ok ? 1 : 0;
+    b.n += 1;
+  }
 }
 
 const endpoints = [...byName.entries()].map(([name, b]) => ({
   name,
   samples: b.n,
-  okRate: round1((b.ok / b.n) * 100) / 100,
+  okRate: round1((b.ok / b.n) * 1000) / 1000,
   throughputRps: round1(b.n / (wallMs / 1000)),
   latencyMs: summarize(b.series),
   series: b.series,
 }));
 
-const totalReq = summary.run.stats.requests.total;
 const allSamples = endpoints.flatMap((e) => e.series);
-const okAll = endpoints.reduce((a, e) => a + e.okRate * e.samples, 0) / (totalReq || 1);
+const okCount = endpoints.reduce((a, e) => a + e.okRate * e.samples, 0);
+const summary = {
+  totalRequests: totalReq,
+  okRate: round1((okCount / (totalReq || 1)) * 1000) / 1000,
+  failures,
+  wallMs: round1(wallMs),
+  rps: round1(totalReq / (wallMs / 1000)),
+  latencyMs: summarize(allSamples),
+};
+
+// SLO 대비 판정 (순수 함수).
+const { verdict, checks } = evaluate(summary, SLO);
 
 const result = {
   tool: 'api',
   kind: 'load-test',
-  runner: `Postman 컬렉션 · Newman (반복 ${iterations}회, 순차)`,
+  verdict,
   goal: GOAL,
+  what: 'QASS 백엔드 읽기 API(rooms·captures)의 응답속도·가용성',
+  why: '동시 사용자 부하에서 응답속도·안정성이 운영 기준(SLO)을 만족하는지',
+  how: `가상 사용자 ${vus}명이 각 ${iterationsPerVu}회 동시 반복 호출(총 ${totalReq}건) → 지연·성공률 측정 → SLO 판정`,
+  runner: `Postman 컬렉션 · Newman (가상 사용자 ${vus} × ${iterationsPerVu}회, 동시성 ${vus})`,
   target: `${TARGET} → Supabase REST`,
   startedAt: new Date().toISOString(),
-  config: { iterations, endpoints: endpoints.length },
-  summary: {
-    totalRequests: totalReq,
-    okRate: round1(okAll * 100) / 100,
-    failures: summary.run.failures.length,
-    wallMs: round1(wallMs),
-    rps: round1(totalReq / (wallMs / 1000)),
-    latencyMs: summarize(allSamples),
-  },
+  config: { vus, iterationsPerVu, totalRequests: totalReq, endpoints: endpoints.length },
+  slo: SLO,
+  checks,
+  summary,
   endpoints,
 };
 
-// 콘솔 요약 (수치)
-const s = result.summary;
-console.log(`\n=== QASS API 부하 테스트 (Postman·Newman) ===`);
-console.log(`목표: ${result.goal}`);
-console.log(`러너: ${result.runner}`);
-console.log(`총 요청 ${s.totalRequests} · 성공률 ${(s.okRate * 100).toFixed(0)}% · 실패 ${s.failures} · ${s.rps} req/s · 벽시계 ${s.wallMs}ms`);
-console.log(`전체 지연(ms): avg ${s.latencyMs.avg} · p50 ${s.latencyMs.p50} · p95 ${s.latencyMs.p95} · p99 ${s.latencyMs.p99}`);
-for (const ep of endpoints) {
-  const l = ep.latencyMs;
-  console.log(`  ${ep.name}: p50 ${l.p50} · p95 ${l.p95} · max ${l.max} ms · ${ep.throughputRps} req/s · ok ${(ep.okRate * 100).toFixed(0)}%`);
+// 콘솔: 판정 + 기준별 통과/실패 (한눈에)
+const L = summary.latencyMs;
+console.log(`\n=== QASS API 성능·부하 검증 (Postman·Newman) ===`);
+console.log(`무엇을: ${result.what}`);
+console.log(`왜:     ${result.why}`);
+console.log(`어떻게: ${result.how}`);
+console.log(`--------------------------------------------------`);
+console.log(`총 요청 ${summary.totalRequests} · 성공률 ${(summary.okRate * 100).toFixed(2)}% · 실패 ${summary.failures} · ${summary.rps} req/s · 벽시계 ${summary.wallMs}ms`);
+console.log(`지연(ms): avg ${L.avg} · p50 ${L.p50} · p95 ${L.p95} · p99 ${L.p99} · max ${L.max}`);
+console.log(`기준 판정:`);
+for (const c of checks) {
+  const fmt = (v) => (c.unit === 'rate' ? (v * 100).toFixed(2) + '%' : c.unit === 'ms' ? v + 'ms' : v);
+  console.log(`  [${c.pass ? 'PASS' : 'FAIL'}] ${c.name}: ${fmt(c.actual)} ${c.op} ${fmt(c.threshold)}`);
 }
+console.log(`==================================================`);
+console.log(`종합 판정: ${verdict}`);
 
 fs.mkdirSync(WEB_ASSETS, { recursive: true });
 fs.writeFileSync(path.join(WEB_ASSETS, 'api-perf.json'), JSON.stringify(result, null, 2));
-console.log(`\nsaved: web/assets/api-perf.json`);
+console.log(`saved: web/assets/api-perf.json`);
 
-process.exit(s.failures === 0 ? 0 : 1);
+process.exit(verdict === 'PASS' ? 0 : 1);

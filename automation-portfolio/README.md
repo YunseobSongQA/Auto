@@ -37,7 +37,7 @@ cd playwright && npm i && npx playwright install chromium && npm test
 
 # 2) API — 읽기 플로우 + Postman/Newman 부하 테스트 (브라우저/드라이버 불필요)
 cd api && npm i && npm start              # 기능 읽기 플로우(FlowResult)
-#   부하·성능 테스트 → web/assets/api-perf.json:  npm run loadtest
+#   부하·성능 검증(10 VU×50=1000건, SLO PASS/FAIL) → api-perf.json:  npm run loadtest
 
 # 3) Selenium (헤드리스 실행, 또는 ./record.sh 로 화면 녹화)
 cd selenium && npm i && npm test          # 헤드리스 실행
@@ -73,5 +73,5 @@ cd web && python3 -m http.server 8080   # http://localhost:8080
 |------|-----------|------|-------------|
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
 | Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
-| API | Postman 컬렉션 × Newman (라이브) | 요청 80건 성공률 100% · p95 ~110ms | `web/assets/api-perf.json` |
+| API | Postman × Newman · 10 VU 동시부하 (라이브) | 요청 1000건 · 성공률 100% · p95 143ms · **SLO PASS** | `web/assets/api-perf.json` |
 | Appium | (PC 전용, 미실행) | 골격 | `pending` |

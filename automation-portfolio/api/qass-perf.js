@@ -8,6 +8,15 @@
  */
 export const GOAL = 'QASS 백엔드(Supabase REST) 읽기 경로 성능·부하 검증';
 
+// 운영 합격 기준(SLO). 자주 바뀌는 값이라 데이터로 분리. (구축기 3번)
+// 국내 운영 API 의 통상 기준선: 가용성 99.9%, 읽기 p95 ≤ 300ms, p99 ≤ 800ms, 치명오류 0.
+export const SLO = {
+  okRateMin: 0.999, // 가용성(성공률) ≥ 99.9%
+  p95MaxMs: 300, //   p95 응답시간 ≤ 300ms
+  p99MaxMs: 800, //   p99 응답시간 ≤ 800ms
+  maxFailures: 0, //  치명 오류(assertion/5xx) = 0
+};
+
 const round1 = (n) => Math.round(n * 10) / 10;
 
 /**
@@ -30,4 +39,38 @@ export function summarize(samples) {
     p95: round1(at(0.95)),
     p99: round1(at(0.99)),
   };
+}
+
+/**
+ * 측정 지표를 SLO 기준과 비교해 항목별 통과/실패 + 종합 판정을 낸다.
+ * 무엇을·왜·어떻게의 "결과(통과/실패)"를 한눈에 보여주는 순수 함수.
+ * @param {{ okRate:number, failures:number, latencyMs:{p95:number,p99:number} }} summary
+ * @param {typeof SLO} slo
+ * @returns {{ verdict: 'PASS'|'FAIL', checks: Array }}
+ */
+export function evaluate(summary, slo = SLO) {
+  const L = summary.latencyMs || {};
+  const checks = [
+    {
+      key: 'okRate', name: '가용성(성공률)', unit: 'rate',
+      actual: summary.okRate, op: '≥', threshold: slo.okRateMin,
+      pass: summary.okRate >= slo.okRateMin,
+    },
+    {
+      key: 'p95', name: 'p95 응답시간', unit: 'ms',
+      actual: L.p95, op: '≤', threshold: slo.p95MaxMs,
+      pass: L.p95 <= slo.p95MaxMs,
+    },
+    {
+      key: 'p99', name: 'p99 응답시간', unit: 'ms',
+      actual: L.p99, op: '≤', threshold: slo.p99MaxMs,
+      pass: L.p99 <= slo.p99MaxMs,
+    },
+    {
+      key: 'failures', name: '치명 오류', unit: 'count',
+      actual: summary.failures, op: '≤', threshold: slo.maxFailures,
+      pass: summary.failures <= slo.maxFailures,
+    },
+  ];
+  return { verdict: checks.every((c) => c.pass) ? 'PASS' : 'FAIL', checks };
 }
