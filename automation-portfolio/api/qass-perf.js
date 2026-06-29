@@ -91,34 +91,39 @@ export function evaluate(summary, slo = SLO) {
   const ax = summary.apdex || {};
   const checks = [
     {
-      key: 'apdex', name: 'Apdex (체감 성능)', unit: 'score',
+      key: 'apdex', name: '체감 성능 점수', unit: 'score',
       actual: ax.score, op: '≥', threshold: slo.apdexMin,
       pass: ax.score >= slo.apdexMin,
-      standard: `Apdex 표준 · T=${slo.apdexT}ms · 등급 ${ax.rating || '-'}`,
+      plain: '실제 사용자가 느끼는 빠름 정도 (1에 가까울수록 좋음)',
+      standard: 'Apdex 국제 표준',
     },
     {
-      key: 'okRate', name: '가용성(성공률)', unit: 'rate',
+      key: 'okRate', name: '성공률', unit: 'rate',
       actual: summary.okRate, op: '≥', threshold: slo.okRateMin,
       pass: summary.okRate >= slo.okRateMin,
-      standard: 'SLA 99.9% (three nines) · ISO/IEC 25010 신뢰성·가용성',
+      plain: '요청이 실패 없이 성공한 비율',
+      standard: 'SLA 99.9% · ISO/IEC 25010',
     },
     {
-      key: 'p95', name: 'p95 응답시간', unit: 'ms',
+      key: 'p95', name: '응답속도 (상위 95%)', unit: 'ms',
       actual: L.p95, op: '≤', threshold: slo.p95MaxMs,
       pass: L.p95 <= slo.p95MaxMs,
-      standard: 'ISO/IEC 25010 성능효율성·시간반응성 · 측정 25023',
+      plain: '100번 중 95번이 이 시간 안에 응답',
+      standard: 'ISO/IEC 25010·25023',
     },
     {
-      key: 'p99', name: 'p99 응답시간', unit: 'ms',
+      key: 'p99', name: '응답속도 (상위 99%)', unit: 'ms',
       actual: L.p99, op: '≤', threshold: slo.p99MaxMs,
       pass: L.p99 <= slo.p99MaxMs,
-      standard: 'ISO/IEC 25010 성능효율성·시간반응성 · 측정 25023',
+      plain: '100번 중 99번이 이 시간 안에 응답 (느린 쪽 포함)',
+      standard: 'ISO/IEC 25010·25023',
     },
     {
-      key: 'failures', name: '치명 오류', unit: 'count',
+      key: 'failures', name: '오류 수', unit: 'count',
       actual: summary.failures, op: '≤', threshold: slo.maxFailures,
       pass: summary.failures <= slo.maxFailures,
-      standard: 'ISO/IEC 25010 신뢰성·성숙성',
+      plain: '서버 오류·검증 실패 건수',
+      standard: 'ISO/IEC 25010',
     },
   ];
   return { verdict: checks.every((c) => c.pass) ? 'PASS' : 'FAIL', checks };
