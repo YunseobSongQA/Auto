@@ -15,7 +15,7 @@ window.QASS_PORTFOLIO = {
   sharedTarget: {
     name: 'QASS',
     url: 'https://qass1.pages.dev/',
-    label: '같은 QASS · 다른 도구',
+    label: '하나의 대상 · 네 가지 자동화 도구',
   },
 
   // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일)

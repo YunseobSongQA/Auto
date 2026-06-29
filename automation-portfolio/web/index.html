@@ -3,32 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Automation Portfolio — QASS 자동화 4종</title>
-  <meta name="description" content="하나의 타깃(QASS)을 Playwright·Selenium·Appium·API 4가지 도구로 자동화한 포트폴리오." />
+  <title>자동화 도구 모음 — Playwright · Selenium · Appium · API</title>
+  <meta name="description" content="Playwright·Selenium·Appium·API 네 가지 자동화 도구로 같은 사용자 플로우를 구현한 모음. 대상은 직접 만든 증적 수집 툴 QASS." />
+  <!-- 테마 깜빡임 방지: CSS 적용 전에 저장된 테마를 먼저 반영 (기본 라이트) -->
+  <script>(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- UI 계층: 구조만. 데이터는 config.js, 채우기는 main.js (구축기 1번) -->
-  <header class="hero">
-    <span class="badge" id="shared-label">같은 QASS · 다른 도구</span>
-    <h1>자동화 작업 모음 <span class="grad">QASS</span></h1>
-    <p class="lede">
-      <b>QASS</b>는 제가 직접 만든 <b>자동화 증적(스크린샷) 수집 툴</b>입니다.
-      이 페이지는 그 <b>QASS 웹사이트와 백엔드 서버</b>를 대상으로, 같은 사용자 플로우를
-      Playwright · Selenium · Appium · API 네 가지 방식으로 자동화한 작업들을 모았습니다.
-    </p>
-    <p class="flow">
-      공통 플로우 — <b id="shared-flow">로그인 → 방 입장 → 증적 확인 → 검색</b>
-      <a id="target-link" href="#" target="_blank" rel="noopener">대상 열기 ↗</a>
-    </p>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="site-logo" href="./">
+        <svg class="logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="2" />
+          <path d="M7.4 12.3l3 3 6.2-6.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        자동화 도구 모음
+      </a>
+      <nav class="site-nav">
+        <a href="https://github.com/YunseobSongQA/Auto" target="_blank" rel="noopener">GitHub</a>
+        <button class="theme-toggle" type="button" aria-label="라이트/다크 모드 전환" aria-pressed="false">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
+        </button>
+      </nav>
+    </div>
   </header>
 
-  <main class="grid" id="cards" aria-label="자동화 도구 카드">
-    <p class="empty">불러오는 중…</p>
+  <main>
+    <section class="hero">
+      <span class="badge" id="shared-label">하나의 대상 · 네 가지 자동화 도구</span>
+      <h1>자동화 <span class="grad">도구 모음</span></h1>
+      <p class="lede">
+        Playwright · Selenium · Appium · API — 네 가지 자동화 도구로 같은 사용자 플로우를
+        구현한 모음입니다. 대상은 제가 직접 만든 자동화 증적 수집 툴 <b>QASS</b>(웹·백엔드 서버)입니다.
+      </p>
+      <p class="flow">
+        공통 플로우 — <b id="shared-flow">로그인 → 방 입장 → 증적 확인 → 검색</b>
+        <a id="target-link" href="#" target="_blank" rel="noopener">대상 열기 ↗</a>
+      </p>
+    </section>
+
+    <section class="grid" id="cards" aria-label="자동화 도구 카드">
+      <p class="empty">불러오는 중…</p>
+    </section>
   </main>
 
-  <footer class="foot">
-    <p>모노레포 구조 · 결과 계약 공유 · 빌드 없이 동작하는 Vanilla JS 쇼케이스</p>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <span class="site-logo">
+          <svg class="logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="2" />
+            <path d="M7.4 12.3l3 3 6.2-6.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          자동화 도구 모음
+        </span>
+        <p>네 가지 자동화 도구 · 하나의 대상(QASS) · 결과 계약 공유</p>
+      </div>
+      <nav class="footer-links">
+        <a href="https://github.com/YunseobSongQA/Auto" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://qass1.pages.dev/" target="_blank" rel="noopener">QASS</a>
+      </nav>
+    </div>
   </footer>
 
   <script src="config.js"></script>

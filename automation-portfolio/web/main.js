@@ -28,7 +28,7 @@
         <ul class="points">${points}</ul>
 
         <div class="card-foot">
-          <span class="target">🎯 ${esc(card.target)}</span>
+          <span class="target"><svg class="ticon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>${esc(card.target)}</span>
           <span class="status ${statusClass}">${statusText}</span>
           <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">GitHub에서 코드 보기 ↗</a>
         </div>
@@ -58,19 +58,27 @@
     // 'pending' → 플레이스홀더 유지
   }
 
-  // video: 파일이 실제로 있으면 <video>로 교체, 없으면 플레이스홀더 유지
+  // video: 파일이 있으면 <video>로 교체하고 클릭 없이 자동재생(muted+playsinline+play()).
   function renderVideo(el, src) {
     if (!src) return;
     fetch(src, { method: 'HEAD' })
       .then(r => {
         if (!r.ok) return;
-        el.innerHTML =
-          `<video src="${esc(src)}" muted loop autoplay playsinline></video>`;
+        const v = document.createElement('video');
+        v.muted = true; v.defaultMuted = true; v.loop = true;
+        v.autoplay = true; v.playsInline = true; v.preload = 'auto';
+        v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+        v.src = src;
+        el.innerHTML = '';
+        el.appendChild(v);
+        const play = () => { const p = v.play(); if (p) p.catch(() => {}); };
+        play();
+        v.addEventListener('canplay', play, { once: true });
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
   }
 
-  // perf: 부하 테스트 결과(api-perf.json)를 수치 타일 + 그래프로 (영상 아님)
+  // perf: 부하 테스트 결과(api-perf.json)를 간결한 판정 + 핵심 수치 + 그래프로 (영상 아님).
   function renderPerf(el, src) {
     if (!src) return;
     const label = el.getAttribute('data-label') || '성능·부하 테스트';
@@ -78,86 +86,52 @@
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(d => {
         el.classList.add('is-perf');
-        const s = d.summary, L = s.latencyMs;
+        const s = d.summary, L = s.latencyMs, ax = s.apdex || {};
         const pass = d.verdict === 'PASS';
 
-        // 종합 판정 배지 + 무엇을/왜/어떻게
         const verdict =
           `<div class="pverdict ${pass ? 'is-pass' : 'is-fail'}">` +
-          `<span class="pv-badge">${pass ? '✓ PASS' : '✗ FAIL'}</span>` +
-          `<span class="pv-sub">공인 표준 기준 종합 판정</span></div>`;
+          `<span class="pv-badge">${pass ? 'PASS' : 'FAIL'}</span>` +
+          `<span class="pv-sub">국제 표준(ISO/IEC 25010 · Apdex) 기준 ${pass ? '통과' : '미달'}</span></div>`;
 
-        // 판정 근거가 된 공인 표준 (객관성 노출)
-        const standards = (d.standards || []).length
-          ? `<div class="pstd"><span class="pstd-h">근거 표준</span>` +
-            d.standards.map(st => `<span class="pstd-chip" title="${esc(st.desc)}">${esc(st.id)}</span>`).join('') +
-            `</div>`
-          : '';
-        const www = (d.what || d.why || d.how)
-          ? `<dl class="pwww">` +
-            (d.what ? `<dt>무엇을</dt><dd>${esc(d.what)}</dd>` : '') +
-            (d.why ? `<dt>왜</dt><dd>${esc(d.why)}</dd>` : '') +
-            (d.how ? `<dt>어떻게</dt><dd>${esc(d.how)}</dd>` : '') +
-            `</dl>`
-          : '';
-
-        // 기준별 통과/실패 (actual vs threshold) + 표준 출처
-        const fmt = (v, unit) => unit === 'rate' ? (v * 100).toFixed(2) + '%' : unit === 'ms' ? v + 'ms' : String(v);
-        const checks = (d.checks || []).map(c =>
-          `<div class="pchk ${c.pass ? 'ok' : 'no'}">` +
-          `<div class="pchk-row"><span class="pchk-m">${c.pass ? '✓' : '✗'}</span>` +
-          `<span class="pchk-n">${esc(c.name)}</span>` +
-          `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>` +
-          ((c.plain || c.standard)
-            ? `<div class="pchk-std">${esc(c.plain || '')}${c.plain && c.standard ? ' · ' : ''}${c.standard ? '근거 ' + esc(c.standard) : ''}</div>`
-            : '') +
-          `</div>`).join('');
-
-        const ax = s.apdex || {};
         const tiles = [
           ['총 요청', s.totalRequests],
-          ['Apdex', (ax.score != null ? ax.score : '-') + (ax.rating ? ' ' + ax.rating : '')],
-          ['성공률', (s.okRate * 100).toFixed(2) + '%'],
-          ['p95 지연', L.p95 + 'ms'],
-          ['처리량', s.rps + ' req/s'],
+          ['체감 성능', (ax.score != null ? ax.score : '-') + (ax.rating ? ' ' + ax.rating : '')],
+          ['성공률', (s.okRate * 100).toFixed(1) + '%'],
+          ['응답 p95', L.p95 + 'ms'],
         ].map(([k, v]) => `<div class="ptile"><b>${esc(String(v))}</b><span>${esc(k)}</span></div>`).join('');
 
-        // 지연 분포 막대 (수치+그래프)
-        const pcts = [['p50', L.p50], ['p90', L.p90], ['p95', L.p95], ['p99', L.p99], ['max', L.max]];
+        // 기준별 통과/실패 (한 줄, 깔끔한 아이콘)
+        const fmt = (v, unit) => unit === 'rate' ? (v * 100).toFixed(1) + '%' : unit === 'ms' ? v + 'ms' : String(v);
+        const checks = (d.checks || []).map(c =>
+          `<div class="pchk ${c.pass ? 'ok' : 'no'}">${icoMark(c.pass)}` +
+          `<span class="pchk-n">${esc(c.name)}</span>` +
+          `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>`).join('');
+
+        // 응답속도 분포 막대 (p50/p95/p99)
+        const pcts = [['p50', L.p50], ['p95', L.p95], ['p99', L.p99]];
         const pmax = Math.max(...pcts.map(p => p[1])) || 1;
         const bars = pcts.map(([k, v]) =>
           `<div class="pbar"><span class="pbar-k">${k}</span>` +
           `<span class="pbar-track"><span class="pbar-fill" style="width:${(v / pmax * 100).toFixed(1)}%"></span></span>` +
           `<span class="pbar-v">${v}ms</span></div>`).join('');
 
-        // 엔드포인트별 지연 추이 스파크라인
-        const eps = d.endpoints.map(ep =>
-          `<div class="pep"><div class="pep-top"><code>${esc(ep.name)}</code>` +
-          `<span>p50 ${ep.latencyMs.p50} · p95 ${ep.latencyMs.p95}ms</span></div>${sparkline(ep.series)}</div>`).join('');
-
         el.innerHTML =
           `<div class="perf">
-             <div class="perf-cap">${esc(label)}<span class="perf-run">${esc(d.runner)}</span></div>
              ${verdict}
-             ${standards}
-             ${www}
-             <div class="pblock"><div class="pblock-h">합격 기준 · 항목별 판정</div>${checks}</div>
              <div class="ptiles">${tiles}</div>
+             <div class="pblock"><div class="pblock-h">합격 기준</div>${checks}</div>
              <div class="pblock"><div class="pblock-h">응답속도 분포 (ms · 낮을수록 빠름)</div>${bars}</div>
-             <div class="pblock"><div class="pblock-h">호출별 응답속도 추이</div>${eps}</div>
            </div>`;
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
   }
 
-  // 작은 라인 그래프(SVG). series(ms 배열)를 viewBox 0..100 × 0..28 로 정규화.
-  function sparkline(series) {
-    if (!series || series.length < 2) return '';
-    const w = 100, h = 28, max = Math.max(...series), min = Math.min(...series), span = (max - min) || 1;
-    const pts = series.map((v, i) =>
-      `${(i / (series.length - 1) * w).toFixed(1)},${(h - (v - min) / span * (h - 2) - 1).toFixed(1)}`).join(' ');
-    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">` +
-      `<polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+  // 깔끔한 통과/실패 아이콘 (이모지 대신 인라인 SVG).
+  function icoMark(pass) {
+    return pass
+      ? '<svg class="pico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg class="pico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   }
 
   function esc(s) {
@@ -165,5 +139,21 @@
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  document.addEventListener('DOMContentLoaded', render);
+  // 라이트/다크 테마 토글 (QASS 방식: data-theme + localStorage, 기본 라이트)
+  function initTheme() {
+    const KEY = 'portfolio-theme';
+    const root = document.documentElement;
+    const btn = document.querySelector('.theme-toggle');
+    if (!btn) return;
+    const cur = () => (root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    btn.setAttribute('aria-pressed', cur() === 'dark' ? 'true' : 'false');
+    btn.addEventListener('click', () => {
+      const next = cur() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+      try { localStorage.setItem(KEY, next); } catch (e) { /* 무시 */ }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => { render(); initTheme(); });
 })();
