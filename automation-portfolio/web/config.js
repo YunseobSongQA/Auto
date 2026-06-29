@@ -5,9 +5,9 @@
  *
  * 계약: 각 카드는 아래 형태를 지킵니다 (구축기 5번).
  *   { id, tool, title, desc, target, repo, demo, demoType, demoLabel, badge, status, points[] }
- *   - demoType: 'video' | 'json' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
+ *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
- *   - demoLabel: 데모 영역 캡션(json 등에서 "영상 아님" 같은 설명).
+ *   - demoLabel: 데모 영역 캡션("영상 아님" 같은 설명).
  *   - status:   'verified'(검증완료) | 'pending'(PC에서 실행예정)
  */
 window.QASS_PORTFOLIO = {
@@ -67,16 +67,16 @@ window.QASS_PORTFOLIO = {
     {
       id: 'api',
       tool: 'API',
-      title: 'QASS 백엔드 · Supabase REST',
-      desc: 'UI 없이 Supabase REST로 같은 데이터(방·증적)를 읽습니다. 순수 함수로 격리되어 테스트가 쉽습니다.',
+      title: 'QASS 백엔드 · 성능·부하 테스트',
+      desc: '목표: QASS 백엔드(Supabase REST) 읽기 경로의 응답 속도·안정성 검증. Postman 컬렉션을 Newman으로 반복 호출해 지연 분포(p50/p95/p99)·성공률·처리량을 수치와 그래프로 냅니다.',
       target: 'QASS 백엔드',
       repo: '../api/',
-      demo: 'assets/api-result.json',
-      demoType: 'json',
-      demoLabel: '실제 응답 구조 · 영상 아님',
-      badge: '읽기 전용',
+      demo: 'assets/api-perf.json',
+      demoType: 'perf',
+      demoLabel: '성능·부하 테스트 결과 · 영상 아님',
+      badge: 'Postman · 부하',
       status: 'verified',
-      points: ['REST 직접 호출', '순수 함수 격리', 'mock 불필요'],
+      points: ['Postman·Newman', 'p50/p95/p99 지연', '성공률·처리량'],
     },
   ],
 };

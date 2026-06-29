@@ -54,7 +54,7 @@
     const type = el.getAttribute('data-type');
     const src = el.getAttribute('data-demo');
     if (type === 'video') return renderVideo(el, src);
-    if (type === 'json') return renderJson(el, src);
+    if (type === 'perf') return renderPerf(el, src);
     // 'pending' → 플레이스홀더 유지
   }
 
@@ -70,22 +70,55 @@
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
   }
 
-  // json: FlowResult 를 fetch 해 "실제 응답 구조"를 코드블록으로 표시 (영상 아님)
-  function renderJson(el, src) {
+  // perf: 부하 테스트 결과(api-perf.json)를 수치 타일 + 그래프로 (영상 아님)
+  function renderPerf(el, src) {
     if (!src) return;
-    const label = el.getAttribute('data-label') || '실제 응답 구조';
+    const label = el.getAttribute('data-label') || '성능·부하 테스트';
     fetch(src)
       .then(r => (r.ok ? r.json() : Promise.reject()))
-      .then(data => {
-        el.classList.add('is-json');
-        const meta = `${esc(data.tool)} · ${esc(data.status)} · ${data.steps.length} steps`;
+      .then(d => {
+        el.classList.add('is-perf');
+        const s = d.summary, L = s.latencyMs;
+
+        const tiles = [
+          ['총 요청', s.totalRequests],
+          ['성공률', Math.round(s.okRate * 100) + '%'],
+          ['p95 지연', L.p95 + 'ms'],
+          ['처리량', s.rps + ' req/s'],
+        ].map(([k, v]) => `<div class="ptile"><b>${esc(String(v))}</b><span>${esc(k)}</span></div>`).join('');
+
+        // 지연 분포 막대 (수치+그래프)
+        const pcts = [['p50', L.p50], ['p90', L.p90], ['p95', L.p95], ['p99', L.p99], ['max', L.max]];
+        const pmax = Math.max(...pcts.map(p => p[1])) || 1;
+        const bars = pcts.map(([k, v]) =>
+          `<div class="pbar"><span class="pbar-k">${k}</span>` +
+          `<span class="pbar-track"><span class="pbar-fill" style="width:${(v / pmax * 100).toFixed(1)}%"></span></span>` +
+          `<span class="pbar-v">${v}ms</span></div>`).join('');
+
+        // 엔드포인트별 지연 추이 스파크라인
+        const eps = d.endpoints.map(ep =>
+          `<div class="pep"><div class="pep-top"><code>${esc(ep.name)}</code>` +
+          `<span>p50 ${ep.latencyMs.p50} · p95 ${ep.latencyMs.p95}ms</span></div>${sparkline(ep.series)}</div>`).join('');
+
         el.innerHTML =
-          `<div class="json-demo">
-             <div class="json-cap">${esc(label)}<span class="json-meta">${meta}</span></div>
-             <pre><code>${esc(JSON.stringify(data, null, 2))}</code></pre>
+          `<div class="perf">
+             <div class="perf-cap">${esc(label)}<span class="perf-run">${esc(d.runner)}</span></div>
+             <div class="ptiles">${tiles}</div>
+             <div class="pblock"><div class="pblock-h">지연 분포 (ms)</div>${bars}</div>
+             <div class="pblock"><div class="pblock-h">엔드포인트별 지연 추이 · 반복 ${esc(String(d.config.iterations))}회</div>${eps}</div>
            </div>`;
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
+  }
+
+  // 작은 라인 그래프(SVG). series(ms 배열)를 viewBox 0..100 × 0..28 로 정규화.
+  function sparkline(series) {
+    if (!series || series.length < 2) return '';
+    const w = 100, h = 28, max = Math.max(...series), min = Math.min(...series), span = (max - min) || 1;
+    const pts = series.map((v, i) =>
+      `${(i / (series.length - 1) * w).toFixed(1)},${(h - (v - min) / span * (h - 2) - 1).toFixed(1)}`).join(' ');
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">` +
+      `<polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
   }
 
   function esc(s) {
