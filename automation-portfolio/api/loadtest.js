@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import newman from 'newman';
-import { summarize, evaluate, SLO, GOAL } from './qass-perf.js';
+import { summarize, apdex, evaluate, SLO, STANDARDS, GOAL } from './qass-perf.js';
 import { TARGET } from './qass-api.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -78,6 +78,7 @@ const summary = {
   wallMs: round1(wallMs),
   rps: round1(totalReq / (wallMs / 1000)),
   latencyMs: summarize(allSamples),
+  apdex: apdex(allSamples, SLO.apdexT), // Apdex 산업 표준 체감 성능 점수
 };
 
 // SLO 대비 판정 (순수 함수).
@@ -95,6 +96,7 @@ const result = {
   target: `${TARGET} → Supabase REST`,
   startedAt: new Date().toISOString(),
   config: { vus, iterationsPerVu, totalRequests: totalReq, endpoints: endpoints.length },
+  standards: STANDARDS, // 판정 근거가 된 공인 표준(쇼케이스가 표시)
   slo: SLO,
   checks,
   summary,
@@ -110,10 +112,12 @@ console.log(`어떻게: ${result.how}`);
 console.log(`--------------------------------------------------`);
 console.log(`총 요청 ${summary.totalRequests} · 성공률 ${(summary.okRate * 100).toFixed(2)}% · 실패 ${summary.failures} · ${summary.rps} req/s · 벽시계 ${summary.wallMs}ms`);
 console.log(`지연(ms): avg ${L.avg} · p50 ${L.p50} · p95 ${L.p95} · p99 ${L.p99} · max ${L.max}`);
+console.log(`Apdex: ${summary.apdex.score} (${summary.apdex.rating}) · 만족 ${summary.apdex.satisfied}/허용 ${summary.apdex.tolerating}/불만 ${summary.apdex.frustrated}`);
+console.log(`근거 표준: ${STANDARDS.map((s) => s.id).join(' · ')}`);
 console.log(`기준 판정:`);
 for (const c of checks) {
   const fmt = (v) => (c.unit === 'rate' ? (v * 100).toFixed(2) + '%' : c.unit === 'ms' ? v + 'ms' : v);
-  console.log(`  [${c.pass ? 'PASS' : 'FAIL'}] ${c.name}: ${fmt(c.actual)} ${c.op} ${fmt(c.threshold)}`);
+  console.log(`  [${c.pass ? 'PASS' : 'FAIL'}] ${c.name}: ${fmt(c.actual)} ${c.op} ${fmt(c.threshold)}  — ${c.standard}`);
 }
 console.log(`==================================================`);
 console.log(`종합 판정: ${verdict}`);

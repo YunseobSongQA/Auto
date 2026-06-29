@@ -8,16 +8,54 @@
  */
 export const GOAL = 'QASS 백엔드(Supabase REST) 읽기 경로 성능·부하 검증';
 
-// 운영 합격 기준(SLO). 자주 바뀌는 값이라 데이터로 분리. (구축기 3번)
-// 국내 운영 API 의 통상 기준선: 가용성 99.9%, 읽기 p95 ≤ 300ms, p99 ≤ 800ms, 치명오류 0.
+// 합격 기준(SLO) — 임의값이 아니라 공인 표준에 근거. 자주 바뀌어 데이터로 분리. (구축기 3번)
+//  · ISO/IEC 25010 성능효율성(시간반응성)·신뢰성(가용성) 품질 특성
+//  · ISO/IEC 25023 품질 정량 측정 방법(응답시간·처리량)
+//  · Apdex 산업 표준(목표 T 기준 체감 성능 0~1, 0.94↑ = Excellent)
+//  · SLA 가용성 등급 99.9%(three nines)
 export const SLO = {
-  okRateMin: 0.999, // 가용성(성공률) ≥ 99.9%
-  p95MaxMs: 300, //   p95 응답시간 ≤ 300ms
+  apdexT: 200, //     Apdex 목표 응답시간 T(ms) — T 이하 "만족", 4T 이하 "허용"
+  apdexMin: 0.94, //  Apdex ≥ 0.94 (Apdex 표준의 Excellent 등급)
+  okRateMin: 0.999, // 가용성 ≥ 99.9% (SLA three nines)
+  p95MaxMs: 300, //   p95 응답시간 ≤ 300ms (ISO/IEC 25010 시간반응성)
   p99MaxMs: 800, //   p99 응답시간 ≤ 800ms
-  maxFailures: 0, //  치명 오류(assertion/5xx) = 0
+  maxFailures: 0, //  치명 오류 = 0 (ISO/IEC 25010 신뢰성·성숙성)
 };
 
+// 결과에 함께 싣는 근거 표준(쇼케이스가 그대로 표시 → 객관적 근거 노출).
+export const STANDARDS = [
+  { id: 'ISO/IEC 25010', desc: '소프트웨어 제품 품질 모델 — 성능효율성(시간반응성·수용력)·신뢰성(가용성)' },
+  { id: 'ISO/IEC 25023', desc: '품질 정량 측정 — 응답시간·처리량 측정 방법' },
+  { id: 'Apdex', desc: '애플리케이션 성능 지수 — 목표 T 기준 사용자 체감 성능(0~1)' },
+  { id: 'SLA 99.9%', desc: '가용성 three nines — 업계 통용 가용성 등급' },
+];
+
 const round1 = (n) => Math.round(n * 10) / 10;
+const round2 = (n) => Math.round(n * 100) / 100;
+
+/**
+ * Apdex (Application Performance Index) — 산업 표준 체감 성능 점수.
+ * 만족(≤T) + 허용(≤4T)/2 를 전체로 나눈 0~1 값. 순수 함수.
+ * @param {number[]} samples ms
+ * @param {number} t 목표 응답시간(ms)
+ */
+export function apdex(samples, t) {
+  const s = samples.filter((x) => Number.isFinite(x));
+  if (!s.length) return { score: 0, t, satisfied: 0, tolerating: 0, frustrated: 0, rating: 'N/A' };
+  let sat = 0, tol = 0;
+  for (const v of s) {
+    if (v <= t) sat++;
+    else if (v <= 4 * t) tol++;
+  }
+  const frustrated = s.length - sat - tol;
+  const score = round2((sat + tol / 2) / s.length);
+  return { score, t, satisfied: sat, tolerating: tol, frustrated, rating: apdexRating(score) };
+}
+
+// Apdex 표준 등급 밴드.
+export function apdexRating(x) {
+  return x >= 0.94 ? 'Excellent' : x >= 0.85 ? 'Good' : x >= 0.7 ? 'Fair' : x >= 0.5 ? 'Poor' : 'Unacceptable';
+}
 
 /**
  * 지연 샘플(ms) 배열 → 통계(min/avg/p50/p90/p95/p99/max).
@@ -50,26 +88,37 @@ export function summarize(samples) {
  */
 export function evaluate(summary, slo = SLO) {
   const L = summary.latencyMs || {};
+  const ax = summary.apdex || {};
   const checks = [
+    {
+      key: 'apdex', name: 'Apdex (체감 성능)', unit: 'score',
+      actual: ax.score, op: '≥', threshold: slo.apdexMin,
+      pass: ax.score >= slo.apdexMin,
+      standard: `Apdex 표준 · T=${slo.apdexT}ms · 등급 ${ax.rating || '-'}`,
+    },
     {
       key: 'okRate', name: '가용성(성공률)', unit: 'rate',
       actual: summary.okRate, op: '≥', threshold: slo.okRateMin,
       pass: summary.okRate >= slo.okRateMin,
+      standard: 'SLA 99.9% (three nines) · ISO/IEC 25010 신뢰성·가용성',
     },
     {
       key: 'p95', name: 'p95 응답시간', unit: 'ms',
       actual: L.p95, op: '≤', threshold: slo.p95MaxMs,
       pass: L.p95 <= slo.p95MaxMs,
+      standard: 'ISO/IEC 25010 성능효율성·시간반응성 · 측정 25023',
     },
     {
       key: 'p99', name: 'p99 응답시간', unit: 'ms',
       actual: L.p99, op: '≤', threshold: slo.p99MaxMs,
       pass: L.p99 <= slo.p99MaxMs,
+      standard: 'ISO/IEC 25010 성능효율성·시간반응성 · 측정 25023',
     },
     {
       key: 'failures', name: '치명 오류', unit: 'count',
       actual: summary.failures, op: '≤', threshold: slo.maxFailures,
       pass: summary.failures <= slo.maxFailures,
+      standard: 'ISO/IEC 25010 신뢰성·성숙성',
     },
   ];
   return { verdict: checks.every((c) => c.pass) ? 'PASS' : 'FAIL', checks };

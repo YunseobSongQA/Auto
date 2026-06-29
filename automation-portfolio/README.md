@@ -73,5 +73,5 @@ cd web && python3 -m http.server 8080   # http://localhost:8080
 |------|-----------|------|-------------|
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
 | Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
-| API | Postman × Newman · 10 VU 동시부하 (라이브) | 요청 1000건 · 성공률 100% · p95 143ms · **SLO PASS** | `web/assets/api-perf.json` |
+| API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.99 · p95 144ms · **PASS** (ISO/IEC 25010·Apdex 근거) | `web/assets/api-perf.json` |
 | Appium | (PC 전용, 미실행) | 골격 | `pending` |
