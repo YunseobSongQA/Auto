@@ -6,9 +6,8 @@ artifacts/
 playwright-report/
 test-results/
 
-# 데모 영상 (Playwright 실행으로 생성, 용량 큼)
-web/assets/*.webm
-web/assets/*.gif
+# web/assets/ 의 데모 영상은 배포 산출물이므로 추적합니다.
+# (playwright/artifacts 의 원본 녹화는 위에서 무시됨)
 
 # OS / 에디터
 .DS_Store
