@@ -2,16 +2,25 @@
   "name": "qass-appium",
   "version": "1.0.0",
   "private": true,
-  "description": "QASS 핵심 플로우 — Appium 모바일 크롬(안드로이드) 구현 (골격, 실행은 PC)",
+  "description": "QASS 핵심 플로우 — Appium 모바일 크롬(안드로이드). WebdriverIO 표준 러너 + standalone 두 방식.",
   "type": "module",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
-    "test": "node run.js",
-    "start": "node run.js"
+    "setup": "appium driver install uiautomator2",
+    "test": "wdio run ./wdio.conf.js",
+    "test:standalone": "node run.js",
+    "appium": "appium"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@wdio/appium-service": "^9.0.0",
+    "@wdio/cli": "^9.0.0",
+    "@wdio/local-runner": "^9.0.0",
+    "@wdio/mocha-framework": "^9.0.0",
+    "@wdio/spec-reporter": "^9.0.0",
+    "appium": "^3.0.0",
+    "appium-uiautomator2-driver": "^4.0.0",
     "webdriverio": "^9.0.0"
   }
 }

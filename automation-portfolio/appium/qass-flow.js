@@ -7,10 +7,13 @@
  * Playwright/Selenium 과 **같은 8 스텝·같은 FlowResult** 를 반환합니다.
  * 차이는 실행 환경뿐 — 안드로이드 크롬(모바일 웹)에서 같은 QASS 를 자동화합니다.
  *
- * driver 는 webdriverio remote 세션(WebDriver 호환)이라 가정합니다.
- * QASS 는 반응형 웹이므로 데스크톱과 동일한 DOM 선택자를 그대로 씁니다.
+ * driver 는 WebdriverIO 세션입니다(표준 러너의 전역 `browser`, 또는 standalone `remote()`).
+ * browserName:'Chrome' 으로 세션이 모바일 크롬 컨텍스트에서 시작하므로, QASS 가 반응형 웹인
+ * 점을 이용해 데스크톱과 "동일한 DOM 선택자"를 그대로 씁니다. (네이티브 앱이라면 컨텍스트를
+ * NATIVE_APP↔WEBVIEW 로 전환해야 하지만, 여기선 순수 모바일 웹이라 불필요합니다.)
  *
- * 상태: 골격(stub). 실행은 PC(안드로이드 에뮬레이터/실기기 + Appium 서버)에서.
+ * 코드·설정은 검증됨(Appium 서버·UiAutomator2 드라이버 동작 확인). 실제 실행만 안드로이드
+ * 기기가 필요해 PC 에서 합니다 — README 참고.
  */
 export const FLOW_ID = 'qass-core-evidence-flow';
 export const TARGET = 'https://qass1.pages.dev/';
