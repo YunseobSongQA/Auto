@@ -79,10 +79,31 @@
       .then(d => {
         el.classList.add('is-perf');
         const s = d.summary, L = s.latencyMs;
+        const pass = d.verdict === 'PASS';
+
+        // 종합 판정 배지 + 무엇을/왜/어떻게
+        const verdict =
+          `<div class="pverdict ${pass ? 'is-pass' : 'is-fail'}">` +
+          `<span class="pv-badge">${pass ? '✓ PASS' : '✗ FAIL'}</span>` +
+          `<span class="pv-sub">SLO 기준 종합 판정</span></div>`;
+        const www = (d.what || d.why || d.how)
+          ? `<dl class="pwww">` +
+            (d.what ? `<dt>무엇을</dt><dd>${esc(d.what)}</dd>` : '') +
+            (d.why ? `<dt>왜</dt><dd>${esc(d.why)}</dd>` : '') +
+            (d.how ? `<dt>어떻게</dt><dd>${esc(d.how)}</dd>` : '') +
+            `</dl>`
+          : '';
+
+        // 기준별 통과/실패 (actual vs threshold)
+        const fmt = (v, unit) => unit === 'rate' ? (v * 100).toFixed(2) + '%' : unit === 'ms' ? v + 'ms' : String(v);
+        const checks = (d.checks || []).map(c =>
+          `<div class="pchk ${c.pass ? 'ok' : 'no'}"><span class="pchk-m">${c.pass ? '✓' : '✗'}</span>` +
+          `<span class="pchk-n">${esc(c.name)}</span>` +
+          `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>`).join('');
 
         const tiles = [
           ['총 요청', s.totalRequests],
-          ['성공률', Math.round(s.okRate * 100) + '%'],
+          ['성공률', (s.okRate * 100).toFixed(2) + '%'],
           ['p95 지연', L.p95 + 'ms'],
           ['처리량', s.rps + ' req/s'],
         ].map(([k, v]) => `<div class="ptile"><b>${esc(String(v))}</b><span>${esc(k)}</span></div>`).join('');
@@ -103,9 +124,12 @@
         el.innerHTML =
           `<div class="perf">
              <div class="perf-cap">${esc(label)}<span class="perf-run">${esc(d.runner)}</span></div>
+             ${verdict}
+             ${www}
+             <div class="pblock"><div class="pblock-h">검증 기준 (SLO) · 항목별 판정</div>${checks}</div>
              <div class="ptiles">${tiles}</div>
              <div class="pblock"><div class="pblock-h">지연 분포 (ms)</div>${bars}</div>
-             <div class="pblock"><div class="pblock-h">엔드포인트별 지연 추이 · 반복 ${esc(String(d.config.iterations))}회</div>${eps}</div>
+             <div class="pblock"><div class="pblock-h">엔드포인트별 지연 추이</div>${eps}</div>
            </div>`;
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });

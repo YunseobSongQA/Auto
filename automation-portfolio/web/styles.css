@@ -84,6 +84,29 @@ body {
   flex-wrap: wrap; font-size: 12px; font-weight: 600; color: var(--brand);
 }
 .perf-run { color: #6b7c93; font-weight: 500; font-size: 11px; }
+
+/* 종합 판정 배지 */
+.pverdict { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; }
+.pverdict.is-pass { background: rgba(31,157,87,.14); border: 1px solid var(--done); }
+.pverdict.is-fail { background: rgba(214,69,69,.14); border: 1px solid #d64545; }
+.pv-badge { font-size: 16px; font-weight: 800; letter-spacing: .02em; }
+.is-pass .pv-badge { color: #57e08f; }
+.is-fail .pv-badge { color: #ff7b7b; }
+.pv-sub { font-size: 11px; color: var(--muted); }
+
+/* 무엇을/왜/어떻게 */
+.pwww { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; font-size: 11px; }
+.pwww dt { color: var(--brand); font-weight: 600; white-space: nowrap; }
+.pwww dd { color: var(--muted); margin: 0; }
+
+/* 기준별 통과/실패 */
+.pchk { display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 3px 0; }
+.pchk-m { width: 14px; font-weight: 800; }
+.pchk.ok .pchk-m { color: #57e08f; }
+.pchk.no .pchk-m { color: #ff7b7b; }
+.pchk-n { flex: 1; color: var(--text); }
+.pchk-v { color: var(--text); font-family: ui-monospace, monospace; }
+.pchk-v i { color: var(--muted); font-style: normal; }
 .ptiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .ptile {
   background: rgba(255,255,255,.03); border: 1px solid var(--line);
