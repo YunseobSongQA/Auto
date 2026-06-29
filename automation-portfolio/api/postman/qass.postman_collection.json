@@ -1,0 +1,83 @@
+{
+  "info": {
+    "name": "QASS Backend Read API",
+    "description": "QASS 백엔드(Supabase REST) 읽기 경로 컬렉션. Postman GUI 로 import 하거나 Newman(CLI)으로 반복 실행해 부하/성능을 측정합니다. 읽기 전용(GET).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://snjexfohyklviarxprvm.supabase.co/rest/v1" },
+    { "key": "anon_key", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuamV4Zm9oeWtsdmlhcnhwcnZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDgwODgsImV4cCI6MjA5MzI4NDA4OH0.jxiiBLM4hyGwoJ7U4RC_M1Laqm0z8T0jHpmU3LlVW3k" },
+    { "key": "test_room_name", "value": "QASS 테스트 방" },
+    { "key": "room_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "List rooms",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.code === 200);",
+              "const rooms = pm.response.json();",
+              "pm.test('배열 반환', () => Array.isArray(rooms));",
+              "pm.test('방이 1개 이상', () => rooms.length >= 1);",
+              "// 다음 요청용으로 테스트 방 id 를 컬렉션 변수에 저장 (요청 체이닝)",
+              "const tr = rooms.find(r => r.room_name === pm.collectionVariables.get('test_room_name')) || rooms[0];",
+              "if (tr) pm.collectionVariables.set('room_id', tr.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "apikey", "value": "{{anon_key}}" },
+          { "key": "Authorization", "value": "Bearer {{anon_key}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/rooms?select=id,room_name,created_by,created_at&order=created_at.asc",
+          "host": ["{{base_url}}"],
+          "path": ["rooms"],
+          "query": [
+            { "key": "select", "value": "id,room_name,created_by,created_at" },
+            { "key": "order", "value": "created_at.asc" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "List captures (test room)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.code === 200);",
+              "pm.test('배열 반환', () => Array.isArray(pm.response.json()));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "apikey", "value": "{{anon_key}}" },
+          { "key": "Authorization", "value": "Bearer {{anon_key}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/captures?select=id,url,title,uploader_name,captured_at,room_id&room_id=eq.{{room_id}}&order=captured_at.asc",
+          "host": ["{{base_url}}"],
+          "path": ["captures"],
+          "query": [
+            { "key": "select", "value": "id,url,title,uploader_name,captured_at,room_id" },
+            { "key": "room_id", "value": "eq.{{room_id}}" },
+            { "key": "order", "value": "captured_at.asc" }
+          ]
+        }
+      }
+    }
+  ]
+}

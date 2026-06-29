@@ -15,7 +15,7 @@ automation-portfolio/
   playwright/   # ✅ 레퍼런스 완전 구현 (헤드리스 + video 녹화)
   selenium/     # ✅ 동일 플로우 실제 실행 + Xvfb/ffmpeg 녹화 (selenium.webm)
   appium/       # 🟡 모바일 크롬 골격(stub) — 실행은 PC에서
-  api/          # ✅ Supabase REST 읽기 플로우 (순수 함수)
+  api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
   README.md
 ```
@@ -27,7 +27,7 @@ automation-portfolio/
 | Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | 핵심 플로우 + video 녹화 |
 | Selenium | QASS 웹 (동일 플로우) | 완전 구현 | 실제 실행 + Xvfb/ffmpeg 녹화 |
 | Appium | QASS 모바일 크롬 (안드로이드) | 골격 | 실행은 PC에서 |
-| API | QASS 백엔드 (Supabase REST) | 완전 구현 | 실제 공개 anon API 읽기 |
+| API | QASS 백엔드 (Supabase REST) | 완전 구현 | 읽기 플로우 + Postman/Newman 부하·성능 테스트 |
 
 ## 빠른 실행 (GitHub Codespaces 기준)
 
@@ -35,8 +35,9 @@ automation-portfolio/
 # 1) Playwright 레퍼런스
 cd playwright && npm i && npx playwright install chromium && npm test
 
-# 2) API 읽기 플로우 (브라우저/드라이버 불필요)
-cd api && npm i && npm start
+# 2) API — 읽기 플로우 + Postman/Newman 부하 테스트 (브라우저/드라이버 불필요)
+cd api && npm i && npm start              # 기능 읽기 플로우(FlowResult)
+#   부하·성능 테스트 → web/assets/api-perf.json:  npm run loadtest
 
 # 3) Selenium (헤드리스 실행, 또는 ./record.sh 로 화면 녹화)
 cd selenium && npm i && npm test          # 헤드리스 실행
@@ -72,5 +73,5 @@ cd web && python3 -m http.server 8080   # http://localhost:8080
 |------|-----------|------|-------------|
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
 | Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
-| API | Node fetch (라이브 REST) | 4/4 스텝 pass · 단위 5/5 | `web/assets/api-result.json` |
+| API | Postman 컬렉션 × Newman (라이브) | 요청 80건 성공률 100% · p95 ~110ms | `web/assets/api-perf.json` |
 | Appium | (PC 전용, 미실행) | 골격 | `pending` |

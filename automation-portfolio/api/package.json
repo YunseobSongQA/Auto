@@ -2,13 +2,18 @@
   "name": "qass-api",
   "version": "1.0.0",
   "private": true,
-  "description": "QASS 백엔드(Supabase REST) 읽기 플로우 — 순수 함수 + 결과 계약",
+  "description": "QASS 백엔드(Supabase REST) 읽기 — 기능 플로우 + Postman/Newman 부하 테스트",
   "type": "module",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "start": "node run.js",
-    "test": "node --test"
+    "test": "node --test",
+    "loadtest": "node loadtest.js",
+    "postman": "newman run postman/qass.postman_collection.json"
+  },
+  "devDependencies": {
+    "newman": "^6.2.2"
   }
 }
