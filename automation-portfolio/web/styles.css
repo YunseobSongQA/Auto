@@ -99,14 +99,25 @@ body {
 .pwww dt { color: var(--brand); font-weight: 600; white-space: nowrap; }
 .pwww dd { color: var(--muted); margin: 0; }
 
-/* 기준별 통과/실패 */
-.pchk { display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 3px 0; }
+/* 근거 표준 칩 */
+.pstd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pstd-h { font-size: 11px; color: var(--muted); }
+.pstd-chip {
+  font-size: 10px; color: var(--brand); border: 1px solid var(--line);
+  background: rgba(91,140,255,.08); padding: 2px 8px; border-radius: 999px; cursor: help;
+}
+
+/* 기준별 통과/실패 + 표준 출처 */
+.pchk { padding: 4px 0; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,.04); }
+.pchk:last-child { border-bottom: 0; }
+.pchk-row { display: flex; align-items: center; gap: 8px; }
 .pchk-m { width: 14px; font-weight: 800; }
 .pchk.ok .pchk-m { color: #57e08f; }
 .pchk.no .pchk-m { color: #ff7b7b; }
 .pchk-n { flex: 1; color: var(--text); }
 .pchk-v { color: var(--text); font-family: ui-monospace, monospace; }
 .pchk-v i { color: var(--muted); font-style: normal; }
+.pchk-std { margin-left: 22px; font-size: 10px; color: #6b7c93; }
 .ptiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .ptile {
   background: rgba(255,255,255,.03); border: 1px solid var(--line);

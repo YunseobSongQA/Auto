@@ -85,7 +85,14 @@
         const verdict =
           `<div class="pverdict ${pass ? 'is-pass' : 'is-fail'}">` +
           `<span class="pv-badge">${pass ? '✓ PASS' : '✗ FAIL'}</span>` +
-          `<span class="pv-sub">SLO 기준 종합 판정</span></div>`;
+          `<span class="pv-sub">공인 표준 기준 종합 판정</span></div>`;
+
+        // 판정 근거가 된 공인 표준 (객관성 노출)
+        const standards = (d.standards || []).length
+          ? `<div class="pstd"><span class="pstd-h">근거 표준</span>` +
+            d.standards.map(st => `<span class="pstd-chip" title="${esc(st.desc)}">${esc(st.id)}</span>`).join('') +
+            `</div>`
+          : '';
         const www = (d.what || d.why || d.how)
           ? `<dl class="pwww">` +
             (d.what ? `<dt>무엇을</dt><dd>${esc(d.what)}</dd>` : '') +
@@ -94,15 +101,20 @@
             `</dl>`
           : '';
 
-        // 기준별 통과/실패 (actual vs threshold)
+        // 기준별 통과/실패 (actual vs threshold) + 표준 출처
         const fmt = (v, unit) => unit === 'rate' ? (v * 100).toFixed(2) + '%' : unit === 'ms' ? v + 'ms' : String(v);
         const checks = (d.checks || []).map(c =>
-          `<div class="pchk ${c.pass ? 'ok' : 'no'}"><span class="pchk-m">${c.pass ? '✓' : '✗'}</span>` +
+          `<div class="pchk ${c.pass ? 'ok' : 'no'}">` +
+          `<div class="pchk-row"><span class="pchk-m">${c.pass ? '✓' : '✗'}</span>` +
           `<span class="pchk-n">${esc(c.name)}</span>` +
-          `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>`).join('');
+          `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>` +
+          (c.standard ? `<div class="pchk-std">근거: ${esc(c.standard)}</div>` : '') +
+          `</div>`).join('');
 
+        const ax = s.apdex || {};
         const tiles = [
           ['총 요청', s.totalRequests],
+          ['Apdex', (ax.score != null ? ax.score : '-') + (ax.rating ? ' ' + ax.rating : '')],
           ['성공률', (s.okRate * 100).toFixed(2) + '%'],
           ['p95 지연', L.p95 + 'ms'],
           ['처리량', s.rps + ' req/s'],
@@ -125,6 +137,7 @@
           `<div class="perf">
              <div class="perf-cap">${esc(label)}<span class="perf-run">${esc(d.runner)}</span></div>
              ${verdict}
+             ${standards}
              ${www}
              <div class="pblock"><div class="pblock-h">검증 기준 (SLO) · 항목별 판정</div>${checks}</div>
              <div class="ptiles">${tiles}</div>
