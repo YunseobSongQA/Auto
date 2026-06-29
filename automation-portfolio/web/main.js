@@ -30,7 +30,7 @@
         <div class="card-foot">
           <span class="target">🎯 ${esc(card.target)}</span>
           <span class="status ${statusClass}">${statusText}</span>
-          <a class="repo" href="${esc(card.repo)}">코드 보기 →</a>
+          <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">GitHub에서 코드 보기 ↗</a>
         </div>
       </article>`;
   }
@@ -108,7 +108,9 @@
           `<div class="pchk-row"><span class="pchk-m">${c.pass ? '✓' : '✗'}</span>` +
           `<span class="pchk-n">${esc(c.name)}</span>` +
           `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>` +
-          (c.standard ? `<div class="pchk-std">근거: ${esc(c.standard)}</div>` : '') +
+          ((c.plain || c.standard)
+            ? `<div class="pchk-std">${esc(c.plain || '')}${c.plain && c.standard ? ' · ' : ''}${c.standard ? '근거 ' + esc(c.standard) : ''}</div>`
+            : '') +
           `</div>`).join('');
 
         const ax = s.apdex || {};
@@ -139,10 +141,10 @@
              ${verdict}
              ${standards}
              ${www}
-             <div class="pblock"><div class="pblock-h">검증 기준 (SLO) · 항목별 판정</div>${checks}</div>
+             <div class="pblock"><div class="pblock-h">합격 기준 · 항목별 판정</div>${checks}</div>
              <div class="ptiles">${tiles}</div>
-             <div class="pblock"><div class="pblock-h">지연 분포 (ms)</div>${bars}</div>
-             <div class="pblock"><div class="pblock-h">엔드포인트별 지연 추이</div>${eps}</div>
+             <div class="pblock"><div class="pblock-h">응답속도 분포 (ms · 낮을수록 빠름)</div>${bars}</div>
+             <div class="pblock"><div class="pblock-h">호출별 응답속도 추이</div>${eps}</div>
            </div>`;
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
