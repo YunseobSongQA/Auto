@@ -43,9 +43,37 @@ npm test
 ```
 
 성공하면 8 스텝이 모두 통과한 `FlowResult` 가 출력되고 `artifacts/` 에 저장됩니다.
-녹화가 필요하면 `adb shell screenrecord` 또는 Android Studio 화면 녹화로 떠서
-`web/assets/appium.webm` 에 넣고, `web/config.js` 의 appium 항목을 `pending → video` 로 바꾸면
-쇼케이스 카드에 영상이 붙습니다.
+
+## 데모 영상 만들어 쇼케이스에 붙이기
+
+### 4) 녹화
+
+- **Mac/Linux (CLI, 가장 간단)** — 녹화+실행+변환을 한 번에:
+  ```bash
+  ./record.sh          # → web/assets/appium.webm 자동 생성 (adb·ffmpeg 필요)
+  ```
+- **Windows / GUI** — Android Studio 에뮬레이터 창의 우측 도구막대 `⋮(Extended controls)`
+  → **Record and Playback** → **Start recording** → 다른 터미널에서 `npm test` 실행 →
+  끝나면 **Stop** → `appium.webm` 으로 저장. (안드로이드 스튜디오는 webm 으로 바로 저장됩니다.)
+  저장한 파일을 `automation-portfolio/web/assets/appium.webm` 로 옮기세요.
+
+### 5) config 한 곳만 바꾸면 카드에 영상이 붙습니다
+
+`web/config.js` 의 appium 카드:
+```js
+demo: 'assets/appium.webm',   // null → 경로
+demoType: 'video',            // 'pending' → 'video'
+status: 'verified',           // 'pending' → 'verified'
+```
+
+### 6) 커밋
+
+```bash
+git add automation-portfolio/web/assets/appium.webm automation-portfolio/web/config.js
+git commit -m "Appium: add mobile demo video, flip card to verified"
+git push
+```
+푸시하면 Cloudflare 가 자동 재배포 → 카드에 모바일 크롬 자동화 영상이 재생됩니다.
 
 ## 구조
 
