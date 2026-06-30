@@ -1,7 +1,7 @@
 # QASS 공통 플로우 계약 (Flow Contract) — v1
 
 > 이 문서는 **단일 진실 공급원(Single Source of Truth)**입니다.
-> Playwright / Selenium / Appium / API 네 가지 도구는 **모두 아래 같은 플로우**를
+> Playwright / Selenium / API / Appium 네 가지 도구는 **모두 아래 같은 플로우**를
 > 자기 방식으로 실행하고, **모두 같은 결과 형태**를 반환합니다.
 > "같은 QASS · 다른 도구"의 핵심이 바로 이 계약입니다.
 >

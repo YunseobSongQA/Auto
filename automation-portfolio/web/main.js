@@ -134,6 +134,7 @@
       : '<svg class="pico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   }
 
+  // HTML 이스케이프: config.js 의 문자열을 innerHTML 에 넣기 전 XSS/깨짐 방지.
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

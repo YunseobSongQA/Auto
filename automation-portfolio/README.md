@@ -1,7 +1,7 @@
 # Automation Portfolio — QASS 자동화 4종
 
 **하나의 타깃([QASS](https://qass1.pages.dev/))을 4가지 도구로 자동화**한 포트폴리오입니다.
-같은 사용자 플로우를 Playwright · Selenium · Appium · API 로 각각 구현해
+같은 사용자 플로우를 Playwright · Selenium · API · Appium 로 각각 구현해
 **도구별 접근 방식의 차이**를 한 화면에서 비교합니다.
 
 > 핵심 아이디어: **"같은 QASS · 다른 도구"**.
@@ -14,11 +14,15 @@ automation-portfolio/
   web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상)
   playwright/   # ✅ 레퍼런스 완전 구현 (헤드리스 + video 녹화)
   selenium/     # ✅ 동일 플로우 실제 실행 + Xvfb/ffmpeg 녹화 (selenium.webm)
-  appium/       # 🟡 모바일 크롬 — WebdriverIO 표준 러너 (툴체인 검증됨, 실행은 PC에서)
   api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
+  appium/       # 🟡 모바일 크롬 — WebdriverIO 표준 러너 (툴체인 검증됨, 실행은 PC에서)
+  CODE_GUIDE.md     # 📖 한 파일로 보는 코드 가이드 (흐름 + 주요 함수 10가지)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
   README.md
 ```
+
+> **코드만 빠르게 보려면 → [`CODE_GUIDE.md`](./CODE_GUIDE.md) 한 파일이면 됩니다.**
+> 전체 흐름, 어느 파일에 뭐가 있는지, 주요 함수 10가지를 코드와 함께 정리했습니다.
 
 ## 도구 매핑
 
@@ -26,8 +30,8 @@ automation-portfolio/
 |------|------|------|------|
 | Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | 핵심 플로우 + video 녹화 |
 | Selenium | QASS 웹 (동일 플로우) | 완전 구현 | 실제 실행 + Xvfb/ffmpeg 녹화 |
-| Appium | QASS 모바일 크롬 (안드로이드) | 표준 러너 구현 | WebdriverIO+Appium · 툴체인 검증 · 실행은 PC에서 |
 | API | QASS 백엔드 (Supabase REST) | 완전 구현 | 읽기 플로우 + Postman/Newman 부하·성능 테스트 |
+| Appium | QASS 모바일 크롬 (안드로이드) | 표준 러너 구현 | WebdriverIO+Appium · 툴체인 검증 · 실행은 PC에서 |
 
 ## 빠른 실행 (GitHub Codespaces 기준)
 
@@ -43,11 +47,11 @@ cd api && npm i && npm start              # 기능 읽기 플로우(FlowResult)
 cd selenium && npm i && npm test          # 헤드리스 실행
 #   화면 녹화(Xvfb+ffmpeg) → web/assets/selenium.webm:  ./record.sh
 
-# 4) Appium — WebdriverIO 표준 러너 (실행은 PC, 안드로이드 기기 필요)
-cd appium && npm i && npm run setup && npm test   # 기기 연결 후. 자세히는 appium/README.md
-
-# 5) 쇼케이스 웹 (빌드 없이 바로)
+# 4) 쇼케이스 웹 (빌드 없이 바로)
 cd web && python3 -m http.server 8080   # http://localhost:8080
+
+# 5) Appium — WebdriverIO 표준 러너 (실행은 PC, 안드로이드 기기 필요)
+cd appium && npm i && npm run setup && npm test   # 기기 연결 후. 자세히는 appium/README.md
 ```
 
 ## 산출 결과
@@ -75,3 +79,6 @@ cd web && python3 -m http.server 8080   # http://localhost:8080
 | Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
 | API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.99 · p95 144ms · **PASS** (ISO/IEC 25010·Apdex 근거) | `web/assets/api-perf.json` |
 | Appium | Appium 서버·드라이버·wdio 설정 (코드스페이스) | 툴체인 OK · 실기기 실행은 PC | `pending` |
+
+> 표 안에서 Appium 을 맨 뒤에 둔 이유: 실기기(안드로이드)가 필요해 **실행이 PC에 의존**하기 때문입니다.
+> 쇼케이스 카드 순서(`web/config.js`)도 동일하게 Playwright → Selenium → API → Appium 입니다.

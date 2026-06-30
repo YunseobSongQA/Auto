@@ -30,6 +30,7 @@ const HEADERS = {
 
 // --- REST 읽기 (네트워크 계층) -------------------------------------------
 
+// 공통 GET: Supabase REST 에 인증 헤더를 붙여 호출하고, 200 이 아니면 던진다.
 async function restGet(pathAndQuery) {
   const res = await fetch(`${REST}/${pathAndQuery}`, { headers: HEADERS });
   if (!res.ok) {

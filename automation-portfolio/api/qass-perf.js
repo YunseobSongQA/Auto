@@ -30,8 +30,8 @@ export const STANDARDS = [
   { id: 'SLA 99.9%', desc: '가용성 three nines — 업계 통용 가용성 등급' },
 ];
 
-const round1 = (n) => Math.round(n * 10) / 10;
-const round2 = (n) => Math.round(n * 100) / 100;
+const round1 = (n) => Math.round(n * 10) / 10; // 소수 1자리 반올림(ms 표기용)
+const round2 = (n) => Math.round(n * 100) / 100; // 소수 2자리 반올림(Apdex 점수용)
 
 /**
  * Apdex (Application Performance Index) — 산업 표준 체감 성능 점수.

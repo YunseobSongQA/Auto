@@ -49,6 +49,7 @@ export async function runFlow(driver, opts = {}) {
     }
   }
 
+  // 선택자(css 또는 xpath)가 화면에 보일 때까지 대기 후 요소를 반환. (Selenium 의 visible() 대응)
   const waitVisible = async (sel) => {
     const el = await driver.$(sel);
     await el.waitForDisplayed({ timeout: T });
