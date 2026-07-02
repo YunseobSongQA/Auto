@@ -12,6 +12,7 @@
     const statusClass = card.status === 'verified' ? 'st-done' : 'st-stub';
     const statusText = card.status === 'verified' ? '검증완료' : 'PC에서 실행예정';
     const points = card.points.map(p => `<li>${esc(p)}</li>`).join('');
+    const repoLabel = card.repoLabel || 'GitHub에서 코드 보기 ↗';
     return `
       <article class="card" data-tool="${esc(card.id)}">
         <div class="card-top">
@@ -30,7 +31,7 @@
         <div class="card-foot">
           <span class="target"><svg class="ticon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>${esc(card.target)}</span>
           <span class="status ${statusClass}">${statusText}</span>
-          <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">GitHub에서 코드 보기 ↗</a>
+          <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">${esc(repoLabel)}</a>
         </div>
       </article>`;
   }
@@ -49,13 +50,31 @@
     grid.querySelectorAll('.demo').forEach(renderDemo);
   }
 
-  // 데모 타입에 따라 딱 3가지로 분기 (구축기 10번 · 조기 추상화 금지)
+  // 데모 타입에 따라 분기 (구축기 10번 · 조기 추상화 금지)
   function renderDemo(el) {
     const type = el.getAttribute('data-type');
     const src = el.getAttribute('data-demo');
     if (type === 'video') return renderVideo(el, src);
     if (type === 'perf') return renderPerf(el, src);
+    if (type === 'mockup') return renderMockup(el);
     // 'pending' → 플레이스홀더 유지
+  }
+
+  // (D) mockup: 실제 실행 영상이 아니라 "예시 프리뷰(데모)"임을 명확히 라벨링해 보여줌.
+  //     공통 플로우(sharedFlow)를 모바일 화면 흐름의 예시 스트립으로 그린다.
+  function renderMockup(el) {
+    const label = el.getAttribute('data-label') || '예시 프리뷰 · 실제 시연 준비 중';
+    const steps = (cfg.sharedFlow || '').split('→').map(s => s.trim()).filter(Boolean);
+    const cells = steps
+      .map((s, i) => `<div class="mk-screen"><span class="mk-idx">${i + 1}</span><span class="mk-txt">${esc(s)}</span></div>`)
+      .join('<span class="mk-arrow" aria-hidden="true">→</span>');
+    el.classList.add('is-mockup');
+    el.innerHTML =
+      `<div class="mockup">
+         <div class="mk-tag">DEMO · 예시</div>
+         <div class="mk-strip">${cells}</div>
+         <div class="mk-note">${esc(label)}</div>
+       </div>`;
   }
 
   // video: 파일이 있으면 <video>로 교체하고 클릭 없이 자동재생(muted+playsinline+play()).
@@ -156,5 +175,25 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => { render(); initTheme(); });
+  // (A) PC/모바일 강제 전환 토글 — 모바일에서 데스크탑 레이아웃을 미리 검증하기 위한 버튼.
+  // 켜면 viewport content 를 width=1200 으로 바꿔 데스크탑 미디어쿼리를 발동시키고,
+  // 끄면 원래 content(width=device-width …)로 정확히 원복한다. viewport 태그의 content 만 교체.
+  function initViewportToggle() {
+    const btn = document.getElementById('viewport-toggle');
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!btn || !meta) return;
+    const MOBILE = meta.getAttribute('content'); // 원본 보존 (기본 width=device-width)
+    const DESKTOP = 'width=1200';
+    const label = btn.querySelector('.vt-label');
+    let on = false;
+    btn.addEventListener('click', () => {
+      on = !on;
+      meta.setAttribute('content', on ? DESKTOP : MOBILE);
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (label) label.textContent = on ? '모바일로 되돌리기' : 'PC 화면으로 보기';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => { render(); initTheme(); initViewportToggle(); });
 })();

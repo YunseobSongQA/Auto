@@ -22,6 +22,22 @@ window.QASS_PORTFOLIO = {
   sharedFlow: '로그인 → 방 입장 → 증적 확인 → 검색',
 
   cards: [
+    // (C) 카드 목록 맨 앞 — 기존 도구 카드와 동일한 구조. QA 흐름의 앞단(설계) 도구.
+    {
+      id: 'prd2tc',
+      tool: 'PRD2TC',
+      title: '기획서(PRD) → 테스트케이스 자동 생성',
+      desc: '기획서(PRD)를 넣으면 테스트케이스를 자동으로 뽑아 주는 도구입니다. 아래 자동화 도구들보다 앞단인 QA 설계 단계를 담당합니다.',
+      target: 'PRD 문서',
+      repo: 'https://qaprd2tc.pages.dev/',
+      repoLabel: '도구 열기 ↗',
+      demo: null,
+      demoType: 'pending',
+      demoLabel: '라이브 도구 · 링크에서 바로 사용',
+      badge: 'PRD → TC',
+      status: 'verified',
+      points: ['기획서 입력', '테스트케이스 자동 생성', 'QA 설계 단계'],
+    },
     {
       id: 'playwright',
       tool: 'Playwright',
@@ -73,8 +89,8 @@ window.QASS_PORTFOLIO = {
       target: 'QASS 모바일',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: null,
-      demoType: 'pending',
-      demoLabel: 'PC(에뮬레이터)에서 녹화 예정',
+      demoType: 'mockup',
+      demoLabel: '예시 프리뷰 · 실제 시연 준비 중',
       badge: '모바일',
       status: 'pending',
       points: ['WebdriverIO 표준 러너', 'UiAutomator2', 'PC에서 실행'],
