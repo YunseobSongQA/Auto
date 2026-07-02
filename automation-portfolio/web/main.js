@@ -57,19 +57,7 @@
     if (type === 'video') return renderVideo(el, src);
     if (type === 'perf') return renderPerf(el, src);
     if (type === 'mockup') return renderMockup(el);
-    if (type === 'image') return renderImage(el, src);
     // 'pending' → 플레이스홀더 유지
-  }
-
-  // (C) image: 실제 라이브 도구(PRD2TC)를 캡처한 스크린샷을 그대로 보여줌.
-  //     상단은 실제 출력 화면, 하단 캡션은 무엇을 보여주는지 설명.
-  function renderImage(el, src) {
-    if (!src) return;
-    const label = el.getAttribute('data-label') || '';
-    el.classList.add('is-image');
-    const cap = label ? `<figcaption class="shot-cap">${esc(label)}</figcaption>` : '';
-    el.innerHTML =
-      `<figure class="shot"><img src="${esc(src)}" alt="PRD2TC 실제 도구 출력 화면" loading="lazy" />${cap}</figure>`;
   }
 
   // (D) mockup: 실제 실행 영상이 아니라 "예시 프리뷰(데모)"임을 명확히 라벨링하되,
