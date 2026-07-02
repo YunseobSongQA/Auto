@@ -15,7 +15,7 @@ window.QASS_PORTFOLIO = {
   sharedTarget: {
     name: 'QASS',
     url: 'https://qass1.pages.dev/',
-    label: '하나의 대상 · 네 가지 자동화 도구',
+    label: 'QA 도구 5종 · 설계부터 자동화까지',
   },
 
   // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일)
@@ -42,7 +42,7 @@ window.QASS_PORTFOLIO = {
       id: 'playwright',
       tool: 'Playwright',
       title: 'QASS 웹 · 데스크톱 크롬',
-      desc: '핵심 사용자 플로우를 헤드리스 크롬으로 자동화하고 실행 과정을 video로 녹화합니다. 4종의 레퍼런스 구현입니다.',
+      desc: '핵심 사용자 플로우를 헤드리스 크롬으로 자동화하고 실행 과정을 video로 녹화합니다. 자동화 4종의 레퍼런스 구현입니다.',
       target: 'QASS 웹',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/playwright',
       demo: 'assets/playwright.webm',

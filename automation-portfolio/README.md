@@ -1,17 +1,21 @@
-# Automation Portfolio — QASS 자동화 4종
+# Automation Portfolio — QA 도구 5종 (설계 1 + 자동화 4)
 
-**하나의 타깃([QASS](https://qass1.pages.dev/))을 4가지 도구로 자동화**한 포트폴리오입니다.
+**QA 설계부터 자동화 실행까지 5가지 도구**로 구성한 포트폴리오입니다.
+앞단에는 기획서(PRD)에서 테스트케이스를 자동 생성하는 **PRD2TC**(QA 설계 단계)가 있고,
+뒷단에는 **하나의 타깃([QASS](https://qass1.pages.dev/))을 4가지 도구로 자동화**한 실행 계층이 있습니다.
 같은 사용자 플로우를 Playwright · Selenium · API · Appium 로 각각 구현해
 **도구별 접근 방식의 차이**를 한 화면에서 비교합니다.
 
-> 핵심 아이디어: **"같은 QASS · 다른 도구"**.
-> 네 도구는 모두 [`FLOW_CONTRACT.md`](./FLOW_CONTRACT.md) 의 동일한 플로우/결과 계약을 따릅니다.
+> 핵심 아이디어: **"QA 설계(PRD2TC) → 같은 QASS · 다른 자동화 도구"**.
+> 자동화 4종은 모두 [`FLOW_CONTRACT.md`](./FLOW_CONTRACT.md) 의 동일한 플로우/결과 계약을 따릅니다.
+> (PRD2TC 는 QASS 를 자동화하는 도구가 아니라 그 앞단의 설계 도구로, 별도로 배포되어 있습니다.)
 
 ## 구조
 
 ```
 automation-portfolio/
   web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상)
+  # PRD2TC (설계 도구)는 별도 배포 웹앱 → https://qaprd2tc.pages.dev/ (이 저장소에 코드 폴더 없음)
   playwright/   # ✅ 레퍼런스 완전 구현 (헤드리스 + video 녹화)
   selenium/     # ✅ 동일 플로우 실제 실행 + Xvfb/ffmpeg 녹화 (selenium.webm)
   api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
@@ -28,6 +32,7 @@ automation-portfolio/
 
 | 도구 | 대상 | 상태 | 비고 |
 |------|------|------|------|
+| PRD2TC | PRD 문서 (QA 설계 단계) | 배포·운영 | 기획서 → 테스트케이스 자동 생성 · [도구 열기](https://qaprd2tc.pages.dev/) |
 | Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | 핵심 플로우 + video 녹화 |
 | Selenium | QASS 웹 (동일 플로우) | 완전 구현 | 실제 실행 + Xvfb/ffmpeg 녹화 |
 | API | QASS 백엔드 (Supabase REST) | 완전 구현 | 읽기 플로우 + Postman/Newman 부하·성능 테스트 |
@@ -75,10 +80,11 @@ cd appium && npm i && npm run setup && npm test   # 기기 연결 후. 자세히
 
 | 도구 | 실행 환경 | 결과 | 데모 산출물 |
 |------|-----------|------|-------------|
+| PRD2TC | 별도 배포 웹앱 (qaprd2tc.pages.dev) | 라이브 · PRD → TC 자동 생성 | `web/assets/prd2tc.webm` (실제 도구 동작 녹화) |
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
 | Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
 | API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.99 · p95 144ms · **PASS** (ISO/IEC 25010·Apdex 근거) | `web/assets/api-perf.json` |
 | Appium | Appium 서버·드라이버·wdio 설정 (코드스페이스) | 툴체인 OK · 실기기 실행은 PC | `pending` |
 
 > 표 안에서 Appium 을 맨 뒤에 둔 이유: 실기기(안드로이드)가 필요해 **실행이 PC에 의존**하기 때문입니다.
-> 쇼케이스 카드 순서(`web/config.js`)도 동일하게 Playwright → Selenium → API → Appium 입니다.
+> 쇼케이스 카드 순서(`web/config.js`)는 QA 흐름 순서대로 PRD2TC(설계) → Playwright → Selenium → API → Appium 입니다.
