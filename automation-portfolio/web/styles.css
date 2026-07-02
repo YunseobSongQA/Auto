@@ -148,11 +148,20 @@ a { color: inherit; }
 }
 .mk-dev { font-size: 11px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .mk-strip { display: flex; align-items: stretch; gap: 6px; }
+.mk-live { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; font-size: 11px; color: var(--muted); }
+.mk-live i { width: 7px; height: 7px; border-radius: 999px; background: var(--good); animation: mk-pulse 1.1s ease-in-out infinite; }
+@keyframes mk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
 .mk-screen {
   position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;
   align-items: center; justify-content: center; text-align: center;
   padding: 10px 6px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 8px; opacity: .55;
+  transition: opacity .3s ease, border-color .3s ease, box-shadow .3s ease, transform .3s ease;
+}
+.mk-screen.is-done { opacity: 1; }
+.mk-screen.is-active {
+  opacity: 1; border-color: var(--brand); transform: translateY(-2px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
 }
 .mk-idx {
   width: 18px; height: 18px; border-radius: 999px; font-size: 11px; font-weight: 700;
@@ -160,34 +169,18 @@ a { color: inherit; }
   color: #fff; background: linear-gradient(90deg, var(--brand), var(--brand-2));
 }
 .mk-txt { font-size: 11.5px; color: var(--text); line-height: 1.3; }
-.mk-ok { position: absolute; top: 5px; right: 5px; width: 13px; height: 13px; color: var(--good); }
+.mk-ok { position: absolute; top: 5px; right: 5px; width: 13px; height: 13px; color: var(--good); opacity: 0; transition: opacity .3s ease; }
+.mk-screen.is-done .mk-ok, .mk-screen.is-active .mk-ok { opacity: 1; }
 .mk-arrow { align-self: center; color: var(--muted); font-size: 12px; flex: none; }
+.mk-bar { height: 6px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+.mk-bar-fill { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); transition: width .5s ease; }
 .mk-note { font-size: 11.5px; color: var(--muted); font-style: italic; }
 
-/* (C) PRD2TC 예시 출력 — PRD 문서 → 생성된 테스트케이스 목록 */
-.demo.is-prd { aspect-ratio: auto; display: block; background: var(--surface-2); overflow: hidden; }
-.prd { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.pd-flow { display: flex; align-items: center; gap: 10px; }
-.pd-doc {
-  flex: none; width: 66px; height: 84px; padding: 10px 8px; border-radius: 8px;
-  background: var(--surface); border: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 6px;
-}
-.pd-doc-h { font-size: 11px; font-weight: 700; color: var(--brand); }
-.pd-line { height: 4px; border-radius: 999px; background: var(--border-strong); }
-.pd-line.short { width: 60%; }
-.pd-arrow { flex: none; color: var(--muted); font-size: 14px; }
-.pd-list { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.pd-tc {
-  display: flex; align-items: center; gap: 8px; padding: 5px 8px; min-width: 0;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-}
-.pd-id {
-  flex: none; font-size: 10.5px; font-weight: 700; color: var(--good);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-.pd-t { font-size: 11.5px; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pd-note { font-size: 11.5px; color: var(--muted); font-style: italic; }
+/* (C) PRD2TC 실제 스크린샷 — 라이브 도구 캡처 이미지 */
+.demo.is-image { aspect-ratio: auto; display: block; background: var(--surface-2); overflow: hidden; }
+.shot { margin: 0; display: flex; flex-direction: column; }
+.shot img { width: 100%; max-height: 340px; object-fit: cover; object-position: top; display: block; }
+.shot-cap { padding: 8px 10px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--border); background: var(--surface); }
 
 /* 성능·부하 결과 (perf) — 간결하게 */
 .demo.is-perf {
