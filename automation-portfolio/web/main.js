@@ -57,7 +57,33 @@
     if (type === 'video') return renderVideo(el, src);
     if (type === 'perf') return renderPerf(el, src);
     if (type === 'mockup') return renderMockup(el);
+    if (type === 'prd') return renderPrd(el);
     // 'pending' → 플레이스홀더 유지
+  }
+
+  // (C) prd: 라이브 도구(PRD2TC)의 "PRD → 테스트케이스" 변환을 대표 예시 출력으로 보여줌.
+  //     아래 행은 도구 사용 방식을 설명하기 위한 샘플(예시)이며, 실제 실행 결과가 아니다.
+  function renderPrd(el) {
+    const label = el.getAttribute('data-label') || '예시 출력';
+    const rows = [
+      ['TC-001', '로그인 성공 — 올바른 계정/비밀번호'],
+      ['TC-002', '로그인 실패 — 비밀번호 오류 메시지'],
+      ['TC-003', '방 입장 — 권한 있는 사용자'],
+      ['TC-004', '증적 검색 — 키워드 필터 결과'],
+    ];
+    const tcs = rows
+      .map(([id, t]) => `<div class="pd-tc"><span class="pd-id">${esc(id)}</span><span class="pd-t">${esc(t)}</span></div>`)
+      .join('');
+    el.classList.add('is-prd');
+    el.innerHTML =
+      `<div class="prd">
+         <div class="pd-flow">
+           <div class="pd-doc"><span class="pd-doc-h">PRD</span><span class="pd-line"></span><span class="pd-line"></span><span class="pd-line short"></span></div>
+           <span class="pd-arrow" aria-hidden="true">→</span>
+           <div class="pd-list">${tcs}</div>
+         </div>
+         <div class="pd-note">${esc(label)}</div>
+       </div>`;
   }
 
   // (D) mockup: 실제 실행 영상이 아니라 "예시 프리뷰(데모)"임을 명확히 라벨링해 보여줌.
@@ -65,13 +91,16 @@
   function renderMockup(el) {
     const label = el.getAttribute('data-label') || '예시 프리뷰 · 실제 시연 준비 중';
     const steps = (cfg.sharedFlow || '').split('→').map(s => s.trim()).filter(Boolean);
+    const check =
+      '<svg class="mk-ok" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     const cells = steps
-      .map((s, i) => `<div class="mk-screen"><span class="mk-idx">${i + 1}</span><span class="mk-txt">${esc(s)}</span></div>`)
+      .map((s, i) =>
+        `<div class="mk-screen"><span class="mk-idx">${i + 1}</span><span class="mk-txt">${esc(s)}</span>${check}</div>`)
       .join('<span class="mk-arrow" aria-hidden="true">→</span>');
     el.classList.add('is-mockup');
     el.innerHTML =
       `<div class="mockup">
-         <div class="mk-tag">DEMO · 예시</div>
+         <div class="mk-head"><span class="mk-tag">DEMO · 예시</span><span class="mk-dev">모바일 크롬 · UiAutomator2</span></div>
          <div class="mk-strip">${cells}</div>
          <div class="mk-note">${esc(label)}</div>
        </div>`;

@@ -140,14 +140,16 @@ a { color: inherit; }
   background: var(--surface-2); overflow: hidden;
 }
 .mockup { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.mk-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mk-tag {
-  align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
   color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn);
   padding: 2px 8px; border-radius: 999px;
 }
+.mk-dev { font-size: 11px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .mk-strip { display: flex; align-items: stretch; gap: 6px; }
 .mk-screen {
-  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;
+  position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;
   align-items: center; justify-content: center; text-align: center;
   padding: 10px 6px; background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px;
@@ -158,8 +160,34 @@ a { color: inherit; }
   color: #fff; background: linear-gradient(90deg, var(--brand), var(--brand-2));
 }
 .mk-txt { font-size: 11.5px; color: var(--text); line-height: 1.3; }
+.mk-ok { position: absolute; top: 5px; right: 5px; width: 13px; height: 13px; color: var(--good); }
 .mk-arrow { align-self: center; color: var(--muted); font-size: 12px; flex: none; }
 .mk-note { font-size: 11.5px; color: var(--muted); font-style: italic; }
+
+/* (C) PRD2TC 예시 출력 — PRD 문서 → 생성된 테스트케이스 목록 */
+.demo.is-prd { aspect-ratio: auto; display: block; background: var(--surface-2); overflow: hidden; }
+.prd { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.pd-flow { display: flex; align-items: center; gap: 10px; }
+.pd-doc {
+  flex: none; width: 66px; height: 84px; padding: 10px 8px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.pd-doc-h { font-size: 11px; font-weight: 700; color: var(--brand); }
+.pd-line { height: 4px; border-radius: 999px; background: var(--border-strong); }
+.pd-line.short { width: 60%; }
+.pd-arrow { flex: none; color: var(--muted); font-size: 14px; }
+.pd-list { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.pd-tc {
+  display: flex; align-items: center; gap: 8px; padding: 5px 8px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+}
+.pd-id {
+  flex: none; font-size: 10.5px; font-weight: 700; color: var(--good);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.pd-t { font-size: 11.5px; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-note { font-size: 11.5px; color: var(--muted); font-style: italic; }
 
 /* 성능·부하 결과 (perf) — 간결하게 */
 .demo.is-perf {
