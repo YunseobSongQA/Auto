@@ -16,10 +16,10 @@
 automation-portfolio/
   web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상)
   # PRD2TC (설계 도구)는 별도 배포 웹앱 → https://qaprd2tc.pages.dev/ (이 저장소에 코드 폴더 없음)
-  playwright/   # ✅ 레퍼런스 완전 구현 (헤드리스 + video 녹화)
-  selenium/     # ✅ 동일 플로우 실제 실행 + Xvfb/ffmpeg 녹화 (selenium.webm)
+  playwright/   # ✅ 레퍼런스 완전 구현 (JS/TS · 헤드리스 + video 녹화)
+  selenium/     # ✅ 동일 플로우 실제 실행 (Python · Xvfb/ffmpeg 녹화 selenium.webm)
   api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
-  appium/       # 🟡 모바일 크롬 — WebdriverIO 표준 러너 (툴체인 검증됨, 실행은 PC에서)
+  appium/       # 🟡 모바일 크롬 — Python(pytest) 표준 러너 (툴체인 검증됨, 실행은 PC에서)
   CODE_GUIDE.md     # 📖 한 파일로 보는 코드 가이드 (흐름 + 주요 함수 10가지)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
   README.md
@@ -33,10 +33,10 @@ automation-portfolio/
 | 도구 | 대상 | 상태 | 비고 |
 |------|------|------|------|
 | PRD2TC | PRD 문서 (QA 설계 단계) | 배포·운영 | 기획서 → 테스트케이스 자동 생성 · [도구 열기](https://qaprd2tc.pages.dev/) |
-| Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | 핵심 플로우 + video 녹화 |
-| Selenium | QASS 웹 (동일 플로우) | 완전 구현 | 실제 실행 + Xvfb/ffmpeg 녹화 |
+| Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | JS/TS · 핵심 플로우 + video 녹화 |
+| Selenium | QASS 웹 (동일 플로우) | 완전 구현 | Python · 실제 실행 + Xvfb/ffmpeg 녹화 |
 | API | QASS 백엔드 (Supabase REST) | 완전 구현 | 읽기 플로우 + Postman/Newman 부하·성능 테스트 |
-| Appium | QASS 모바일 크롬 (안드로이드) | 표준 러너 구현 | WebdriverIO+Appium · 툴체인 검증 · 실행은 PC에서 |
+| Appium | QASS 모바일 크롬 (안드로이드) | 표준 러너 구현 | Python(pytest + Appium-Python-Client) · 툴체인 검증 · 실행은 PC에서 |
 
 ## 빠른 실행 (GitHub Codespaces 기준)
 
@@ -48,15 +48,15 @@ cd playwright && npm i && npx playwright install chromium && npm test
 cd api && npm i && npm start              # 기능 읽기 플로우(FlowResult)
 #   부하·성능 검증(10 VU×50=1000건, SLO PASS/FAIL) → api-perf.json:  npm run loadtest
 
-# 3) Selenium (헤드리스 실행, 또는 ./record.sh 로 화면 녹화)
-cd selenium && npm i && npm test          # 헤드리스 실행
+# 3) Selenium (Python · 헤드리스 실행, 또는 ./record.sh 로 화면 녹화)
+cd selenium && pip install -r requirements.txt && python run.py   # 헤드리스 실행
 #   화면 녹화(Xvfb+ffmpeg) → web/assets/selenium.webm:  ./record.sh
 
 # 4) 쇼케이스 웹 (빌드 없이 바로)
 cd web && python3 -m http.server 8080   # http://localhost:8080
 
-# 5) Appium — WebdriverIO 표준 러너 (실행은 PC, 안드로이드 기기 필요)
-cd appium && npm i && npm run setup && npm test   # 기기 연결 후. 자세히는 appium/README.md
+# 5) Appium — Python(pytest) 표준 러너 (실행은 PC, 안드로이드 기기 필요)
+cd appium && pip install -r requirements.txt && appium driver install uiautomator2 && pytest -s   # 자세히는 appium/README.md
 ```
 
 ## 산출 결과
@@ -82,9 +82,9 @@ cd appium && npm i && npm run setup && npm test   # 기기 연결 후. 자세히
 |------|-----------|------|-------------|
 | PRD2TC | 별도 배포 웹앱 (qaprd2tc.pages.dev) | 라이브 · PRD → TC 자동 생성 | `web/assets/prd2tc.webm` (실제 도구 동작 녹화) |
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
-| Selenium | Codespaces Xvfb + ffmpeg | 8/8 스텝 pass | `web/assets/selenium.webm` |
+| Selenium | Codespaces Xvfb + ffmpeg (Python) | 8/8 스텝 pass | `web/assets/selenium.webm` |
 | API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.99 · p95 144ms · **PASS** (ISO/IEC 25010·Apdex 근거) | `web/assets/api-perf.json` |
-| Appium | Appium 서버·드라이버·wdio 설정 (코드스페이스) | 툴체인 OK · 실기기 실행은 PC | `pending` |
+| Appium | Appium 서버·드라이버·pytest 설정 (코드스페이스) | 툴체인 OK · 실기기 실행은 PC | `pending` |
 
 > 표 안에서 Appium 을 맨 뒤에 둔 이유: 실기기(안드로이드)가 필요해 **실행이 PC에 의존**하기 때문입니다.
 > 쇼케이스 카드 순서(`web/config.js`)는 QA 흐름 순서대로 PRD2TC(설계) → Playwright → Selenium → API → Appium 입니다.

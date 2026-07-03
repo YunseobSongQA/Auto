@@ -16,8 +16,8 @@ adb shell screenrecord --bit-rate 4000000 --time-limit 180 "$DEVICE_MP4" &
 REC_PID=$!
 sleep 1
 
-echo "▶ Appium 테스트 실행 (npm test)"
-npm test || echo "(테스트가 실패해도 녹화는 저장합니다)"
+echo "▶ Appium 테스트 실행 (pytest)"
+python -m pytest -s test_qass.py || echo "(테스트가 실패해도 녹화는 저장합니다)"
 
 echo "▶ 녹화 종료"
 adb shell pkill -INT screenrecord 2>/dev/null || true

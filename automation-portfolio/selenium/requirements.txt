@@ -1,0 +1,2 @@
+# Selenium (Python) — 드라이버는 selenium 4 의 Selenium Manager 가 자동 해결
+selenium>=4.25.0

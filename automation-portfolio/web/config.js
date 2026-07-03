@@ -85,7 +85,7 @@ window.QASS_PORTFOLIO = {
       id: 'appium',
       tool: 'Appium',
       title: 'QASS 모바일 · 안드로이드 크롬',
-      desc: '같은 플로우를 모바일 크롬(안드로이드)에서 실행합니다. WebdriverIO 표준 러너로 구현했고, 안드로이드 기기가 필요해 실제 실행은 PC에서 합니다.',
+      desc: '같은 플로우를 모바일 크롬(안드로이드)에서 실행합니다. Python(pytest + Appium-Python-Client) 표준 러너로 구현했고, 안드로이드 기기가 필요해 실제 실행은 PC에서 합니다.',
       target: 'QASS 모바일',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: null,
@@ -93,7 +93,7 @@ window.QASS_PORTFOLIO = {
       demoLabel: '예시 프리뷰 · 실제 시연 준비 중',
       badge: '모바일',
       status: 'pending',
-      points: ['WebdriverIO 표준 러너', 'UiAutomator2', 'PC에서 실행'],
+      points: ['pytest 표준 러너', 'UiAutomator2', 'PC에서 실행'],
     },
   ],
 };

@@ -1,0 +1,4 @@
+# Appium 모바일 자동화 (Python) — pytest 표준 러너 + standalone 두 방식
+Appium-Python-Client>=4.0.0
+selenium>=4.25.0
+pytest>=8.0.0

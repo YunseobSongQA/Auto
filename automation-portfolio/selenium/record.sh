@@ -40,7 +40,7 @@ sleep 1
 
 # 3) 플로우 실행 (headed, 가상 디스플레이 안에서)
 set +e
-node run.js "${1:-google}"
+python run.py "${1:-google}"
 RUN_RC=$?
 set -e
 
