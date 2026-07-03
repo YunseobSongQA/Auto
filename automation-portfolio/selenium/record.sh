@@ -57,5 +57,5 @@ if ffmpeg -y -loglevel error -ss "$TRIM_SEC" -i "$OUT" -c:v libvpx-vp9 -b:v 1M -
   mv "${OUT}.trim.webm" "$OUT"
 fi
 
-echo "saved: $OUT (run.js rc=$RUN_RC)"
+echo "saved: $OUT (run.py rc=$RUN_RC)"
 exit "$RUN_RC"
