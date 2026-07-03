@@ -23,13 +23,17 @@ QASS 의 가장 대표적인 사용자 여정 — **로그인 → 방 입장 →
 | 2 | `go_app`          | `/app.html` 로 이동                                              | `#login-screen` 노출                              |
 | 3 | `login`           | `#login-name` 에 이름 입력 → `#btn-login` 클릭                   | `#rooms-screen` 노출                              |
 | 4 | `rooms_loaded`    | 방 목록 로딩 대기                                                 | `.room-card` 1개 이상, "QASS 테스트 방" 존재      |
-| 5 | `open_test_room`  | "QASS 테스트 방" 카드의 `.room-enter-btn` 클릭                   | `#enter-room-modal` 노출                          |
-| 6 | `enter_room`      | `#enter-room-password`=`qass1234`, `#enter-uploader-name`=이름 → `#btn-enter-room-submit` | `#room-screen` 노출      |
+| 5 | `open_test_room`  | "QASS 테스트 방" 카드의 `.room-enter-btn` 클릭                   | `#enter-room-modal` **또는** `#room-screen` 노출  |
+| 6 | `enter_room`      | 모달이 뜨면 `#enter-room-password`=`qass1234`·`#enter-uploader-name`=이름 → `#btn-enter-room-submit`; 무비번 방이면 바로 통과 | `#room-screen` 노출      |
 | 7 | `captures_loaded` | 캡처 그리드 로딩 대기                                             | `#count-label` 이 "불러오는 중…" 이 아님          |
 | 8 | `search`          | `#search` 에 `google` 입력                                       | 그리드가 필터됨(에러 없이 입력 반영)              |
 
 > 고정 테스트 자격증명: 방 이름 `QASS 테스트 방`, 비밀번호 `qass1234`.
 > (QASS `main.js` 의 `TEST_ROOM_NAME` / `TEST_ROOM_PASSWORD` 와 동일)
+>
+> 참고: "QASS 테스트 방" 은 현재 **비밀번호 없이 바로 입장**하는 방으로 운영됩니다. 도구들은
+> 5·6 스텝에서 (비밀번호 모달) / (무비번 바로 입장) 두 형태를 모두 처리하므로, 방 설정이
+> 바뀌어도 같은 8스텝 계약이 그대로 통과합니다.
 
 ## 2. API 시나리오 (도구: API)
 

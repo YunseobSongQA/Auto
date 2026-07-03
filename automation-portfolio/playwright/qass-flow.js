@@ -67,14 +67,24 @@ export async function runFlow(page, opts = {}) {
   await step('open_test_room', async () => {
     const card = page.locator('.room-card', { hasText: TEST_ROOM_NAME }).first();
     await card.locator('.room-enter-btn').click();
-    await page.locator('#enter-room-modal').waitFor({ state: 'visible', timeout: 10_000 });
+    // 테스트 방은 (비밀번호 모달) 또는 (무비번 바로 입장) 두 형태 → 둘 중 하나가 보일 때까지 대기.
+    await Promise.race([
+      page.locator('#enter-room-modal').waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {}),
+      page.locator('#room-screen').waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {}),
+    ]);
   });
 
   await step('enter_room', async () => {
-    await page.fill('#enter-room-password', TEST_ROOM_PASSWORD);
-    await page.fill('#enter-uploader-name', name);
-    await page.click('#btn-enter-room-submit');
+    // 비밀번호 모달이 뜨는 방이면 입력 후 제출, 무비번 방이면 이미 room-screen 이라 바로 통과.
+    if (await page.locator('#enter-room-modal').isVisible()) {
+      await page.fill('#enter-room-password', TEST_ROOM_PASSWORD);
+      await page.fill('#enter-uploader-name', name);
+      await page.click('#btn-enter-room-submit');
+      await page.locator('#room-screen').waitFor({ state: 'visible', timeout: 10_000 });
+      return 'entered via password modal';
+    }
     await page.locator('#room-screen').waitFor({ state: 'visible', timeout: 10_000 });
+    return 'no-password room · entered directly';
   });
 
   await step('captures_loaded', async () => {

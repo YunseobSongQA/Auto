@@ -48,6 +48,11 @@ def run_flow(driver, name="QA봇", search="google"):
     def visible(css):
         return wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, css)))
 
+    def shown(css):
+        # 예외 없이 "지금 화면에 보이는가"만 판정 (요소가 없으면 False).
+        els = driver.find_elements(By.CSS_SELECTOR, css)
+        return bool(els) and els[0].is_displayed()
+
     def open_landing():
         driver.get(TARGET)
         wait.until(EC.presence_of_element_located(
@@ -78,21 +83,26 @@ def run_flow(driver, name="QA봇", search="google"):
         card = driver.find_element(
             By.XPATH, f"//*[contains(@class,'room-card')][.//*[contains(., '{TEST_ROOM_NAME}')]]")
         card.find_element(By.CSS_SELECTOR, ".room-enter-btn").click()
-        visible("#enter-room-modal")
+        # 테스트 방은 (비밀번호 모달) 또는 (무비번 바로 입장) 두 형태가 있으므로 둘 중 하나를 대기.
+        wait.until(lambda _d: shown("#enter-room-modal") or shown("#room-screen"))
     step("open_test_room", open_test_room)
 
     def enter_room():
-        # Playwright 차이 ①: page.fill() 은 기존 값을 비우고 입력하지만,
-        #   Selenium send_keys() 는 "덧붙인다". QASS 는 테스트 방의 비밀번호/이름을
-        #   프리필하므로 반드시 clear() 후 입력해야 인증이 통과한다.
-        pw = driver.find_element(By.CSS_SELECTOR, "#enter-room-password")
-        uploader = driver.find_element(By.CSS_SELECTOR, "#enter-uploader-name")
-        pw.clear()
-        pw.send_keys(TEST_ROOM_PASSWORD)
-        uploader.clear()
-        uploader.send_keys(name)
-        driver.find_element(By.CSS_SELECTOR, "#btn-enter-room-submit").click()
+        # 비밀번호 모달이 뜨는 방이면 입력 후 제출, 무비번 방이면 이미 room-screen 이라 바로 통과.
+        # (모달일 때) Playwright 차이 ①: page.fill() 은 기존 값을 비우고 입력하지만 Selenium
+        #   send_keys() 는 "덧붙인다". QASS 는 프리필 값이 있으므로 반드시 clear() 후 입력한다.
+        if shown("#enter-room-modal"):
+            pw = driver.find_element(By.CSS_SELECTOR, "#enter-room-password")
+            uploader = driver.find_element(By.CSS_SELECTOR, "#enter-uploader-name")
+            pw.clear()
+            pw.send_keys(TEST_ROOM_PASSWORD)
+            uploader.clear()
+            uploader.send_keys(name)
+            driver.find_element(By.CSS_SELECTOR, "#btn-enter-room-submit").click()
+            visible("#room-screen")
+            return "entered via password modal"
         visible("#room-screen")
+        return "no-password room · entered directly"
     step("enter_room", enter_room)
 
     def captures_loaded():
