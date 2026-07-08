@@ -100,8 +100,10 @@
   // video: 파일이 있으면 <video>로 교체하고 클릭 없이 자동재생(muted+playsinline+play()).
   // 모바일은 화면 밖이거나 로드 타이밍이 어긋나면 자동재생이 막혀 재생버튼이 뜨므로,
   // canplay·화면 노출(IntersectionObserver)·첫 사용자 제스처마다 play()를 재시도한다.
-  // 코덱 폴백: WebM(VP9)은 아이폰(WebKit)에서 재생 불가 → 같은 이름의 .mp4(H.264)를
-  // <source>로 함께 제공하고, 그래도 못 틀면 poster(실행 스크린샷)라도 보이게 한다.
+  // 코덱: MP4(H.264)를 첫 번째 <source>로 둔다. WebKit(아이폰)은 canPlayType('video/webm')에
+  // "재생 가능"이라 답해 놓고 실제로는 VP9 디코딩을 못 해 멈추므로, webm을 앞에 두면
+  // mp4 폴백이 영원히 발동하지 않는다. H.264는 전 브라우저 재생 가능 → mp4 우선.
+  // webm은 폴백(2순위)으로 유지하고, 그래도 못 틀면 poster(실행 스크린샷)라도 보이게 한다.
   function renderVideo(el, src) {
     if (!src) return;
     fetch(src, { method: 'HEAD' })
@@ -114,7 +116,7 @@
         v.setAttribute('autoplay', ''); v.setAttribute('loop', '');
         const poster = el.getAttribute('data-poster');
         if (poster) v.poster = poster;
-        [['video/webm', src], ['video/mp4', src.replace(/\.webm$/, '.mp4')]].forEach(([type, s]) => {
+        [['video/mp4', src.replace(/\.webm$/, '.mp4')], ['video/webm', src]].forEach(([type, s]) => {
           const source = document.createElement('source');
           source.src = s; source.type = type;
           v.appendChild(source);
