@@ -118,7 +118,7 @@ def run_flow(driver, name="QA봇", search="google"):
     def search_captures():
         box = driver.find_element(By.CSS_SELECTOR, "#search")
         box.send_keys(search)
-        val = box.get_attribute("value")
+        val = box.get_property("value")
         if val != search:
             raise RuntimeError("search input not reflected")
         return f'filtered by "{search}"'
