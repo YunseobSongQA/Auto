@@ -23,8 +23,9 @@ DOM 선택자는 데스크톱과 동일하게 재사용합니다.
 
 - ✅ **이 저장소(코드스페이스)에서 검증됨**: Appium 서버 기동 + UiAutomator2 드라이버
   설치 + pytest/Appium-Python-Client 로드. 즉 **코드·설정은 정상**입니다.
-- 🟡 **PC 필요**: 안드로이드 에뮬레이터/실기기만 있으면 그대로 돌아갑니다. 클라우드
-  컨테이너는 에뮬레이터(KVM·메모리) 제약이 커서 **실제 실행·녹화는 PC 에서** 합니다.
+- ✅ **PC(Windows)에서 실제 실행 검증됨**: 안드로이드 에뮬레이터(Pixel 8 / API 34)의
+  크롬에서 8스텝 전부 통과. 진행 중 스크린샷: [`../web/assets/appium-run.png`](../web/assets/appium-run.png)
+  (에뮬레이터 창에서 검색 스텝이 실행되는 장면), 데모 영상: `../web/assets/appium.webm`
 
 ## PC 실행 (Python 3.9+ · Node(Appium 서버) · Android SDK 필요)
 

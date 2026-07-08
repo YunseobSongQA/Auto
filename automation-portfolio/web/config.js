@@ -85,7 +85,7 @@ window.QASS_PORTFOLIO = {
       id: 'appium',
       tool: 'Appium',
       title: 'QASS 모바일 · 안드로이드 크롬',
-      desc: '같은 검사를 이번에는 스마트폰(안드로이드의 크롬)에서 실행합니다. Python(pytest)으로 구현했고, 실제 기기가 있어야 돌릴 수 있어서 실행 영상은 PC에서 준비 중입니다.',
+      desc: '같은 검사를 이번에는 스마트폰(안드로이드의 크롬)에서 실행합니다. Python(pytest)으로 구현했고, PC의 안드로이드 에뮬레이터(Pixel 8)에서 실제로 실행해 8단계를 모두 통과했습니다. 아래 영상이 에뮬레이터 창에서 자동화가 진행되는 실제 모습입니다.',
       target: 'QASS 모바일',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: 'assets/appium.webm',
