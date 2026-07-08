@@ -15,7 +15,7 @@ window.QASS_PORTFOLIO = {
   sharedTarget: {
     name: 'QASS',
     url: 'https://qass1.pages.dev/',
-    label: 'QA 도구 5종 · 설계부터 자동 테스트까지',
+    label: '자동화는 목적이 아니라, 품질을 올리는 수단',
   },
 
   // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일 · "증적"은 쉬운 말 "캡처"로 표기)
