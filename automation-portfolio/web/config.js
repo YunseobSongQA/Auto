@@ -8,6 +8,7 @@
  *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
  *   - demoLabel: 데모 영역 캡션("영상 아님" 같은 설명).
+ *   - poster:   (선택) 영상 로드 전/재생 불가 시 표시할 스크린샷 경로.
  *   - status:   'verified'(검증완료) | 'pending'(PC에서 실행예정)
  */
 window.QASS_PORTFOLIO = {
@@ -32,6 +33,7 @@ window.QASS_PORTFOLIO = {
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: 'assets/appium.webm',
       demoType: 'video',
+      poster: 'assets/appium-run.png', // 영상 로드 전/재생 불가 시 보이는 실행 스크린샷
       demoLabel: '실제 실행 녹화 · 안드로이드 에뮬레이터(Pixel 8) 크롬 · 8스텝 통과',
       badge: '모바일',
       status: 'verified',

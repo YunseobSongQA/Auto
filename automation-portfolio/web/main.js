@@ -22,7 +22,7 @@
         <h2>${esc(card.title)}</h2>
         <p class="desc">${esc(card.desc)}</p>
 
-        <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}">
+        <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">
           <div class="demo-ph">${esc(card.demoLabel || '데모 준비 중')}<br><small>${esc(card.tool)} 실행 결과</small></div>
         </div>
 
@@ -100,6 +100,8 @@
   // video: 파일이 있으면 <video>로 교체하고 클릭 없이 자동재생(muted+playsinline+play()).
   // 모바일은 화면 밖이거나 로드 타이밍이 어긋나면 자동재생이 막혀 재생버튼이 뜨므로,
   // canplay·화면 노출(IntersectionObserver)·첫 사용자 제스처마다 play()를 재시도한다.
+  // 코덱 폴백: WebM(VP9)은 아이폰(WebKit)에서 재생 불가 → 같은 이름의 .mp4(H.264)를
+  // <source>로 함께 제공하고, 그래도 못 틀면 poster(실행 스크린샷)라도 보이게 한다.
   function renderVideo(el, src) {
     if (!src) return;
     fetch(src, { method: 'HEAD' })
@@ -110,7 +112,13 @@
         v.autoplay = true; v.playsInline = true; v.preload = 'auto';
         v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
         v.setAttribute('autoplay', ''); v.setAttribute('loop', '');
-        v.src = src;
+        const poster = el.getAttribute('data-poster');
+        if (poster) v.poster = poster;
+        [['video/webm', src], ['video/mp4', src.replace(/\.webm$/, '.mp4')]].forEach(([type, s]) => {
+          const source = document.createElement('source');
+          source.src = s; source.type = type;
+          v.appendChild(source);
+        });
         el.innerHTML = '';
         el.appendChild(v);
 
