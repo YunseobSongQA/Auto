@@ -22,7 +22,22 @@ window.QASS_PORTFOLIO = {
   sharedFlow: '로그인 → 방 입장 → 캡처 확인 → 검색',
 
   cards: [
-    // (C) 카드 목록 맨 앞 — 기존 도구 카드와 동일한 구조. QA 흐름의 앞단(설계) 도구.
+    // Appium — 에뮬레이터(Pixel 8)에서 실제 실행·녹화까지 검증 완료 → 대표 카드로 맨 앞.
+    {
+      id: 'appium',
+      tool: 'Appium',
+      title: 'QASS 모바일 · 안드로이드 크롬',
+      desc: '같은 검사를 이번에는 스마트폰(안드로이드의 크롬)에서 실행합니다. Python(pytest)으로 구현했고, PC의 안드로이드 에뮬레이터(Pixel 8)에서 실제로 실행해 8단계를 모두 통과했습니다. 아래 영상이 에뮬레이터 창에서 자동화가 진행되는 실제 모습입니다.',
+      target: 'QASS 모바일',
+      repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
+      demo: 'assets/appium.webm',
+      demoType: 'video',
+      demoLabel: '실제 실행 녹화 · 안드로이드 에뮬레이터(Pixel 8) 크롬 · 8스텝 통과',
+      badge: '모바일',
+      status: 'verified',
+      points: ['pytest 표준 러너', 'UiAutomator2', 'PC에서 실행'],
+    },
+    // (C) 기존 도구 카드와 동일한 구조. QA 흐름의 앞단(설계) 도구.
     {
       id: 'prd2tc',
       tool: 'PRD2TC',
@@ -79,21 +94,6 @@ window.QASS_PORTFOLIO = {
       badge: 'Postman · 부하',
       status: 'verified',
       points: ['Postman·Newman', 'p50/p95/p99 지연', '성공률·처리량'],
-    },
-    // Appium 은 실기기(안드로이드)가 필요해 실행이 PC 의존 → 카드 순서를 맨 뒤로 둡니다.
-    {
-      id: 'appium',
-      tool: 'Appium',
-      title: 'QASS 모바일 · 안드로이드 크롬',
-      desc: '같은 검사를 이번에는 스마트폰(안드로이드의 크롬)에서 실행합니다. Python(pytest)으로 구현했고, PC의 안드로이드 에뮬레이터(Pixel 8)에서 실제로 실행해 8단계를 모두 통과했습니다. 아래 영상이 에뮬레이터 창에서 자동화가 진행되는 실제 모습입니다.',
-      target: 'QASS 모바일',
-      repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
-      demo: 'assets/appium.webm',
-      demoType: 'video',
-      demoLabel: '실제 실행 녹화 · 안드로이드 에뮬레이터(Pixel 8) 크롬 · 8스텝 통과',
-      badge: '모바일',
-      status: 'verified',
-      points: ['pytest 표준 러너', 'UiAutomator2', 'PC에서 실행'],
     },
   ],
 };
