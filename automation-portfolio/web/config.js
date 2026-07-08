@@ -15,11 +15,11 @@ window.QASS_PORTFOLIO = {
   sharedTarget: {
     name: 'QASS',
     url: 'https://qass1.pages.dev/',
-    label: 'QA 도구 5종 · 설계부터 자동화까지',
+    label: 'QA 도구 5종 · 설계부터 자동 테스트까지',
   },
 
-  // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일)
-  sharedFlow: '로그인 → 방 입장 → 증적 확인 → 검색',
+  // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일 · "증적"은 쉬운 말 "캡처"로 표기)
+  sharedFlow: '로그인 → 방 입장 → 캡처 확인 → 검색',
 
   cards: [
     // (C) 카드 목록 맨 앞 — 기존 도구 카드와 동일한 구조. QA 흐름의 앞단(설계) 도구.
@@ -42,7 +42,7 @@ window.QASS_PORTFOLIO = {
       id: 'playwright',
       tool: 'Playwright',
       title: 'QASS 웹 · 데스크톱 크롬',
-      desc: '핵심 사용자 플로우를 헤드리스 크롬으로 자동화하고 실행 과정을 video로 녹화합니다. 자동화 4종의 레퍼런스 구현입니다.',
+      desc: '로그인부터 검색까지, 사람이 하던 검사를 크롬 브라우저가 스스로 실행합니다(화면 없이 도는 \'헤드리스\' 방식). 실행 과정은 아래 영상으로 녹화해 두었고, 자동화 4종 중 기준이 되는 구현입니다.',
       target: 'QASS 웹',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/playwright',
       demo: 'assets/playwright.webm',
@@ -56,7 +56,7 @@ window.QASS_PORTFOLIO = {
       id: 'selenium',
       tool: 'Selenium',
       title: 'QASS 웹 · 동일 플로우 비교',
-      desc: 'Playwright와 똑같은 플로우 계약을 Selenium WebDriver로 구현해 두 도구의 작성 방식을 비교합니다.',
+      desc: '위 Playwright와 똑같은 검사를, 업계에서 가장 오래 쓰여 온 도구인 Selenium으로 한 번 더 만들었습니다. 같은 일을 두 도구로 짜 보면 무엇이 다른지 그대로 비교됩니다.',
       target: 'QASS 웹',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/selenium',
       demo: 'assets/selenium.webm',
@@ -70,7 +70,7 @@ window.QASS_PORTFOLIO = {
       id: 'api',
       tool: 'API',
       title: 'QASS 서버 · 성능·부하 테스트',
-      desc: 'QASS 서버(데이터를 주는 백엔드)가 사용자가 몰려도 빠르고 안정적인지 부하를 걸어 측정합니다. Postman으로 만든 요청을 자동으로 1000번 보내, 국제 표준 기준으로 통과/실패를 가립니다.',
+      desc: '화면 뒤에서 데이터를 보내 주는 서버가, 사용자가 한꺼번에 몰려도 빠르고 안정적인지 시험합니다. 요청을 자동으로 1,000번 보내 응답 속도를 재고, 국제 표준 기준으로 통과/실패를 판정합니다.',
       target: 'QASS 백엔드',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/api',
       demo: 'assets/api-perf.json',
@@ -85,7 +85,7 @@ window.QASS_PORTFOLIO = {
       id: 'appium',
       tool: 'Appium',
       title: 'QASS 모바일 · 안드로이드 크롬',
-      desc: '같은 플로우를 모바일 크롬(안드로이드)에서 실행합니다. Python(pytest + Appium-Python-Client) 표준 러너로 구현했고, 안드로이드 기기가 필요해 실제 실행은 PC에서 합니다.',
+      desc: '같은 검사를 이번에는 스마트폰(안드로이드의 크롬)에서 실행합니다. Python(pytest)으로 구현했고, 실제 기기가 있어야 돌릴 수 있어서 실행 영상은 PC에서 준비 중입니다.',
       target: 'QASS 모바일',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: null,
