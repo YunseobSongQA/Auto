@@ -131,6 +131,10 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: center;
 }
 .demo video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* 모바일(세로) 데모 — appium 은 폰 화면 비율이라 16:9 박스에서 위아래가 잘림 →
+   세로 규격 박스 + contain 으로 영상 전체가 보이게 */
+.card[data-tool="appium"] .demo { aspect-ratio: auto; height: 430px; }
+.card[data-tool="appium"] .demo video { object-fit: contain; }
 .demo-ph { text-align: center; color: var(--muted); font-size: 13px; padding: 10px; }
 .demo-ph small { color: var(--muted); opacity: .8; }
 
