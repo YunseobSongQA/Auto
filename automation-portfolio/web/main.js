@@ -98,6 +98,8 @@
   }
 
   // video: 파일이 있으면 <video>로 교체하고 클릭 없이 자동재생(muted+playsinline+play()).
+  // 모바일은 화면 밖이거나 로드 타이밍이 어긋나면 자동재생이 막혀 재생버튼이 뜨므로,
+  // canplay·화면 노출(IntersectionObserver)·첫 사용자 제스처마다 play()를 재시도한다.
   function renderVideo(el, src) {
     if (!src) return;
     fetch(src, { method: 'HEAD' })
@@ -107,14 +109,37 @@
         v.muted = true; v.defaultMuted = true; v.loop = true;
         v.autoplay = true; v.playsInline = true; v.preload = 'auto';
         v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+        v.setAttribute('autoplay', ''); v.setAttribute('loop', '');
         v.src = src;
         el.innerHTML = '';
         el.appendChild(v);
+
         const play = () => { const p = v.play(); if (p) p.catch(() => {}); };
         play();
         v.addEventListener('canplay', play, { once: true });
+        v.addEventListener('loadeddata', play, { once: true });
+
+        // 스크롤로 화면에 들어올 때마다 재생 재시도 (모바일에서 화면 밖 자동재생 차단 대응)
+        if ('IntersectionObserver' in window) {
+          new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) play(); });
+          }, { threshold: 0.25 }).observe(v);
+        }
+        registerGestureFallback(play);
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
+  }
+
+  // 자동재생이 끝내 막혔을 때, 사용자의 첫 터치/클릭/스크롤 한 번으로 모든 영상을 재생.
+  const gestureCbs = [];
+  let gestureBound = false;
+  function registerGestureFallback(cb) {
+    gestureCbs.push(cb);
+    if (gestureBound) return;
+    gestureBound = true;
+    const fire = () => { gestureCbs.forEach(fn => fn()); };
+    ['touchstart', 'click', 'scroll'].forEach(ev =>
+      document.addEventListener(ev, fire, { once: true, passive: true }));
   }
 
   // perf: 부하 테스트 결과(api-perf.json)를 간결한 판정 + 핵심 수치 + 그래프로 (영상 아님).
