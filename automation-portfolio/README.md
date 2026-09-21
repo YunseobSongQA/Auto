@@ -87,4 +87,6 @@ cd appium && pip install -r requirements.txt && appium driver install uiautomato
 | Appium | Appium 서버·드라이버·pytest 설정 (코드스페이스) | 툴체인 OK · 실기기 실행은 PC | `pending` |
 
 > 표 안에서 Appium 을 맨 뒤에 둔 이유: 실기기(안드로이드)가 필요해 **실행이 PC에 의존**하기 때문입니다.
-> 쇼케이스 카드 순서(`web/config.js`)는 QA 흐름 순서대로 PRD2TC(설계) → Playwright → Selenium → API → Appium 입니다.
+> 쇼케이스 카드 순서(`web/config.js`)는 QASS(직접 만든 증적 관리 플랫폼 · 자동화의 대상) →
+> Appium(모바일 · 실행 검증 완료) → PRD2TC(설계) → Playwright → Selenium → API 입니다.
+> QASS 카드의 시연 영상은 [`playwright/qass-demo.mjs`](./playwright/qass-demo.mjs) 로 녹화합니다.

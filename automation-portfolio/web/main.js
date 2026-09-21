@@ -13,6 +13,11 @@
     const statusText = card.status === 'verified' ? '검증완료' : 'PC에서 실행예정';
     const points = card.points.map(p => `<li>${esc(p)}</li>`).join('');
     const repoLabel = card.repoLabel || 'GitHub에서 코드 보기 ↗';
+    // note: 선택 필드. 있으면 포인트 아래에 '제언' 블록으로 — 한계/다음 과제를 숨기지 않고 적는다.
+    const note = card.note
+      ? `<div class="note"><span class="note-tag">${esc(card.note.label || '제언')}</span>` +
+        `<p>${esc(card.note.text)}</p></div>`
+      : '';
     return `
       <article class="card" data-tool="${esc(card.id)}">
         <div class="card-top">
@@ -27,6 +32,7 @@
         </div>
 
         <ul class="points">${points}</ul>
+        ${note}
 
         <div class="card-foot">
           <span class="target"><svg class="ticon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>${esc(card.target)}</span>

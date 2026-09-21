@@ -70,7 +70,7 @@ Appium 만 실기기(안드로이드)가 필요해 실행이 PC에 의존하므�
 | **API 성능 통계** | [`api/qass-perf.js`](./api/qass-perf.js) | p50/p95/p99·Apdex·SLO 판정 (순수 함수) |
 | **API 부하 실행** | [`api/loadtest.js`](./api/loadtest.js) | 가상 사용자 동시 호출 → 수치/그래프 산출 |
 | **Appium (맨 뒤)** | [`appium/qass_flow.py`](./appium/qass_flow.py) | 같은 8스텝을 모바일 크롬으로 (Python · 실행은 PC) |
-| **쇼케이스 데이터** | [`web/config.js`](./web/config.js) | 카드 5개 메타(PRD2TC + 자동화 4종 · 도구명/설명/링크) — 여기만 고치면 화면 바뀜 |
+| **쇼케이스 데이터** | [`web/config.js`](./web/config.js) | 카드 6개 메타(QASS + PRD2TC + 자동화 4종 · 도구명/설명/링크/제언) — 여기만 고치면 화면 바뀜 |
 | **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면. 영상/그래프/대기 3가지로 분기 |
 
 > **설계 원칙(관심사 분리):** UI(`index.html`/`styles.css`) · 로직(`main.js`) · 데이터(`config.js`)를

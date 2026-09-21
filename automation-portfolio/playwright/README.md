@@ -35,6 +35,24 @@ cp artifacts/**/video.webm ../web/assets/playwright.webm   # 경로는 실제 �
 | `qass-flow.js` | 플로우 구현. `runFlow(page, opts) -> FlowResult` (모듈 경계 고정) |
 | `tests/qass.spec.js` | 테스트 러너. 계약 검증 + 결과 저장 |
 | `playwright.config.js` | 헤드리스·video·뷰포트 설정 |
+| `qass-demo.mjs` | (별도) QASS **제품 시연 영상** 녹화기 — 플로우 계약과 무관 |
+
+## QASS 제품 시연 영상 (`qass-demo.mjs`)
+
+쇼케이스 맨 앞 QASS 카드에 붙는 영상입니다. 플로우 계약 구현이 아니라,
+배포된 QASS 를 랜딩 → 로그인 → 방 목록 → 방 → 검색 → 1차 자동 점검 순으로
+돌아다니며 자막과 함께 녹화합니다.
+
+```bash
+node qass-demo.mjs        # → ../web/assets/qass.webm (+ 포스터는 아래 참고)
+
+# 모바일 재생용 mp4 (main.js 가 mp4 를 1순위 source 로 씁니다 — 아이폰 WebKit 대응)
+ffmpeg -i qass.webm -vf "scale=1152:720:flags=lanczos,fps=24" -c:v libx264 -crf 28 -preset slow -pix_fmt yuv420p -movflags +faststart -an qass.mp4
+# webm 도 같은 규격으로 다시 눌러 용량을 맞춥니다 (VP9 · 원본 녹화본에서)
+ffmpeg -i qass-raw.webm -vf "scale=1152:720:flags=lanczos,fps=24" -c:v libvpx-vp9 -crf 36 -b:v 0 -row-mt 1 -an qass.webm
+# 포스터 — 아이폰에서 재생이 막혔을 때 대신 보이는 한 장 (방 화면 프레임)
+ffmpeg -i qass.mp4 -vf "select='eq(n\,690)'" -frames:v 1 -q:v 4 qass-run.jpg
+```
 
 ## 핵심 플로우 결정 근거 (라이브 DOM inspect)
 
