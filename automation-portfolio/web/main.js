@@ -10,8 +10,9 @@
   // ── 순수 함수: 카드 데이터 → HTML 문자열 (DOM/네트워크 없음) ────────────────
   function buildCard(card, shared) {
     const statusClass = card.status === 'verified' ? 'st-done' : 'st-stub';
-    const statusText = card.status === 'verified' ? '검증완료' : 'PC에서 실행예정';
-    const points = card.points.map(p => `<li>${esc(p)}</li>`).join('');
+    const statusText = card.statusLabel || (card.status === 'verified' ? '검증완료' : 'PC에서 실행예정');
+    // 알약 칩을 여러 줄로 깔면 카드가 시끄러워진다 → 가운뎃점으로 이은 한 줄.
+    const points = card.points.map(p => `<li>${esc(p)}</li>`).join('<li aria-hidden="true">·</li>');
     const repoLabel = card.repoLabel || 'GitHub에서 코드 보기 ↗';
     // note: 선택 필드. 있으면 포인트 아래에 '제언' 블록으로 — 한계/다음 과제를 숨기지 않고 적는다.
     const note = card.note
@@ -35,8 +36,7 @@
         ${note}
 
         <div class="card-foot">
-          <span class="target"><svg class="ticon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>${esc(card.target)}</span>
-          <span class="status ${statusClass}">${statusText}</span>
+          <span class="status ${statusClass}">${icoMark(card.status === 'verified')}${statusText}</span>
           <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">${esc(repoLabel)}</a>
         </div>
       </article>`;
@@ -44,11 +44,14 @@
 
   // ── 부수효과: 화면에 반영 ──────────────────────────────────────────────────
   function render() {
-    document.getElementById('shared-label').textContent = cfg.sharedTarget.label;
-    document.getElementById('shared-flow').textContent = cfg.sharedFlow;
+    const fill = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    fill('shared-label', cfg.sharedTarget.label);
+    fill('shared-flow', cfg.sharedFlow);
     const link = document.getElementById('target-link');
-    link.href = cfg.sharedTarget.url;
-    link.textContent = `${cfg.sharedTarget.name} 열기 ↗`;
+    if (link) {
+      link.href = cfg.sharedTarget.url;
+      link.textContent = `${cfg.sharedTarget.name} 열기 ↗`;
+    }
 
     const grid = document.getElementById('cards');
     grid.innerHTML = cfg.cards.map(c => buildCard(c, cfg.sharedTarget)).join('');
@@ -200,7 +203,7 @@
           `<div class="perf">
              ${verdict}
              <div class="ptiles">${tiles}</div>
-             <div class="pblock"><div class="pblock-h">합격 기준</div>${checks}</div>
+             <details class="pblock"><summary>합격 기준 ${(d.checks || []).length}개 보기</summary>${checks}</details>
              <div class="pblock"><div class="pblock-h">응답속도 분포 (ms · 낮을수록 빠름)</div>${bars}</div>
            </div>`;
       })

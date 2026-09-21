@@ -84,18 +84,19 @@ h1, h2, p, li, .note-tag { word-break: keep-all; overflow-wrap: break-word; }
 [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 /* ── 히어로 ────────────────────────────────────────────────────────────── */
-.hero { max-width: 880px; margin: 0 auto; padding: 56px 20px 24px; text-align: center; }
+.hero { max-width: 660px; margin: 0 auto; padding: 64px 20px 28px; text-align: center; }
 .badge {
-  display: inline-block; padding: 6px 14px; border: 1px solid var(--border);
-  border-radius: 999px; color: var(--brand); font-size: 13px; font-weight: 600;
-  background: var(--surface);
+  display: inline-block; padding: 5px 13px; border: 1px solid var(--border);
+  border-radius: 999px; color: var(--muted); font-size: 12.5px; font-weight: 600;
+  background: var(--surface); letter-spacing: .01em;
 }
-.hero h1 { font-size: clamp(28px, 5vw, 44px); margin: 18px 0 10px; letter-spacing: -.02em; }
+.hero h1 { font-size: clamp(30px, 5vw, 42px); margin: 20px 0 14px; letter-spacing: -.025em; line-height: 1.25; }
 .grad {
   background: linear-gradient(90deg, var(--brand), var(--brand-2));
   -webkit-background-clip: text; background-clip: text; color: transparent;
+  white-space: nowrap; /* "바로 / 도구로" 처럼 강조구가 쪼개지지 않게 */
 }
-.lede { color: var(--muted); max-width: 680px; margin: 0 auto 14px; font-size: 16px; }
+.lede { color: var(--muted); max-width: 620px; margin: 0 auto 18px; font-size: 15.5px; }
 .lede b { color: var(--text); }
 .flow { color: var(--muted); font-size: 14px; }
 .flow b { color: var(--text); }
@@ -212,6 +213,15 @@ h1, h2, p, li, .note-tag { word-break: keep-all; overflow-wrap: break-word; }
 .ptile span { font-size: 10.5px; color: var(--muted); }
 
 .pblock-h { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+/* 합격 기준은 접어 둔다 — PASS 판정과 핵심 수치가 먼저 읽히도록 */
+.pblock > summary {
+  font-size: 11px; color: var(--muted); cursor: pointer; list-style: none;
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 0;
+}
+.pblock > summary::-webkit-details-marker { display: none; }
+.pblock > summary::before { content: '▸'; font-size: 9px; transition: transform .15s ease; }
+.pblock[open] > summary::before { transform: rotate(90deg); }
+.pblock > summary:hover { color: var(--text); }
 .pchk { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 3px 0; min-width: 0; }
 .pico { width: 15px; height: 15px; flex: none; }
 .pchk.ok .pico { color: var(--good); }
@@ -226,37 +236,32 @@ h1, h2, p, li, .note-tag { word-break: keep-all; overflow-wrap: break-word; }
 .pbar-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); }
 .pbar-v { width: 56px; text-align: right; color: var(--text); font-family: ui-monospace, monospace; }
 
-/* 포인트 태그 */
-.points { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; }
-.points li {
-  font-size: 12px; color: var(--muted);
-  background: var(--surface-2); border: 1px solid var(--border);
-  padding: 3px 9px; border-radius: 8px;
+/* 포인트 — 알약 칩을 여러 줄로 깔면 카드가 시끄러워져 한 줄 텍스트로 잇는다 */
+.points {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 7px;
+  padding: 0; margin: 0; list-style: none; font-size: 12.5px; color: var(--muted);
 }
+.points li[aria-hidden] { opacity: .45; }
 
 /* 제언 — 카드의 한계/다음 과제를 숨기지 않고 적는 블록 (config.js 의 note 필드) */
 .note {
-  display: flex; gap: 10px; align-items: flex-start;
-  padding: 11px 13px; border-radius: 12px;
-  background: var(--warn-bg); border: 1px solid var(--warn);
+  display: flex; gap: 9px; align-items: baseline;
+  padding: 11px 13px; border-radius: 10px; background: var(--warn-bg);
 }
 .note-tag {
-  flex: none; font-size: 11.5px; font-weight: 700; color: var(--warn);
-  border: 1px solid var(--warn); border-radius: 999px; padding: 2px 9px;
-  background: var(--surface); white-space: nowrap;
+  flex: none; font-size: 11.5px; font-weight: 700; color: var(--warn); white-space: nowrap;
 }
-.note p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text); }
+.note p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
 
 /* 카드 푸터 */
 .card-foot {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  margin-top: auto; padding-top: 6px;
+  margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border);
 }
-.target { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); }
-.ticon { width: 14px; height: 14px; color: var(--brand); }
-.status { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
-.st-done { color: var(--good); background: var(--good-bg); border: 1px solid var(--good); }
-.st-stub { color: var(--warn); background: var(--warn-bg); border: 1px solid var(--warn); }
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; }
+.status .pico { width: 14px; height: 14px; }
+.st-done { color: var(--good); }
+.st-stub { color: var(--warn); }
 .repo { margin-left: auto; color: var(--brand); text-decoration: none; font-size: 13px; font-weight: 600; white-space: nowrap; }
 .repo:hover { text-decoration: underline; }
 
@@ -292,6 +297,8 @@ h1, h2, p, li, .note-tag { word-break: keep-all; overflow-wrap: break-word; }
 }
 
 /* ── 반응형 ────────────────────────────────────────────────────────────── */
+@media (min-width: 721px) { .viewport-toggle { display: none; } }
+
 @media (max-width: 720px) {
   .grid { grid-template-columns: 1fr; }
   .hero { padding-top: 36px; }

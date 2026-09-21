@@ -4,20 +4,23 @@
  * 카드/규칙/문구를 여기서만 바꾸면 코드는 안 건드려도 됩니다. (구축기 3번)
  *
  * 계약: 각 카드는 아래 형태를 지킵니다 (구축기 5번).
- *   { id, tool, title, desc, target, repo, demo, demoType, demoLabel, badge, status, points[] }
+ *   { id, tool, title, desc, repo, demo, demoType, demoLabel, badge, status, points[] }
  *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
  *   - demoLabel: 데모 영역 캡션("영상 아님" 같은 설명).
  *   - poster:   (선택) 영상 로드 전/재생 불가 시 표시할 스크린샷 경로.
  *   - status:   'verified'(검증완료) | 'pending'(PC에서 실행예정)
+ *   - statusLabel: (선택) status 기본 문구 대신 쓸 라벨. 색/아이콘은 status 를 따릅니다.
  *   - note:     (선택) { label, text } — 카드 하단 '제언' 블록. 한계/다음 과제를 적습니다.
+ *
+ * 문구 원칙: desc 는 두 문장 이내, points 는 세 개까지. 카드가 길어지면 읽히지 않습니다.
  */
 window.QASS_PORTFOLIO = {
   // 모든 카드가 공유하는 타깃 — "같은 QASS · 다른 도구" 라벨의 근거
   sharedTarget: {
     name: 'QASS',
     url: 'https://qass1.pages.dev/',
-    label: '품질 관리 중 생긴 문제를, 바로 도구로 — 팀이 함께 쓰는 모음집',
+    label: 'QA 도구 모음집',
   },
 
   // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일 · "증적"은 쉬운 말 "캡처"로 표기)
@@ -30,29 +33,28 @@ window.QASS_PORTFOLIO = {
       id: 'qass',
       tool: 'QASS',
       title: 'QA 증적 자동 수집 · 팀 공유 플랫폼',
-      desc: 'QA에서 가장 번거로웠던 증적(테스트 기록) 모으기를 직접 서비스로 만들어 운영 중입니다. 크롬 확장 프로그램으로 시작을 누르면 탭을 옮기거나 스크롤할 때마다 풀페이지 캡처가 팀 공유 방에 자동 저장되고, 캡처하는 순간 맞춤법·띄어쓰기·텍스트 잘림 같은 UI 장애를 1차로 자동 점검해 분류합니다. 아래 영상은 실제 배포된 서비스를 그대로 돌려 본 시연입니다.',
-      target: 'QA 증적 관리',
+      desc: 'QA에서 가장 번거로운 증적(테스트 기록) 모으기를 직접 서비스로 만들어 운영 중입니다. 탭만 옮겨도 풀페이지 캡처가 팀 공유 방에 쌓이고, 모인 증적을 맞춤법·UI 장애 기준으로 한 번 훑어 주는 1차 자동 점검이 파일럿으로 들어가 있습니다. 아래 영상은 캡처를 실제로 돌리는 장면이 아니라, 화면 구성이 어떻게 돼 있는지 차례로 둘러본 것입니다.',
       repo: 'https://qass1.pages.dev/',
       repoLabel: '서비스 열기 ↗',
       demo: 'assets/qass.webm',
       demoType: 'video',
       poster: 'assets/qass-run.jpg',
-      demoLabel: '실제 서비스 시연 · 로그인 → 방 입장 → 증적 확인 → 검색 → 1차 자동 점검',
+      demoLabel: '화면 구성 둘러보기 · 로그인 → 방 목록 → 방 입장 → 검색 → 1차 자동 점검',
       badge: '직접 만든 서비스',
       status: 'verified',
-      points: ['자동 풀페이지 캡처', '방(Room) 단위 팀 공유', '맞춤법·UI 장애 1차 자동 점검', 'ZIP 일괄 다운로드'],
+      statusLabel: '운영 중',
+      points: ['자동 풀페이지 캡처', '방 단위 팀 공유', '1차 자동 점검 (파일럿)'],
       note: {
         label: '제언',
-        text: '자동 캡처와 1차 자동 점검은 크롬 확장 프로그램 기능이라, 현재는 PC(데스크톱 크롬)에서만 진행할 수 있습니다. 모바일에서는 업로드·열람만 가능합니다. 모바일 QA까지 같은 방식으로 덮으려면 앱용을 따로 만들어야 하며, 이를 다음 과제로 보고 있습니다.',
+        text: '자동 캡처와 1차 자동 점검은 크롬 확장 프로그램 기능이라 지금은 PC(데스크톱 크롬) 전용이고, 모바일에서는 업로드·열람만 됩니다. 모바일 QA까지 덮으려면 앱용을 따로 만들어야 하며, 이를 다음 과제로 보고 있습니다.',
       },
     },
-    // Appium — 에뮬레이터(Pixel 8)에서 실제 실행·녹화까지 검증 완료 → 대표 카드로 맨 앞.
+    // Appium — 에뮬레이터(Pixel 8)에서 실제 실행·녹화까지 검증 완료 → 자동화 4종 중 맨 앞.
     {
       id: 'appium',
       tool: 'Appium',
       title: 'QASS 모바일 · 안드로이드 크롬',
-      desc: '모바일 자동화부터 시작합니다. 공통 검사(로그인→방 입장→캡처 확인→검색)를 스마트폰(안드로이드의 크롬)에서 실행하는 구현으로, Python(pytest)으로 만들었고 PC의 안드로이드 에뮬레이터(Pixel 8)에서 실제로 실행해 8단계를 모두 통과했습니다. 아래 영상이 에뮬레이터 창에서 자동화가 진행되는 실제 모습입니다.',
-      target: 'QASS 모바일',
+      desc: '공통 검사를 스마트폰(안드로이드 크롬)에서 실행합니다. PC의 에뮬레이터(Pixel 8)에서 8스텝을 모두 통과했고, 아래가 그 실행 녹화입니다.',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: 'assets/appium.webm',
       demoType: 'video',
@@ -67,8 +69,7 @@ window.QASS_PORTFOLIO = {
       id: 'prd2tc',
       tool: 'PRD2TC',
       title: '기획서(PRD) → 테스트케이스 자동 생성',
-      desc: '기획서(PRD)를 넣으면 테스트케이스를 자동으로 뽑아 주는 도구입니다. 다른 자동화 도구들보다 앞단인 QA 설계 단계를 담당합니다.',
-      target: 'PRD 문서',
+      desc: '기획서(PRD)를 넣으면 테스트케이스를 자동으로 뽑아 줍니다. 자동화보다 앞단인 QA 설계 단계를 담당합니다.',
       repo: 'https://qaprd2tc.pages.dev/',
       repoLabel: '도구 열기 ↗',
       demo: 'assets/prd2tc.webm',
@@ -82,8 +83,7 @@ window.QASS_PORTFOLIO = {
       id: 'playwright',
       tool: 'Playwright',
       title: 'QASS 웹 · 데스크톱 크롬',
-      desc: '로그인부터 검색까지, 사람이 하던 검사를 크롬 브라우저가 스스로 실행합니다(화면 없이 도는 \'헤드리스\' 방식). 실행 과정은 아래 영상으로 녹화해 두었고, 자동화 4종 중 기준이 되는 구현입니다.',
-      target: 'QASS 웹',
+      desc: '사람이 하던 검사를 크롬이 화면 없이(헤드리스) 스스로 실행합니다. 자동화 4종의 기준이 되는 구현입니다.',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/playwright',
       demo: 'assets/playwright.webm',
       demoType: 'video',
@@ -96,8 +96,7 @@ window.QASS_PORTFOLIO = {
       id: 'selenium',
       tool: 'Selenium',
       title: 'QASS 웹 · 동일 플로우 비교',
-      desc: '위 Playwright와 똑같은 검사를, 업계에서 가장 오래 쓰여 온 도구인 Selenium으로 한 번 더 만들었습니다. 같은 일을 두 도구로 짜 보면 무엇이 다른지 그대로 비교됩니다.',
-      target: 'QASS 웹',
+      desc: '위 Playwright와 똑같은 검사를, 업계에서 가장 오래 쓰여 온 Selenium으로 한 번 더 만들었습니다. 같은 일을 두 도구로 짜 보면 차이가 그대로 드러납니다.',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/selenium',
       demo: 'assets/selenium.webm',
       demoType: 'video',
@@ -110,8 +109,7 @@ window.QASS_PORTFOLIO = {
       id: 'api',
       tool: 'API',
       title: 'QASS 서버 · 성능·부하 테스트',
-      desc: '화면 뒤에서 데이터를 보내 주는 서버가, 사용자가 한꺼번에 몰려도 빠르고 안정적인지 시험합니다. 요청을 자동으로 1,000번 보내 응답 속도를 재고, 국제 표준 기준으로 통과/실패를 판정합니다.',
-      target: 'QASS 백엔드',
+      desc: '화면 뒤에서 데이터를 보내 주는 서버가 사용자가 몰려도 빠른지 시험합니다. 요청을 1,000번 보내 응답 속도를 재고, 국제 표준 기준으로 통과/실패를 판정합니다.',
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/api',
       demo: 'assets/api-perf.json',
       demoType: 'perf',
