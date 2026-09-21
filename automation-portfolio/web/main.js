@@ -45,7 +45,6 @@
   // ── 부수효과: 화면에 반영 ──────────────────────────────────────────────────
   function render() {
     const fill = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-    fill('shared-label', cfg.sharedTarget.label);
     fill('shared-flow', cfg.sharedFlow);
     const link = document.getElementById('target-link');
     if (link) {

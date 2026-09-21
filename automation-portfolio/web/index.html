@@ -7,6 +7,9 @@
   <meta name="description" content="품질 관리를 하다 생긴 문제를 그때마다 도구로 만들어 실제 업무에 쓰고 있습니다. 증적 관리 플랫폼(QASS)부터 자동 테스트 4종까지, 같은 팀원·같은 프로젝트의 누구나 함께 열어 쓸 수 있도록 실행 영상과 측정 수치까지 공개한 도구 모음집입니다." />
   <!-- 테마 깜빡임 방지: CSS 적용 전에 저장된 테마를 먼저 반영 (기본 라이트) -->
   <script>(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <!-- 본문용 한글 가변 폰트. 막히면 시스템 폰트로 자연히 내려갑니다(styles.css 의 --font). -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -15,16 +18,16 @@
     <div class="site-header-inner">
       <a class="site-logo" href="./">
         <svg class="logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="2" />
-          <path d="M7.4 12.3l3 3 6.2-6.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="1.8" />
+          <path d="M7.4 12.3l3 3 6.2-6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        QA 자동화 포트폴리오
+        QA 도구 모음집
       </a>
       <nav class="site-nav">
         <a href="https://github.com/YunseobSongQA/Auto" target="_blank" rel="noopener">GitHub</a>
         <button class="theme-toggle" type="button" aria-label="라이트/다크 모드 전환" aria-pressed="false">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
         </button>
       </nav>
     </div>
@@ -32,15 +35,26 @@
 
   <main>
     <section class="hero">
-      <span class="badge" id="shared-label">QA 도구 모음집</span>
-      <h1>품질 관리 중 생긴 문제를 <span class="grad">바로 도구로</span></h1>
+      <h1>품질 관리 중 생긴 문제를<br />바로 도구로 만듭니다</h1>
       <p class="lede">
         QA를 하다 만난 불편을 그때마다 도구로 만들어 실제 업무에 쓰고 있습니다.
-        <b>같은 팀원이나 같은 프로젝트의 누구나</b> 그대로 열어 쓰도록 전부 공개해 두었습니다.
+        <b>같은 팀원이나 같은 프로젝트의 누구나</b> 그대로 열어 쓰도록 한 곳에 모아두었습니다.
       </p>
-      <p class="flow">
-        자동화 4종의 공통 검사 — <b id="shared-flow">로그인 → 방 입장 → 캡처 확인 → 검색</b>
-        <a id="target-link" href="#" target="_blank" rel="noopener">대상 열기 ↗</a>
+    </section>
+
+    <!-- 소개 — 누가 만들었고 무엇을 하는 사람인지 짧게 -->
+    <section class="bio" aria-label="소개">
+      <div class="bio-head">
+        <h2>송윤섭</h2>
+        <span class="bio-role">QA Engineer</span>
+      </div>
+      <p>
+        증적 관리 플랫폼 <b>QASS</b>를 직접 만들어 운영하고, 같은 검사를 자동화 도구 네 가지로
+        구현해 차이를 비교합니다.
+      </p>
+      <p class="bio-links">
+        <a href="mailto:eyelash96@naver.com">eyelash96@naver.com</a>
+        <a href="https://github.com/YunseobSongQA" target="_blank" rel="noopener">GitHub</a>
       </p>
     </section>
 
@@ -51,16 +65,7 @@
 
   <footer class="site-footer">
     <div class="site-footer-inner">
-      <div class="footer-brand">
-        <span class="site-logo">
-          <svg class="logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="2" />
-            <path d="M7.4 12.3l3 3 6.2-6.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          QA 자동화 포트폴리오
-        </span>
-        <p>품질 관리 중 생긴 문제를 그때마다 도구로 · 팀 누구나 열어 쓰도록 공개</p>
-      </div>
+      <p class="footer-brand">송윤섭 · QA Engineer</p>
       <nav class="footer-links">
         <a href="https://github.com/YunseobSongQA/Auto" target="_blank" rel="noopener">GitHub</a>
         <a href="https://qass1.pages.dev/" target="_blank" rel="noopener">QASS</a>
@@ -71,7 +76,7 @@
 
   <!-- (A) PC/모바일 강제 전환 토글 — 모바일에서 데스크탑 레이아웃을 미리 검증하기 위한 버튼 -->
   <button id="viewport-toggle" class="viewport-toggle" type="button" aria-pressed="false" title="데스크탑 레이아웃 미리보기 (viewport 강제 전환)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
     <span class="vt-label">PC 화면으로 보기</span>
   </button>
 

@@ -16,11 +16,10 @@
  * 문구 원칙: desc 는 두 문장 이내, points 는 세 개까지. 카드가 길어지면 읽히지 않습니다.
  */
 window.QASS_PORTFOLIO = {
-  // 모든 카드가 공유하는 타깃 — "같은 QASS · 다른 도구" 라벨의 근거
+  // 모든 카드가 공유하는 타깃 — 소개 문단의 'QASS 열기' 링크가 여기를 가리킵니다
   sharedTarget: {
     name: 'QASS',
     url: 'https://qass1.pages.dev/',
-    label: 'QA 도구 모음집',
   },
 
   // 공통 플로우 한 줄 요약 (FLOW_CONTRACT.md §1 과 동일 · "증적"은 쉬운 말 "캡처"로 표기)
@@ -69,15 +68,20 @@ window.QASS_PORTFOLIO = {
       id: 'prd2tc',
       tool: 'PRD2TC',
       title: '기획서(PRD) → 테스트케이스 자동 생성',
-      desc: '기획서(PRD)를 넣으면 테스트케이스를 자동으로 뽑아 줍니다. 자동화보다 앞단인 QA 설계 단계를 담당합니다.',
+      desc: '기획서는 작성자마다 말투와 정리 방식이 달라서, QA가 매번 해석하고 테스트를 짜는 데 시간이 걸립니다. 그래서 표 양식과 테스트케이스 생성 방식은 코드로 고정해 두고 빈칸만 Gemini API로 채우게 만들었습니다. pptx를 넣으면 testcases.xlsx가 나옵니다.',
       repo: 'https://qaprd2tc.pages.dev/',
       repoLabel: '도구 열기 ↗',
       demo: 'assets/prd2tc.webm',
       demoType: 'video',
-      demoLabel: '실제 도구 동작 · PRD 입력 → 테스트케이스 자동 생성',
+      demoLabel: '실제 도구 동작 · 기획서(pptx) 입력 → 테스트케이스 표 생성',
       badge: 'PRD → TC',
       status: 'verified',
-      points: ['기획서 입력', '테스트케이스 자동 생성', 'QA 설계 단계'],
+      statusLabel: '운영 중',
+      points: ['pptx 입력 → xlsx 출력', '표 양식·열 규격은 코드로 고정', '빈칸만 Gemini API로 생성'],
+      note: {
+        label: '제언',
+        text: 'TC 초안을 잡는 데 쓰는 것을 권합니다. 결과물을 그대로 쓰기보다, QA가 방향을 한 번 더 검증하는 편이 안전합니다.',
+      },
     },
     {
       id: 'playwright',
