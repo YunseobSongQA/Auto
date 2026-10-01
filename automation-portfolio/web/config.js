@@ -49,19 +49,20 @@ window.QASS_PORTFOLIO = {
         text: '크롬 확장 프로그램이라 지금은 PC에서만 캡처됩니다. 모바일용은 다음 과제입니다.',
       },
     },
-    // Appium — 가상 폰(Pixel 8)에서 실제 실행·녹화까지 검증 완료 → 자동화 4종 중 맨 앞.
+    // Appium — PC의 Android Studio 에뮬레이터(Pixel 8)에서 실제 실행·녹화까지 검증 완료 → 자동화 4종 중 맨 앞.
+    // \u2060(눈에 안 보이는 글자): 사파리가 ')'와 '에서' 사이에서 줄을 바꾸지 않게 붙여 둔다.
     {
       id: 'appium',
       tool: 'Appium',
       short: '안드로이드 폰 자동 검사',
       title: 'QASS 모바일 · 안드로이드 크롬',
-      desc: '같은 8단계 검사를 안드로이드 폰의 크롬에서 자동으로 돌립니다. 가상 폰 Pixel\u00a08에서 8단계를 모두 통과했습니다.',
+      desc: '같은 8단계 검사를 안드로이드 폰의 크롬에서 자동으로 돌립니다. PC의 안드로이드 에뮬레이터(Android Studio · Pixel\u00a08)\u2060에서 8단계를 모두 통과했습니다.',
       saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: 'assets/appium.webm',
       demoType: 'video',
       poster: 'assets/appium-poster.webp',
-      demoLabel: '실제 실행 녹화 · 가상 폰(Pixel\u00a08)',
+      demoLabel: '실제 실행 녹화 · Android Studio 에뮬레이터(Pixel\u00a08)',
       badge: '모바일',
       status: 'verified',
       points: ['Python · Appium', '안드로이드 크롬 자동 조작', 'PC에서 실행'],
@@ -165,7 +166,7 @@ window.QASS_PORTFOLIO = {
       {
         name: '자동 검사', sub: 'Playwright · Selenium · Appium', from: 'selenium',
         effect: ['PC · 모바일 크롬에서 자동 확인'],
-        limit: ['핵심 흐름 8단계만 검사', 'Appium은 가상 폰에서만 실행'],
+        limit: ['핵심 흐름 8단계만 검사', 'Appium은 PC 에뮬레이터에서만 실행'],
         next: ['GitHub Actions로 정기 실행', '업로드 등으로 검사 범위 확대'],
       },
       {

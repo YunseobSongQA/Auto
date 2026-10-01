@@ -20,7 +20,7 @@ automation-portfolio/
   playwright/   # ✅ 레퍼런스 완전 구현 (JS/TS · 헤드리스 + video 녹화)
   selenium/     # ✅ 동일 플로우 실제 실행 (Python · Xvfb/ffmpeg 녹화 selenium.webm)
   api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
-  appium/       # ✅ 안드로이드 크롬 — Python · pytest (에뮬레이터 Pixel 8 에서 8/8 통과 · 실행은 PC)
+  appium/       # ✅ 안드로이드 크롬 — Python · pytest (Android Studio 에뮬레이터 Pixel 8 에서 8/8 통과 · 실행은 PC)
   CODE_GUIDE.md     # 📖 한 파일로 보는 코드 가이드 (흐름 + 주요 함수 10가지)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
   README.md
@@ -97,7 +97,7 @@ cd appium && pip install -r requirements.txt && appium driver install uiautomato
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
 | Selenium | Codespaces Xvfb + ffmpeg (Python) | 8/8 스텝 pass | `web/assets/selenium.webm` |
 | API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.98 · p95 171ms · **PASS** (목표 수치는 직접 정함 · 지표는 ISO/IEC 25010·Apdex) | `web/assets/api-perf.json` |
-| Appium | PC · 안드로이드 에뮬레이터(Pixel 8 / API 34) 크롬 | 8/8 스텝 pass | `web/assets/appium.webm` |
+| Appium | PC(Windows) · Android Studio 에뮬레이터(Pixel 8 / API 34) 크롬 | 8/8 스텝 pass | `web/assets/appium.webm` |
 
 > 표 안에서 Appium 을 맨 뒤에 둔 이유: 실기기(안드로이드)가 필요해 **실행이 PC에 의존**하기 때문입니다.
 > 쇼케이스 카드 순서(`web/config.js`)는 QASS(직접 만든 증적 관리 플랫폼 · 자동화의 대상) →

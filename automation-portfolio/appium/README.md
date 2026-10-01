@@ -23,7 +23,7 @@ DOM 선택자는 데스크톱과 동일하게 재사용합니다.
 
 - ✅ **이 저장소(코드스페이스)에서 검증됨**: Appium 서버 기동 + UiAutomator2 드라이버
   설치 + pytest/Appium-Python-Client 로드. 즉 **코드·설정은 정상**입니다.
-- ✅ **PC(Windows)에서 실제 실행 검증됨**: 안드로이드 에뮬레이터(Pixel 8 / API 34)의
+- ✅ **PC(Windows)에서 실제 실행 검증됨**: Android Studio 안드로이드 에뮬레이터(Pixel 8 / API 34)의
   크롬에서 8스텝 전부 통과. 데모 영상: `../web/assets/appium.mp4` (포스터 `appium-poster.webp` 는
   영상 첫 프레임 — 뽑는 방법은 `../README.md` 의 '데모 영상 손질')
 
