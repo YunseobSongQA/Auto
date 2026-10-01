@@ -1,0 +1,46 @@
+# 소개 사이트(automation-portfolio/web) 자동 테스트
+# 사이트나 테스트가 바뀔 때마다 크롬 · 사파리(WebKit) · 아이폰 화면에서 같은 검사를 돌린다.
+name: showcase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'automation-portfolio/web/**'
+      - 'automation-portfolio/showcase-tests/**'
+      - '.github/workflows/showcase.yml'
+  pull_request:
+    paths:
+      - 'automation-portfolio/web/**'
+      - 'automation-portfolio/showcase-tests/**'
+      - '.github/workflows/showcase.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: automation-portfolio/showcase-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: automation-portfolio/showcase-tests/package-lock.json
+      - run: npm ci
+      - name: 워커(Range) 단위 테스트
+        run: npm run test:worker
+      - run: npx playwright install --with-deps chromium webkit
+      - name: 화면 테스트 (크롬 · 사파리 · 아이폰)
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: automation-portfolio/showcase-tests/playwright-report
+          retention-days: 7

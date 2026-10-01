@@ -1,0 +1,15 @@
+{
+  "name": "qa-automation-showcase-tests",
+  "private": true,
+  "type": "module",
+  "description": "소개 사이트(web/) 자동 테스트 — 문구·수치·장 전환·영상 재생·대비·워커(Range)",
+  "scripts": {
+    "test": "npm run test:worker && npm run test:e2e",
+    "test:worker": "node --test tests/worker.test.mjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.63.0"
+  }
+}
