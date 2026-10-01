@@ -5,6 +5,8 @@
  *
  * 계약: 각 카드는 아래 형태를 지킵니다 (구축기 5번).
  *   { id, tool, title, desc, repo, demo, demoType, demoLabel, badge, status, points[] }
+ *   - id:       카드 = 슬라이드 한 장. 슬라이드 주소(#id)로도 쓰이니 바꾸면 기존 링크가 끊깁니다.
+ *   - tool:     슬라이드 머리 라벨이자 위치 레일의 이름표.
  *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
  *   - demoLabel: 데모 영역 캡션("영상 아님" 같은 설명).

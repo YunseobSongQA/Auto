@@ -71,7 +71,7 @@ Appium 만 실기기(안드로이드)가 필요해 실행이 PC에 의존하므�
 | **API 부하 실행** | [`api/loadtest.js`](./api/loadtest.js) | 가상 사용자 동시 호출 → 수치/그래프 산출 |
 | **Appium (맨 뒤)** | [`appium/qass_flow.py`](./appium/qass_flow.py) | 같은 8스텝을 모바일 크롬으로 (Python · 실행은 PC) |
 | **쇼케이스 데이터** | [`web/config.js`](./web/config.js) | 카드 6개 메타(QASS + PRD2TC + 자동화 4종 · 도구명/설명/링크/제언) — 여기만 고치면 화면 바뀜 |
-| **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면. 영상/그래프/대기 3가지로 분기 |
+| **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면(카드 한 장 = 스크롤 슬라이드 한 장). 영상/그래프/대기 3가지로 분기 |
 
 > **설계 원칙(관심사 분리):** UI(`index.html`/`styles.css`) · 로직(`main.js`) · 데이터(`config.js`)를
 > 한 파일에 섞지 않습니다. 자주 바뀌는 것과 거의 안 바뀌는 것을 분리해 유지보수가 쉽습니다.
@@ -229,20 +229,24 @@ function runVU(iterationCount) {                            // 가상 사용자 
 const runs = await Promise.all(Array.from({ length: vus }, () => runVU(iterationsPerVu)));
 ```
 
-### ⑨ `buildCard(card, shared)` — 쇼케이스 카드 렌더 (순수 변환)
+### ⑨ `buildCard(card, shared, no)` — 쇼케이스 카드 렌더 (순수 변환)
 📍 [`web/main.js`](./web/main.js)
 
 `config.js`의 카드 데이터 하나를 받아 **HTML 문자열로만** 변환합니다(DOM 조작 없음).
 순수 변환과 부수효과(`render`)를 나눠, 데이터만 바꾸면 화면이 바뀌도록 했습니다.
+카드 한 장은 스크롤 슬라이드 한 장(`<section class="slide">`)이 되고, 화면을 고정한 채
+슬라이드를 바꿔 끼우는 일은 `initReel()`이 따로 맡습니다.
 
 ```js
-function buildCard(card, shared) {
+function buildCard(card, shared, no) {
   const points = card.points.map(p => `<li>${esc(p)}</li>`).join('');
-  return `<article class="card" data-tool="${esc(card.id)}">
-            <h2>${esc(card.title)}</h2>
-            <p class="desc">${esc(card.desc)}</p>
-            <a class="repo" href="${esc(card.repo)}">GitHub에서 코드 보기 ↗</a>
-          </article>`;
+  return `<section class="slide" data-id="${esc(card.id)}" data-name="${esc(card.tool)}">
+            <article class="card slide-inner" data-tool="${esc(card.id)}">
+              <h2>${esc(card.title)}</h2>
+              <p class="desc">${esc(card.desc)}</p>
+              <a class="repo" href="${esc(card.repo)}">GitHub에서 코드 보기 ↗</a>
+            </article>
+          </section>`;
 }
 ```
 

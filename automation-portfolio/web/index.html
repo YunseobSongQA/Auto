@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>품질 관리 중 생긴 문제를, 바로 도구로 — QA 도구 모음집</title>
-  <meta name="description" content="품질 관리를 하다 생긴 문제를 그때마다 도구로 만들어 실제 업무에 쓰고 있습니다. 증적 관리 플랫폼(QASS)부터 자동 테스트 4종까지, 같은 팀원·같은 프로젝트의 누구나 함께 열어 쓸 수 있도록 실행 영상과 측정 수치까지 공개한 도구 모음집입니다." />
+  <title>품질 관리 중 생기는 문제를, 바로 도구로 — QA Automation</title>
+  <meta name="description" content="QA를 하며 마주치는 반복 업무를 자동화합니다. 증적 수집부터 기획서 기반 테스트케이스 작성, 자동화 테스트까지 필요한 도구를 직접 만들어 실무에 쓰고, 실행 영상과 측정 수치까지 공개합니다." />
   <!-- 테마 깜빡임 방지: CSS 적용 전에 저장된 테마를 먼저 반영 (기본 라이트) -->
   <script>(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
   <!-- 본문용 한글 가변 폰트. 막히면 시스템 폰트로 자연히 내려갑니다(styles.css 의 --font). -->
@@ -16,12 +16,10 @@
   <!-- UI 계층: 구조만. 데이터는 config.js, 채우기는 main.js (구축기 1번) -->
   <header class="site-header">
     <div class="site-header-inner">
-      <a class="site-logo" href="./">
-        <svg class="logo-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="currentColor" stroke-width="1.8" />
-          <path d="M7.4 12.3l3 3 6.2-6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        QA 도구 모음집
+      <!-- 워드마크 — 아이콘 없이 글자만. 대문자·자간은 styles.css 가 맡습니다. -->
+      <a class="brand" href="#top" aria-label="QA Automation, 처음으로">
+        <span class="brand-qa">QA</span>
+        <span class="brand-word">Automation</span>
       </a>
       <nav class="site-nav">
         <a href="https://github.com/YunseobSongQA/Auto" target="_blank" rel="noopener">GitHub</a>
@@ -34,29 +32,40 @@
   </header>
 
   <main>
-    <section class="hero">
-      <h1>품질 관리 중 생긴 문제를<br />바로 도구로 만듭니다</h1>
-      <p class="lede">
-        QA를 하다 만난 불편을 그때마다 도구로 만들어 실제 업무에 쓰고 있습니다.
-        <b>같은 팀원이나 같은 프로젝트의 누구나</b> 그대로 열어 쓰도록 한 곳에 모아두었습니다.
-      </p>
-    </section>
+    <!-- 위치 레일 — 지금 몇 번째 화면인지 보여 주고, 눌러서 옮겨 갑니다. 눈금은 main.js 가 만듭니다. -->
+    <nav class="rail" data-rail aria-label="화면 이동"></nav>
 
-    <!-- 소개 — 누가 만들었고 무엇을 하는 사람인지 짧게 -->
-    <section class="bio" aria-label="소개">
-      <div class="bio-head">
-        <h2>송윤섭</h2>
-        <span class="bio-role">QA Engineer</span>
-      </div>
-      <p>
-        증적 관리 플랫폼 <b>QASS</b>를 직접 만들어 운영하고, 같은 검사를 자동화 도구 네 가지로
-        구현해 차이를 비교합니다.
-      </p>
-    </section>
+    <!-- 릴 — 화면은 고정해 두고 스크롤 위치에 맞춰 슬라이드를 바꿔 끼웁니다 (main.js initReel).
+         첫 장은 여기, 도구 슬라이드는 config.js 카드로 main.js 가 뒤에 이어 붙입니다. -->
+    <div class="reel" id="reel">
+      <section class="slide slide--intro" id="top" data-id="top" data-name="소개">
+        <div class="slide-inner">
+          <h1 class="intro-title rv" style="--i:0">품질 관리 중 생기는 문제를<br />바로 도구로 만듭니다</h1>
+          <p class="lede rv" style="--i:1">
+            <span>QA를 하며 마주치는 반복 업무를 자동화합니다.</span>
+            <span>증적 수집부터 기획서 기반 테스트케이스 작성, 자동화 테스트까지 필요한 도구를 직접 만들어 실무에 씁니다.</span>
+            <span class="lede-key">반복은 줄이고, 아낀 시간은 목표한 품질에 투자합니다.</span>
+          </p>
 
-    <section class="grid" id="cards" aria-label="자동화 도구 카드">
-      <p class="empty">불러오는 중…</p>
-    </section>
+          <!-- 소개 — 누가 만들었고 무엇을 하는 사람인지 짧게 -->
+          <div class="bio rv" style="--i:2">
+            <div class="bio-head">
+              <h2>송윤섭</h2>
+              <span class="bio-role">QA Engineer</span>
+            </div>
+            <p>
+              증적 관리 플랫폼 <b>QASS</b>를 직접 만들어 운영하고, 같은 검사를 자동화 도구 네 가지로
+              구현해 차이를 비교합니다.
+            </p>
+          </div>
+
+          <a class="slide-next rv" style="--i:3" href="#qass" data-next>
+            도구 둘러보기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" /></svg>
+          </a>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="site-footer">
