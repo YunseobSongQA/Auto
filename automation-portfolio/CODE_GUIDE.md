@@ -71,7 +71,9 @@ Appium 만 실기기(안드로이드)가 필요해 실행이 PC에 의존하므�
 | **API 부하 실행** | [`api/loadtest.js`](./api/loadtest.js) | 가상 사용자 동시 호출 → 수치/그래프 산출 |
 | **Appium (맨 뒤)** | [`appium/qass_flow.py`](./appium/qass_flow.py) | 같은 8스텝을 모바일 크롬으로 (Python · 실행은 PC) |
 | **쇼케이스 데이터** | [`web/config.js`](./web/config.js) | 카드 6개 메타(QASS + PRD2TC + 자동화 4종 · 도구명/설명/링크/제언) — 여기만 고치면 화면 바뀜 |
-| **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면(카드 한 장 = 스크롤 슬라이드 한 장). 영상/그래프/대기 3가지로 분기 |
+| **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면(카드 한 장 = 스크롤 슬라이드 한 장 + 마지막 비교 장). 영상/그래프/대기 3가지로 분기 |
+| **쇼케이스 영상 전달** | [`web/_worker.js`](./web/_worker.js) | Cloudflare Pages 워커 — 영상 Range 요청에 206 으로 답해 아이폰(사파리)에서 재생되게 |
+| **쇼케이스 테스트** | [`showcase-tests/`](./showcase-tests/) | 쇼케이스 자동 테스트 (Playwright · 크롬·사파리·아이폰) — GitHub Actions 로 매번 실행 |
 
 > **설계 원칙(관심사 분리):** UI(`index.html`/`styles.css`) · 로직(`main.js`) · 데이터(`config.js`)를
 > 한 파일에 섞지 않습니다. 자주 바뀌는 것과 거의 안 바뀌는 것을 분리해 유지보수가 쉽습니다.
@@ -178,7 +180,7 @@ export function summarize(samples) {
 ### ⑥ `apdex(samples, t)` — 체감 성능 점수 (산업 표준)
 📍 [`api/qass-perf.js`](./api/qass-perf.js)
 
-Apdex = 사용자가 **체감하는** 빠름을 0~1로 나타내는 국제 표준 지표입니다.
+Apdex = 사용자가 **체감하는** 빠름을 0~1로 나타내는 업계 표준 지표입니다.
 목표시간 T 이하는 "만족", 4T 이하는 "허용(0.5점)", 그 위는 "불만". → 단순 평균보다 직관적입니다.
 
 ```js
@@ -194,7 +196,7 @@ export function apdex(samples, t) {
 📍 [`api/qass-perf.js`](./api/qass-perf.js)
 
 측정값을 **합격 기준(SLO)**과 비교해 항목별 통과/실패 + 종합 판정을 냅니다.
-기준은 임의값이 아니라 **공인 표준**(ISO/IEC 25010·Apdex·SLA 99.9%)에 근거합니다.
+무엇을 잴지는 **표준**(ISO/IEC 25010·25023·Apdex)을 따랐고, 합격선(목표 수치)은 서비스에 맞게 직접 정했습니다.
 "호출 되나?"가 아니라 **"기준 안에서 빠르고 안정적인가?"**를 판정하는 게 핵심입니다.
 
 ```js
@@ -229,7 +231,7 @@ function runVU(iterationCount) {                            // 가상 사용자 
 const runs = await Promise.all(Array.from({ length: vus }, () => runVU(iterationsPerVu)));
 ```
 
-### ⑨ `buildCard(card, shared, no)` — 쇼케이스 카드 렌더 (순수 변환)
+### ⑨ `buildCard(card, no)` — 쇼케이스 카드 렌더 (순수 변환)
 📍 [`web/main.js`](./web/main.js)
 
 `config.js`의 카드 데이터 하나를 받아 **HTML 문자열로만** 변환합니다(DOM 조작 없음).
@@ -238,7 +240,7 @@ const runs = await Promise.all(Array.from({ length: vus }, () => runVU(iteration
 슬라이드를 바꿔 끼우는 일은 `initReel()`이 따로 맡습니다.
 
 ```js
-function buildCard(card, shared, no) {
+function buildCard(card, no) {
   const points = card.points.map(p => `<li>${esc(p)}</li>`).join('');
   return `<section class="slide" data-id="${esc(card.id)}" data-name="${esc(card.tool)}">
             <article class="card slide-inner" data-tool="${esc(card.id)}">
@@ -277,8 +279,8 @@ function renderPerf(el, src) {
 |------|-----------|----------|--------|-----|
 | 대기 | auto-wait (자동) | `WebDriverWait(...).until` 명시 | `WebDriverWait(...).until` 명시 | 네트워크 응답 대기 |
 | 입력 | `fill()` (기존값 비우고 입력) | `clear()` 후 `send_keys()` 필요 | `clear()` 후 `send_keys()` | 입력 없음(REST) |
-| 실행 | 헤드리스 크롬 | Xvfb + ffmpeg 녹화 | 모바일 크롬(실기기, PC) | 브라우저 불필요 |
-| 산출 | `video.webm` | `selenium.webm` | `pending`(PC 녹화 예정) | `api-perf.json`(수치·그래프) |
+| 실행 | 헤드리스 크롬 | Xvfb + ffmpeg 녹화 | 모바일 크롬(에뮬레이터, PC) | 브라우저 불필요 |
+| 산출 | `playwright.webm` | `selenium.webm` | `appium.webm`(에뮬레이터 녹화) | `api-perf.json`(수치·그래프) |
 
 > 💡 **Selenium 함정 사례:** QASS는 테스트 방 비밀번호를 미리 채워두는데, Selenium `send_keys()`는
 > 기존 값에 **덧붙이기** 때문에 `clear()` 없이는 인증이 깨집니다. → [`selenium/qass_flow.py`](./selenium/qass_flow.py) `enter_room` 스텝 주석 참고.

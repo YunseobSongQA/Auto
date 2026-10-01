@@ -24,8 +24,8 @@ DOM 선택자는 데스크톱과 동일하게 재사용합니다.
 - ✅ **이 저장소(코드스페이스)에서 검증됨**: Appium 서버 기동 + UiAutomator2 드라이버
   설치 + pytest/Appium-Python-Client 로드. 즉 **코드·설정은 정상**입니다.
 - ✅ **PC(Windows)에서 실제 실행 검증됨**: 안드로이드 에뮬레이터(Pixel 8 / API 34)의
-  크롬에서 8스텝 전부 통과. 진행 중 스크린샷: [`../web/assets/appium-run.png`](../web/assets/appium-run.png)
-  (에뮬레이터 창에서 검색 스텝이 실행되는 장면), 데모 영상: `../web/assets/appium.webm`
+  크롬에서 8스텝 전부 통과. 데모 영상: `../web/assets/appium.mp4` (포스터 `appium-poster.webp` 는
+  영상 첫 프레임 — 뽑는 방법은 `../README.md` 의 '데모 영상 손질')
 
 ## PC 실행 (Python 3.9+ · Node(Appium 서버) · Android SDK 필요)
 
@@ -70,7 +70,7 @@ python run.py                 # standalone (동일 플로우)
 `web/config.js` 의 appium 카드:
 ```js
 demo: 'assets/appium.webm',   // null → 경로
-demoType: 'video',            // 'mockup' → 'video'
+demoType: 'video',            // 'pending' → 'video'
 status: 'verified',           // 'pending' → 'verified'
 ```
 

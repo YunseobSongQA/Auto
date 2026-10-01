@@ -14,12 +14,13 @@
 
 ```
 automation-portfolio/
-  web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상)
+  web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상 → https://auto-x2o.pages.dev/)
+  showcase-tests/  # 쇼케이스 자동 테스트 (Playwright · 크롬·사파리·아이폰 · GitHub Actions)
   # PRD2TC (설계 도구)는 별도 배포 웹앱 → https://qaprd2tc.pages.dev/ (이 저장소에 코드 폴더 없음)
   playwright/   # ✅ 레퍼런스 완전 구현 (JS/TS · 헤드리스 + video 녹화)
   selenium/     # ✅ 동일 플로우 실제 실행 (Python · Xvfb/ffmpeg 녹화 selenium.webm)
   api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
-  appium/       # 🟡 모바일 크롬 — Python(pytest) 표준 러너 (툴체인 검증됨, 실행은 PC에서)
+  appium/       # ✅ 안드로이드 크롬 — Python · pytest (에뮬레이터 Pixel 8 에서 8/8 통과 · 실행은 PC)
   CODE_GUIDE.md     # 📖 한 파일로 보는 코드 가이드 (흐름 + 주요 함수 10가지)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
   README.md
@@ -36,7 +37,7 @@ automation-portfolio/
 | Playwright | QASS 웹 (데스크톱 크롬) | 완전 구현 | JS/TS · 핵심 플로우 + video 녹화 |
 | Selenium | QASS 웹 (동일 플로우) | 완전 구현 | Python · 실제 실행 + Xvfb/ffmpeg 녹화 |
 | API | QASS 백엔드 (Supabase REST) | 완전 구현 | 읽기 플로우 + Postman/Newman 부하·성능 테스트 |
-| Appium | QASS 모바일 크롬 (안드로이드) | 표준 러너 구현 | Python(pytest + Appium-Python-Client) · 툴체인 검증 · 실행은 PC에서 |
+| Appium | QASS 모바일 크롬 (안드로이드) | 완전 구현 | Python(pytest + Appium-Python-Client) · 에뮬레이터 실행 + 녹화 · 실행은 PC에서 |
 
 ## 빠른 실행 (GitHub Codespaces 기준)
 
@@ -52,10 +53,11 @@ cd api && npm i && npm start              # 기능 읽기 플로우(FlowResult)
 cd selenium && pip install -r requirements.txt && python run.py   # 헤드리스 실행
 #   화면 녹화(Xvfb+ffmpeg) → web/assets/selenium.webm:  ./record.sh
 
-# 4) 쇼케이스 웹 (빌드 없이 바로)
-cd web && python3 -m http.server 8080   # http://localhost:8080
+# 4) 쇼케이스 웹 (빌드 없이 바로) — 배포처처럼 영상 Range 요청에 답하는 서버라 사파리 재생도 그대로 확인
+node showcase-tests/serve.mjs   # http://127.0.0.1:4173
+#    쇼케이스 테스트: cd showcase-tests && npm ci && npx playwright install chromium webkit && npm test
 
-# 5) Appium — Python(pytest) 표준 러너 (실행은 PC, 안드로이드 기기 필요)
+# 5) Appium — Python · pytest (실행은 PC, 안드로이드 기기 또는 에뮬레이터 필요)
 cd appium && pip install -r requirements.txt && appium driver install uiautomator2 && pytest -s   # 자세히는 appium/README.md
 ```
 
@@ -69,9 +71,9 @@ cd appium && pip install -r requirements.txt && appium driver install uiautomato
 - **API mock 불필요**: QASS 가 클라이언트에 공개 anon 키를 노출하므로, 그 키로
   `rooms`/`captures` 를 실제로 읽을 수 있음을 확인했습니다. 따라서 API 도구는 mock 이 아닌
   **실제 REST 읽기**로 구현했습니다. (쓰기/삭제는 하지 않음 — 읽기 전용 플로우)
-- **데모 산출물**: 쇼케이스는 `web/config.js` 의 `demoType` 으로 분기합니다 — Playwright/
-  Selenium 은 `video`(webm), API 는 `json`(FlowResult), Appium 은 `pending`. 파일이 없으면
-  플레이스홀더를 보여줍니다.
+- **데모 산출물**: 쇼케이스는 `web/config.js` 의 `demoType` 으로 분기합니다 — QASS·PRD2TC·
+  Playwright·Selenium·Appium 은 `video`(mp4 1순위 · webm 폴백), API 는 `perf`(부하 테스트 결과
+  `api-perf.json`). 파일이 없으면 플레이스홀더를 보여줍니다.
 - **데모 영상 손질**: 슬라이드에 들어가자마자 화면이 보여야 하므로, 녹화 앞부분의 빈 화면·대기
   구간(브라우저가 뜨기 전 검은/흰 화면, 앱 시작 화면 등)은 잘라 냅니다. 같은 구간을 mp4(1순위
   · H.264 · faststart)와 webm 에서 함께 자르고, 첫 프레임을 포스터 `web/assets/<id>-poster.webp`
@@ -83,9 +85,9 @@ cd appium && pip install -r requirements.txt && appium driver install uiautomato
   ffmpeg -i x-raw.webm -vf "trim=start=<같은 값>,setpts=PTS-STARTPTS" -an -c:v libvpx-vp9 -crf 32 -b:v 0 x.webm
   ffmpeg -i x.mp4 -vf "select='eq(n\,0)'" -frames:v 1 -c:v libwebp -quality 80 x-poster.webp
   ```
-- **Appium 미실행**: 안드로이드 에뮬레이터가 필요해 이번 산출물은 동일 계약 골격까지.
-  PC 에서 `appium/README.md` 절차로 실행·녹화 후 `web/assets/appium.webm` 을 추가하고
-  `config.js` 의 appium 항목만 `pending → video` 로 바꾸면 됩니다.
+- **Appium 실행 위치**: 안드로이드 에뮬레이터가 필요해 코드스페이스가 아니라 PC 에서
+  `appium/README.md` 절차로 실행·녹화했습니다. 다시 녹화하면 `web/assets/appium.mp4`·`.webm` 과
+  포스터만 바꾸면 됩니다.
 
 ## 검증 상태 (이 저장소에서 실제로 실행한 결과)
 
@@ -94,8 +96,8 @@ cd appium && pip install -r requirements.txt && appium driver install uiautomato
 | PRD2TC | 별도 배포 웹앱 (qaprd2tc.pages.dev) | 라이브 · PRD → TC 자동 생성 | `web/assets/prd2tc.webm` (실제 도구 동작 녹화) |
 | Playwright | Codespaces 헤드리스 크롬 | 8/8 스텝 pass | `web/assets/playwright.webm` |
 | Selenium | Codespaces Xvfb + ffmpeg (Python) | 8/8 스텝 pass | `web/assets/selenium.webm` |
-| API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.99 · p95 144ms · **PASS** (ISO/IEC 25010·Apdex 근거) | `web/assets/api-perf.json` |
-| Appium | Appium 서버·드라이버·pytest 설정 (코드스페이스) | 툴체인 OK · 실기기 실행은 PC | `pending` |
+| API | Postman × Newman · 10 VU 동시부하 (라이브) | 1000건 · Apdex 0.98 · p95 171ms · **PASS** (목표 수치는 직접 정함 · 지표는 ISO/IEC 25010·Apdex) | `web/assets/api-perf.json` |
+| Appium | PC · 안드로이드 에뮬레이터(Pixel 8 / API 34) 크롬 | 8/8 스텝 pass | `web/assets/appium.webm` |
 
 > 표 안에서 Appium 을 맨 뒤에 둔 이유: 실기기(안드로이드)가 필요해 **실행이 PC에 의존**하기 때문입니다.
 > 쇼케이스 카드 순서(`web/config.js`)는 QASS(직접 만든 증적 관리 플랫폼 · 자동화의 대상) →
