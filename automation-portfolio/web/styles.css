@@ -293,7 +293,7 @@ main { overflow-x: clip; }
 .card-no { font-size: 12px; color: var(--faint); }
 .tool { font-size: 12.5px; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; color: var(--text); }
 .chip { margin-left: auto; font-size: 12px; color: var(--faint); white-space: nowrap; }
-.card h2, .compare h2 { margin-top: 14px; font-size: clamp(23px, 2.4vw, 32px); letter-spacing: -.035em; line-height: 1.3; }
+.card h2, .plan h2 { margin-top: 14px; font-size: clamp(23px, 2.4vw, 32px); letter-spacing: -.035em; line-height: 1.3; }
 .desc { margin: 14px 0 0; max-width: 38em; font-size: 15px; line-height: 1.8; color: var(--muted); }
 .card > .demo { margin-top: 26px; }
 .card > .points { margin-top: 20px; }
@@ -333,69 +333,68 @@ main { overflow-x: clip; }
   .card > .demo { grid-column: 2; grid-row: 1 / -1; align-self: center; margin-top: 0; }
 }
 
-/* ── 비교 장 (같은 검사 · 네 도구) ─────────────────────────────────────── */
-.compare { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; }
-.box-h { margin: 0 0 8px; font-size: 12.5px; font-weight: 650; color: var(--text); }
-.steps-box { margin-top: 20px; }
-.steps {
-  margin: 0; padding: 0; list-style: none; counter-reset: step;
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px;
-}
-.steps li { counter-increment: step; display: flex; align-items: baseline; gap: 8px; font-size: 13.5px; color: var(--muted); }
-.steps li::before {
-  content: counter(step); flex: none; display: inline-grid; place-items: center;
-  width: 19px; height: 19px; border-radius: 999px; border: 1px solid var(--border-strong);
-  font-size: 10.5px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;
-}
-.cmp-box {
-  margin-top: 22px; overflow-x: auto; -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+/* ── 제언 장 (도구별 현재 효과 · 한계 · 다음 단계) ────────────────────── */
+.plan { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; }
+.slide--plan .tool { letter-spacing: .06em; } /* 한글 이름은 자간을 덜 벌린다 ("제 언" 방지) */
+.plan-box {
+  margin-top: 24px; overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
   container-type: inline-size; /* 아래 @container 가 화면 폭이 아니라 이 상자 폭으로 표 배치를 고른다 */
 }
-.cmp { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 13px; line-height: 1.5; }
-.cmp th, .cmp td {
-  padding: 9px 12px; text-align: left; vertical-align: top; border-top: 1px solid var(--border);
-  word-break: keep-all; overflow-wrap: break-word; /* 한글 단어 중간("크/롬")에서 줄을 바꾸지 않는다 */
+.plan-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13.5px; line-height: 1.65; }
+.plan-tbl th, .plan-tbl td {
+  padding: 14px 16px; text-align: left; vertical-align: top; border-top: 1px solid var(--border);
+  word-break: keep-all; overflow-wrap: break-word; /* 한글 단어 중간에서 줄을 바꾸지 않는다 */
 }
-.cmp thead th {
-  border-top: 0; background: var(--surface-2);
-  font-size: 11.5px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--text);
+.plan-tbl thead th {
+  padding-block: 10px; border-top: 0; background: var(--surface-2);
+  font-size: 12px; font-weight: 650; color: var(--text);
 }
-.cmp tbody th { font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
-.cmp td { color: var(--text); }
-/* 상자가 표 최소 폭(520px)보다 좁으면(휴대폰 · 1024px 안팎 화면) 옆으로 밀게 두지 않고, 항목 이름을
-   값 위에 한 줄로 따로 두어 네 칸이 상자 폭을 똑같이 나눠 쓴다. 항목 칸까지 다섯 칸으로 나누면
-   "JavaScript"·"안드로이드"가 단어 중간에서 끊긴다. 표의 display 를 바꾸면 사파리가 표로 읽지
-   않아 main.js 가 role 을 붙여 둔다. */
-@container (max-width: 519px) {
-  .cmp, .cmp thead, .cmp tbody { display: block; min-width: 0; }
-  .cmp tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .cmp th, .cmp td { padding: 7px 6px; }
-  .cmp tr > :nth-child(2) { padding-left: 10px; }
-  .cmp thead th:first-child { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); }
-  .cmp tbody th { grid-column: 1 / -1; padding: 9px 10px 0; }
-  .cmp tbody td { border-top: 0; padding-top: 3px; }
+.plan-tbl thead th:first-child { width: 20%; } /* 1100px 이상에서 "Playwright · Selenium · Appium"이 한 줄에 들어가는 폭 */
+/* 칸 이름 앞 점 — 현재 효과(초록) · 한계(황토) · 다음 단계(파랑). 좁은 화면에서는 같은 색 글자로. */
+.plan-tbl thead th + th::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 8px;
+  border-radius: 999px; vertical-align: .12em; background: var(--good);
 }
-.lessons-box { margin-top: 20px; }
-.lessons { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.lessons li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.7; color: var(--muted); }
-.lessons li::before {
-  content: ""; position: absolute; left: 2px; top: .72em;
-  width: 6px; height: 6px; border-radius: 999px; background: var(--accent);
+.plan-tbl thead th:nth-child(3)::before { background: var(--warn); }
+.plan-tbl thead th:nth-child(4)::before { background: var(--accent); }
+.plan-tbl tbody th b {
+  display: block; font-size: 12.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text);
 }
-@media (min-width: 900px) {
-  .compare {
-    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-    grid-template-rows: 1fr repeat(5, auto) 1fr;
-    column-gap: clamp(40px, 5vw, 72px);
+.plan-tbl tbody th span { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 400; color: var(--muted); }
+.plan-tbl td { color: var(--muted); }
+.plan-tbl td p { margin: 0; }
+.plan-tbl td p + p { margin-top: 4px; }
+.plan-metric { color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; }
+.plan-metric span { white-space: nowrap; } /* "2시간 → 1시간"은 한 줄로 — 칸이 좁으면 감소율만 다음 줄로 */
+.plan-metric em {
+  margin-left: 8px; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--good-ink);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+}
+/* 상자가 760px 보다 좁으면(휴대폰 · 세로 태블릿) 네 칸을 옆으로 늘어놓지 않고 도구별 묶음으로 쌓는다 —
+   그보다 좁은 네 칸에서는 "2시간 → / 1시간"처럼 수치가 갈리고 한 칸이 네댓 줄로 길어진다.
+   도구 이름 아래에 칸 이름(현재 효과 등)을 왼쪽에 두고 내용을 오른쪽에. 표의 display 를 바꾸면
+   사파리가 표로 읽지 않아 main.js 가 role 을 붙여 둔다. */
+@container (max-width: 759px) {
+  .plan-tbl, .plan-tbl tbody, .plan-tbl tr, .plan-tbl th, .plan-tbl td { display: block; }
+  .plan-tbl thead { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .plan-tbl thead th { padding: 0; white-space: nowrap; } /* 스크린리더만 읽는 머리글 — .sr 과 같은 처리 */
+  .plan-tbl tbody tr { padding: 14px 16px 16px; }
+  .plan-tbl tbody tr + tr { border-top: 1px solid var(--border); }
+  .plan-tbl tbody th, .plan-tbl td { padding: 0; border: 0; }
+  .plan-tbl tbody th { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-bottom: 10px; }
+  .plan-tbl tbody th span { margin-top: 0; }
+  .plan-tbl td { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); column-gap: 10px; font-size: 13px; }
+  .plan-tbl td + td { margin-top: 8px; }
+  .plan-tbl td::before {
+    content: attr(data-label); grid-column: 1; grid-row: 1 / span 4;
+    font-size: 11.5px; font-weight: 650; line-height: 1.95; color: var(--good-ink);
   }
-  .compare > * { grid-column: 1; }
-  .compare > .card-top { grid-row: 2; }
-  .compare > h2 { grid-row: 3; }
-  .compare > .desc { grid-row: 4; }
-  .compare > .steps-box { grid-row: 5; }
-  .compare > .lessons-box { grid-row: 6; }
-  .compare > .cmp-box { grid-column: 2; grid-row: 1 / -1; align-self: center; margin-top: 0; }
+  .plan-tbl td:nth-of-type(2)::before { color: var(--warn); }
+  .plan-tbl td:nth-of-type(3)::before { color: var(--accent); }
+  .plan-tbl td > * { grid-column: 2; }
 }
 
 /* 화면에는 안 보이고 스크린리더만 읽는 글 */
@@ -563,13 +562,8 @@ main { overflow-x: clip; }
   .lede { margin-top: 22px; }
   .bio { margin-top: 32px; }
   .slide-next { margin-top: 30px; }
-  .card h2, .compare h2 { margin-top: 12px; font-size: 22px; }
+  .card h2, .plan h2 { margin-top: 12px; font-size: 22px; }
   .saving-num b { font-size: 26px; }
-  /* 비교표 글자를 한 단계 줄여 360px 폭에서도 "JavaScript" 가 한 칸에 한 줄로 들어가게 */
-  .cmp { font-size: 12px; }
-  .cmp thead th { font-size: 10.5px; letter-spacing: 0; text-transform: none; }
-  .cmp tbody th { font-size: 11.5px; }
-  .steps li { font-size: 13px; }
   .desc { font-size: 14.5px; }
   .card > .demo { margin-top: 22px; }
   .ptiles { grid-template-columns: repeat(2, 1fr); }

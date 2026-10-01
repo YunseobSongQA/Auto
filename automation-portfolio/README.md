@@ -4,7 +4,7 @@
 앞단에는 기획서(PRD)에서 테스트케이스를 자동 생성하는 **PRD2TC**(QA 설계 단계)가 있고,
 뒷단에는 **하나의 타깃([QASS](https://qass1.pages.dev/))을 4가지 도구로 자동화**한 실행 계층이 있습니다.
 같은 사용자 플로우를 Playwright · Selenium · API · Appium 로 각각 구현해
-**도구별 접근 방식의 차이**를 한 화면에서 비교합니다.
+**도구별 접근 방식의 차이**를 비교합니다 (비교표: [`CODE_GUIDE.md`](./CODE_GUIDE.md) §4).
 
 > 핵심 아이디어: **"QA 설계(PRD2TC) → 같은 QASS · 다른 자동화 도구"**.
 > 자동화 4종은 모두 [`FLOW_CONTRACT.md`](./FLOW_CONTRACT.md) 의 동일한 플로우/결과 계약을 따릅니다.

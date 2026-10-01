@@ -2,8 +2,16 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const SLIDES = ['top', 'qass', 'appium', 'prd2tc', 'playwright', 'selenium', 'api', 'compare'];
+const SLIDES = ['top', 'qass', 'appium', 'prd2tc', 'playwright', 'selenium', 'api', 'plan'];
 const VIDEOS = ['qass', 'appium', 'prd2tc', 'playwright', 'selenium'];
+// 도구마다 다른 실무 적용 시간 — [기존, 지금, 감소율]. 8단계 자동 검사 셋은 같은 검사라 같은 수치.
+const SAVINGS = {
+  qass: ['2시간', '1시간', '50%'],
+  prd2tc: ['1시간', '5분', '92%'],
+  appium: ['1분', '10초', '83%'],
+  playwright: ['1분', '10초', '83%'],
+  selenium: ['1분', '10초', '83%'],
+};
 
 // 위치 레일을 눌러 그 장으로 옮기고, 장이 켜질 때까지 기다린다.
 async function goTo(page, id) {
@@ -37,19 +45,33 @@ test('넓은 화면 첫 화면에 도구별 단축 수치가 바로 보인다', 
   test.skip(isMobile, '좁은 화면에서는 각 장에서 보여 준다');
   await page.goto('/');
   await expect(page.locator('.intro-index li')).toHaveCount(SLIDES.length - 1);
-  await expect(page.locator('.intro-index')).toContainText('60→5분');
-  await expect(page.locator('.intro-index')).toContainText('92%');
+  for (const [id, [before, after, rate]] of Object.entries(SAVINGS)) {
+    await expect(page.locator(`.intro-index a[href="#${id}"] .ix-metric`)).toHaveText(`${before}→${after} ${rate}↓`);
+  }
 });
 
-test('도구 장마다 실무 적용 시간이 보인다 (60분 → 5분 · 92% 감소)', async ({ page }) => {
+test('도구 장마다 그 도구의 실무 적용 시간이 보인다 (2시간 → 1시간 · 1시간 → 5분 · 1분 → 10초)', async ({ page }) => {
   await page.goto('/');
-  for (const id of VIDEOS) {
+  for (const [id, [before, after, rate]] of Object.entries(SAVINGS)) {
     await goTo(page, id);
-    const saving = page.locator(`.slide[data-id="${id}"] .saving`);
-    await expect(saving).toContainText('60분');
-    await expect(saving).toContainText('5분');
-    await expect(saving).toContainText('92% 감소');
+    const num = page.locator(`.slide[data-id="${id}"] .saving-num`);
+    await expect(num.locator('span')).toHaveText(before);
+    await expect(num.locator('b')).toHaveText(after);
+    await expect(num.locator('em')).toHaveText(`${rate} 감소`);
   }
+});
+
+test('마지막 장은 도구별 현재 효과 · 한계 · 다음 단계 표다', async ({ page }) => {
+  await page.goto('/');
+  await goTo(page, 'plan');
+  const table = page.locator('.slide[data-id="plan"] .plan-tbl');
+  await expect(table.locator('thead th')).toHaveText(['도구', '현재 효과', '한계', '다음 단계']);
+  await expect(table.locator('tbody th b')).toHaveText(['QASS', 'PRD2TC', '자동 검사', 'API']);
+  // 효과 칸 첫 줄의 수치는 카드의 실무 적용 시간에서 가져온다 — 카드와 어긋나면 안 된다
+  const metrics = table.locator('.plan-metric');
+  await expect(metrics.locator('span')).toHaveText(['2시간 → 1시간', '1시간 → 5분', '1분 → 10초']);
+  await expect(metrics.locator('em')).toHaveText(['50% 감소', '92% 감소', '83% 감소']);
+  await expect(metrics.nth(3)).toHaveText('요청 1,000번 · 성공률 100%');
 });
 
 test('레일을 누르면 그 장이 켜지고 주소가 바뀐다', async ({ page }) => {
@@ -121,18 +143,18 @@ test('글자 대비가 기준(4.5:1)을 넘는다 — 첫 화면 · 도구 장 �
   await expect(page.locator('.slide[data-id="api"] .perf')).toBeVisible();
   await check('API 결과표');
   await page.locator('.theme-toggle').click();
-  await goTo(page, 'compare');
-  await check('비교 · 다크 모드');
+  await goTo(page, 'plan');
+  await check('제언 · 다크 모드');
 });
 
-test('비교표 글자가 단어 중간에서 끊기지 않는다 (JavaScrip/t 방지)', async ({ page }) => {
+test('제언 표 글자가 단어 중간에서 끊기지 않는다', async ({ page }) => {
   await page.goto('/');
-  await goTo(page, 'compare');
+  await goTo(page, 'plan');
   // 띄어쓰기로 나눈 단어마다, 그려진 글자가 두 줄에 걸쳐 있으면 단어 중간에서 끊긴 것이다
   const broken = await page.evaluate(() => {
     const out = [];
-    document.querySelectorAll('.cmp th, .cmp td').forEach(cell => {
-      if (cell.offsetWidth <= 1) return; // 스크린리더용으로 숨긴 '항목' 칸은 뺀다
+    document.querySelectorAll('.plan-tbl th, .plan-tbl td').forEach(cell => {
+      if (cell.offsetWidth <= 1) return; // 스크린리더용으로 숨긴 칸(좁은 화면의 머리글)은 뺀다
       const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         for (const m of node.data.matchAll(/\S+/g)) {

@@ -10,15 +10,23 @@
   // ── 순수 함수: 데이터 → HTML 문자열 (DOM/네트워크 없음) ───────────────────────
   const pad = n => String(n).padStart(2, '0');
 
-  // 실무 적용 시간: 기존 → 지금, 감소율은 여기서 계산한다 (config 에는 분만 적는다).
+  // 실무 적용 시간: config 에는 '2시간' · '5분' · '10초'처럼 적고, 감소율은 여기서 초로 바꿔 계산한다.
+  const SEC = { 시간: 3600, 분: 60, 초: 1 };
+  function toSec(t) {
+    const m = /^(\d+(?:\.\d+)?)(시간|분|초)$/.exec(String(t).trim());
+    return m ? Number(m[1]) * SEC[m[2]] : NaN;
+  }
+  // 감소율(%) — 시간을 읽지 못하면 null 이고, 그때는 감소율 없이 그린다.
   function savingRate(s) {
-    return Math.round((s.before - s.after) / s.before * 100);
+    const before = toSec(s.before), after = toSec(s.after);
+    return before > 0 && after >= 0 ? Math.round((before - after) / before * 100) : null;
   }
   function buildSaving(s, i) {
-    const label = `${s.what} 시간 ${s.before}${s.unit}에서 ${s.after}${s.unit}으로, ${savingRate(s)}% 감소`;
+    const rate = savingRate(s);
+    const label = `${s.what}: 기존 ${s.before}, 지금 ${s.after}` + (rate == null ? '' : `, ${rate}% 감소`);
     return `
           <div class="saving rv" style="--i:${i}" role="group" aria-label="${esc(label)}">
-            <p class="saving-num" aria-hidden="true"><span>${esc(s.before)}${esc(s.unit)}</span><i>→</i><b>${esc(s.after)}${esc(s.unit)}</b><em>${savingRate(s)}% 감소</em></p>
+            <p class="saving-num" aria-hidden="true"><span>${esc(s.before)}</span><i>→</i><b>${esc(s.after)}</b>${rate == null ? '' : `<em>${rate}% 감소</em>`}</p>
             <p class="saving-what" aria-hidden="true">${esc(s.what)} · 실무 적용 기준</p>
           </div>`;
   }
@@ -67,53 +75,61 @@
   }
 
   // 첫 화면 '한눈에 보기' — 도구마다 한 줄(이름 · 한 줄 소개 · 단축 수치), 누르면 그 장으로.
-  function buildIndex(cards, compare) {
+  function buildIndex(cards, plan) {
     const rows = cards.map((c, i) => {
+      const rate = c.saving ? savingRate(c.saving) : null;
       const metric = c.saving
-        ? `${esc(c.saving.before)}→${esc(c.saving.after)}${esc(c.saving.unit)} <b>${savingRate(c.saving)}%↓</b>`
+        ? `${esc(c.saving.before)}→${esc(c.saving.after)}` + (rate == null ? '' : ` <b>${rate}%↓</b>`)
         : esc(c.highlight || '');
-      return `<li><a href="#${esc(c.id)}"><span class="ix-no">${pad(i + 1)}</span>` +
-        `<span class="ix-tool">${esc(c.tool)}</span><span class="ix-short">${esc(c.short || '')}</span>` +
-        `<span class="ix-metric">${metric}</span></a></li>`;
+      return indexRow(c.id, i + 1, c.tool, c.short || '', metric);
     });
-    if (compare) {
-      rows.push(`<li><a href="#${esc(compare.id)}"><span class="ix-no">${pad(cards.length + 1)}</span>` +
-        `<span class="ix-tool">${esc(compare.name)}</span><span class="ix-short">${esc(compare.title)}</span>` +
-        `<span class="ix-metric">${esc(compare.tools.length)}종</span></a></li>`);
-    }
+    if (plan) rows.push(indexRow(plan.id, cards.length + 1, plan.name, plan.title, ''));
     return rows.join('');
   }
+  function indexRow(id, no, name, short, metricHtml) {
+    return `<li><a href="#${esc(id)}"><span class="ix-no">${pad(no)}</span>` +
+      `<span class="ix-tool">${esc(name)}</span><span class="ix-short">${esc(short)}</span>` +
+      `<span class="ix-metric">${metricHtml}</span></a></li>`;
+  }
 
-  // 마지막 장 — 같은 8단계를 네 도구로 짠 결과 비교 (단계 · 비교표 · 배운 점)
-  function buildCompare(c, no) {
-    const steps = c.steps.map(s => `<li>${esc(s)}</li>`).join('');
-    // role 은 좁은 화면용 — styles.css 가 표의 display 를 바꿔도 스크린리더가 표로 읽게 한다.
-    const head = `<tr role="row"><th scope="col" role="columnheader"><span class="sr">항목</span></th>` +
-      `${c.tools.map(t => `<th scope="col" role="columnheader">${esc(t)}</th>`).join('')}</tr>`;
-    const body = c.rows.map(([k, ...vals]) =>
-      `<tr role="row"><th scope="row" role="rowheader">${esc(k)}</th>` +
-      `${vals.map(v => `<td role="cell">${esc(v)}</td>`).join('')}</tr>`).join('');
-    const lessons = c.lessons.map(l => `<li>${esc(l)}</li>`).join('');
+  // 마지막 장 — 도구별 현재 효과 · 한계 · 다음 단계를 한 표로 (제언).
+  // '현재 효과' 첫 줄은 from 카드의 실무 적용 시간에서 가져온다 — 수치는 카드 한 곳에서만 고친다.
+  function buildPlan(p, no, cards) {
+    const lines = list => list.map(t => `<p>${esc(t)}</p>`).join('');
+    const metric = row => {
+      const card = row.from ? cards.find(c => c.id === row.from) : null;
+      if (!card || !card.saving) return esc(row.metric || '');
+      const rate = savingRate(card.saving);
+      return `<span>${esc(card.saving.before)} → ${esc(card.saving.after)}</span>` + (rate == null ? '' : `<em>${rate}% 감소</em>`);
+    };
+    // role 은 좁은 화면용 — styles.css 가 표를 칸 대신 도구별 묶음으로 쌓아도 스크린리더가 표로 읽게 한다.
+    // data-label 은 그 묶음에서 칸 이름(현재 효과 등)을 값 앞에 붙이는 데 쓴다.
+    const [effect, limit, next] = p.columns;
+    const head = `<tr role="row"><th scope="col" role="columnheader"><span class="sr">도구</span></th>` +
+      p.columns.map(c => `<th scope="col" role="columnheader">${esc(c)}</th>`).join('') + '</tr>';
+    const body = p.rows.map(r => `
+                <tr role="row">
+                  <th scope="row" role="rowheader"><b>${esc(r.name)}</b><span>${esc(r.sub)}</span></th>
+                  <td role="cell" data-label="${esc(effect)}"><p class="plan-metric">${metric(r)}</p>${lines(r.effect)}</td>
+                  <td role="cell" data-label="${esc(limit)}">${lines(r.limit)}</td>
+                  <td role="cell" data-label="${esc(next)}">${lines(r.next)}</td>
+                </tr>`).join('');
     return `
-      <section class="slide slide--compare" data-id="${esc(c.id)}" data-name="${esc(c.name)}">
-        <div class="compare slide-inner">
+      <section class="slide slide--plan" data-id="${esc(p.id)}" data-name="${esc(p.name)}">
+        <div class="plan slide-inner">
           <div class="card-top rv" style="--i:0">
             <span class="card-no">${pad(no)}</span>
-            <span class="tool">${esc(c.name)}</span>
-            <span class="chip">${esc(c.badge)}</span>
+            <span class="tool">${esc(p.name)}</span>
+            <span class="chip">${esc(p.badge)}</span>
           </div>
-          <h2 class="rv" style="--i:1">${esc(c.title)}</h2>
-          <p class="desc rv" style="--i:2">${esc(c.desc)}</p>
-          <div class="steps-box rv" style="--i:3">
-            <p class="box-h">공통 8단계 검사</p>
-            <ol class="steps">${steps}</ol>
-          </div>
-          <div class="cmp-box rv" style="--i:2">
-            <table class="cmp" role="table"><thead role="rowgroup">${head}</thead><tbody role="rowgroup">${body}</tbody></table>
-          </div>
-          <div class="lessons-box rv" style="--i:4">
-            <p class="box-h">비교해서 알게 된 것</p>
-            <ul class="lessons">${lessons}</ul>
+          <h2 class="rv" style="--i:1">${esc(p.title)}</h2>
+          <p class="desc rv" style="--i:2">${esc(p.desc)}</p>
+          <div class="plan-box rv" style="--i:3">
+            <table class="plan-tbl" role="table">
+              <thead role="rowgroup">${head}</thead>
+              <tbody role="rowgroup">${body}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>`;
@@ -121,16 +137,16 @@
 
   // ── 부수효과: 화면에 반영 ──────────────────────────────────────────────────
   function render() {
-    // 첫 장(소개)은 index.html 에 있고, 도구 슬라이드와 비교 장을 그 뒤에 잇는다.
+    // 첫 장(소개)은 index.html 에 있고, 도구 슬라이드와 제언 장을 그 뒤에 잇는다.
     const reel = document.getElementById('reel');
     reel.insertAdjacentHTML('beforeend',
       cfg.cards.map((c, i) => buildCard(c, i + 1)).join('') +
-      (cfg.compare ? buildCompare(cfg.compare, cfg.cards.length + 1) : ''));
+      (cfg.plan ? buildPlan(cfg.plan, cfg.cards.length + 1, cfg.cards) : ''));
     // '도구 둘러보기'는 카드 순서가 바뀌어도 첫 도구 슬라이드를 가리키게.
     const next = document.querySelector('[data-next]');
     if (next && cfg.cards[0]) next.setAttribute('href', '#' + cfg.cards[0].id);
     const index = document.querySelector('[data-index]');
-    if (index) index.innerHTML = buildIndex(cfg.cards, cfg.compare);
+    if (index) index.innerHTML = buildIndex(cfg.cards, cfg.plan);
 
     reel.querySelectorAll('.demo').forEach(renderDemo);
   }

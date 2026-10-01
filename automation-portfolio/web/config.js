@@ -8,7 +8,8 @@
  *   - id:       카드 = 슬라이드 한 장. 슬라이드 주소(#id)로도 쓰이니 바꾸면 기존 링크가 끊깁니다.
  *   - tool:     슬라이드 머리 라벨이자 위치 레일·첫 화면 '한눈에 보기'의 이름.
  *   - short:    첫 화면 '한눈에 보기'에 들어갈 한 줄 소개 (짧게).
- *   - saving:   (선택) 실무 적용 시간 { before, after, unit, what } — 감소율(%)은 main.js 가 계산.
+ *   - saving:   (선택) 실무 적용 시간 { before, after, what }. before/after 는 '2시간'·'5분'·'10초'처럼
+ *               숫자+단위(시간·분·초)로 적습니다. 감소율(%)은 main.js 가 초로 바꿔 계산합니다.
  *   - highlight: (선택) saving 이 없는 카드가 '한눈에 보기'에 대신 띄울 짧은 수치.
  *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
@@ -32,7 +33,7 @@ window.QASS_PORTFOLIO = {
       short: '증적 자동 수집 · 팀 공유',
       title: 'QA 증적 자동 수집 · 팀 공유 서비스',
       desc: '탭만 옮겨도 화면 전체가 캡처되어 팀 공유 방에 쌓입니다. 영상은 서비스 화면을 차례로 둘러본 모습입니다.',
-      saving: { before: 60, after: 5, unit: '분', what: '증적 수집·정리' },
+      saving: { before: '2시간', after: '1시간', what: '증적 수집·정리' },
       repo: 'https://qass1.pages.dev/',
       repoLabel: '서비스 열기 ↗',
       demo: 'assets/qass.webm',
@@ -55,7 +56,7 @@ window.QASS_PORTFOLIO = {
       short: '안드로이드 폰 자동 검사',
       title: 'QASS 모바일 · 안드로이드 크롬',
       desc: '같은 8단계 검사를 안드로이드 폰의 크롬에서 자동으로 돌립니다. 가상 폰 Pixel\u00a08에서 8단계를 모두 통과했습니다.',
-      saving: { before: 60, after: 5, unit: '분', what: '8단계 검사 1회' },
+      saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: 'assets/appium.webm',
       demoType: 'video',
@@ -72,7 +73,7 @@ window.QASS_PORTFOLIO = {
       short: '기획서 → 테스트케이스 초안',
       title: '기획서(PRD) → 테스트케이스 자동 생성',
       desc: '기획서(pptx)를 넣으면 테스트케이스 표(xlsx)가 나옵니다. 표 양식은 코드로 고정하고, 빈칸만 Gemini AI가 채웁니다.',
-      saving: { before: 60, after: 5, unit: '분', what: '기획서 1건 TC 초안' },
+      saving: { before: '1시간', after: '5분', what: '기획서 1건 TC 초안' },
       repo: 'https://qaprd2tc.pages.dev/',
       repoLabel: '도구 열기 ↗',
       demo: 'assets/prd2tc.webm',
@@ -94,7 +95,7 @@ window.QASS_PORTFOLIO = {
       short: '웹 자동 검사 (기준 코드)',
       title: 'QASS 웹 · 데스크톱 크롬',
       desc: '사람이 하던 8단계 검사를 크롬이 화면 없이 스스로 실행합니다. 네 가지 자동화의 기준이 되는 코드입니다.',
-      saving: { before: 60, after: 5, unit: '분', what: '8단계 검사 1회' },
+      saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/playwright',
       demo: 'assets/playwright.webm',
       demoType: 'video',
@@ -110,7 +111,7 @@ window.QASS_PORTFOLIO = {
       short: '웹 자동 검사 (비교용)',
       title: 'QASS 웹 · 같은 검사 비교',
       desc: 'Playwright와 똑같은 검사를 Selenium으로 한 번 더 만들어, 두 도구의 차이를 비교했습니다.',
-      saving: { before: 60, after: 5, unit: '분', what: '8단계 검사 1회' },
+      saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/selenium',
       demo: 'assets/selenium.webm',
       demoType: 'video',
@@ -138,28 +139,41 @@ window.QASS_PORTFOLIO = {
     },
   ],
 
-  // 마지막 장 — 같은 8단계 검사를 네 도구로 짠 결과 비교 (FLOW_CONTRACT.md · CODE_GUIDE.md §4 요약)
-  // 코드 줄 수는 각 흐름 구현 파일에서 빈 줄·주석을 뺀 값입니다.
-  compare: {
-    id: 'compare',
-    name: '비교',
-    badge: '4종 비교',
-    title: '같은 검사, 네 가지 도구',
-    desc: 'QASS의 같은 8단계를 네 도구로 각각 자동화하고, 짜는 방식을 비교했습니다.',
-    steps: ['첫 화면 열기', '앱 화면으로 이동', '이름으로 로그인', '방 목록 확인',
-      '테스트 방 고르기', '방 입장', '캡처 목록 확인', "'google' 검색"],
-    tools: ['Playwright', 'Selenium', 'Appium', 'API'],
+  // 마지막 장 — 도구별 현재 효과 · 한계 · 다음 단계 (제언).
+  // 칸마다 짧은 명사형 한두 줄로 적는다(마침표 없이). '현재 효과' 첫 줄의 단축 시간은 from 카드의
+  // saving 에서 main.js 가 가져온다 — 수치를 바꿀 때는 카드만 고치면 된다. from 이 없으면 metric 을 쓴다.
+  plan: {
+    id: 'plan',
+    name: '제언',
+    badge: '효과 · 한계 · 다음 단계',
+    title: '지금의 효과, 그리고 다음 단계',
+    desc: '실무에 활용하며 확인한 효과와 한계를 바탕으로, 도구마다 다음에 다듬을 방향을 정리했습니다.',
+    columns: ['현재 효과', '한계', '다음 단계'],
     rows: [
-      ['언어', 'JavaScript', 'Python', 'Python', 'JavaScript'],
-      ['실행 환경', 'PC 크롬 · 화면 없이', 'PC 크롬', '안드로이드 크롬', '브라우저 없이 서버로'],
-      ['기다리기', '알아서 기다림', '직접 지정', '직접 지정', '응답 올 때까지'],
-      ['글자 입력', '지우고 입력을 한 번에', '지운 뒤 입력', '지운 뒤 입력', '입력 없음'],
-      ['코드 줄\u00a0수', '88줄', '98줄', '98줄', '88줄'], // \u00a0: 좁은 화면에서 '줄 수'가 떨어지지 않게
-      ['결과', '8단계 통과', '8단계 통과', '8단계 통과', '4단계·부하 통과'],
-    ],
-    lessons: [
-      'Selenium·Appium은 입력칸을 먼저 비워야 했습니다. 미리 채워진 값 뒤에 글자가 이어 붙어 방 입장이 실패했습니다.',
-      'Playwright는 누르고 입력하기 전에 알아서 기다려 주지만, Selenium은 기다릴 곳마다 직접 지정해야 했습니다.',
+      {
+        name: 'QASS', sub: '증적 수집 · 공유', from: 'qass',
+        effect: ['전체 화면 자동 캡처 · 팀 공유'],
+        limit: ['크롬 확장 프로그램이라 PC 전용', '1차 자동 점검은 시범 운영 중'],
+        next: ['모바일 캡처 지원', '1차 자동 점검 정식 운영'],
+      },
+      {
+        name: 'PRD2TC', sub: '기획서 → TC 초안', from: 'prd2tc',
+        effect: ['기획서만 넣으면 TC 초안 완성'],
+        limit: ['AI가 쓴 초안이라 QA 검토 필수'],
+        next: ['검토 결과를 다음 생성에 반영', 'TC 관리 도구로 바로 내보내기'],
+      },
+      {
+        name: '자동 검사', sub: 'Playwright · Selenium · Appium', from: 'selenium',
+        effect: ['PC · 모바일 크롬에서 자동 확인'],
+        limit: ['핵심 흐름 8단계만 검사', 'Appium은 가상 폰에서만 실행'],
+        next: ['GitHub Actions로 정기 실행', '업로드 등으로 검사 범위 확대'],
+      },
+      {
+        name: 'API', sub: '서버 속도 · 부하', metric: '요청 1,000번 · 성공률 100%',
+        effect: ['요청 95%가 0.17초 안에 응답'],
+        limit: ['조회 요청만 측정', '동시 사용자 10명 규모'],
+        next: ['저장 · 삭제 요청까지 측정', '사용자 규모를 늘려 정기 측정'],
+      },
     ],
   },
 };

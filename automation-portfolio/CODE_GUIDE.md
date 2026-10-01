@@ -71,7 +71,7 @@ Appium 만 실기기(안드로이드)가 필요해 실행이 PC에 의존하므�
 | **API 부하 실행** | [`api/loadtest.js`](./api/loadtest.js) | 가상 사용자 동시 호출 → 수치/그래프 산출 |
 | **Appium (맨 뒤)** | [`appium/qass_flow.py`](./appium/qass_flow.py) | 같은 8스텝을 모바일 크롬으로 (Python · 실행은 PC) |
 | **쇼케이스 데이터** | [`web/config.js`](./web/config.js) | 카드 6개 메타(QASS + PRD2TC + 자동화 4종 · 도구명/설명/링크/제언) — 여기만 고치면 화면 바뀜 |
-| **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면(카드 한 장 = 스크롤 슬라이드 한 장 + 마지막 비교 장). 영상/그래프/대기 3가지로 분기 |
+| **쇼케이스 렌더** | [`web/main.js`](./web/main.js) | config → 화면(카드 한 장 = 스크롤 슬라이드 한 장 + 마지막 제언 장: 현재 효과·한계·다음 단계). 영상/그래프/대기 3가지로 분기 |
 | **쇼케이스 영상 전달** | [`web/_worker.js`](./web/_worker.js) | Cloudflare Pages 워커 — 영상 Range 요청에 206 으로 답해 아이폰(사파리)에서 재생되게 |
 | **쇼케이스 테스트** | [`showcase-tests/`](./showcase-tests/) | 쇼케이스 자동 테스트 (Playwright · 크롬·사파리·아이폰) — GitHub Actions 로 매번 실행 |
 
