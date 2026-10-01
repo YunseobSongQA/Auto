@@ -10,7 +10,8 @@
  *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
  *   - demoLabel: 데모 영역 캡션("영상 아님" 같은 설명).
- *   - poster:   (선택) 영상 로드 전/재생 불가 시 표시할 스크린샷 경로.
+ *   - poster:   (선택) 영상이 뜨기 전에 보일 이미지 경로. 영상의 첫 프레임을 써야 재생이 시작될 때
+ *               화면이 튀지 않습니다 (assets/<id>-poster.webp).
  *   - status:   'verified'(검증완료) | 'pending'(PC에서 실행예정)
  *   - statusLabel: (선택) status 기본 문구 대신 쓸 라벨. 색/아이콘은 status 를 따릅니다.
  *   - note:     (선택) { label, text } — 카드 하단 '제언' 블록. 한계/다음 과제를 적습니다.
@@ -39,7 +40,7 @@ window.QASS_PORTFOLIO = {
       repoLabel: '서비스 열기 ↗',
       demo: 'assets/qass.webm',
       demoType: 'video',
-      poster: 'assets/qass-run.jpg',
+      poster: 'assets/qass-poster.webp',
       demoLabel: '화면 구성 둘러보기 · 로그인 → 방 목록 → 방 입장 → 검색 → 1차 자동 점검',
       badge: '직접 만든 서비스',
       status: 'verified',
@@ -59,7 +60,7 @@ window.QASS_PORTFOLIO = {
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/appium',
       demo: 'assets/appium.webm',
       demoType: 'video',
-      poster: 'assets/appium-run.png', // 영상 로드 전/재생 불가 시 보이는 실행 스크린샷
+      poster: 'assets/appium-poster.webp',
       demoLabel: '실제 실행 녹화 · 안드로이드 에뮬레이터(Pixel 8) 크롬 · 8스텝 통과',
       badge: '모바일',
       status: 'verified',
@@ -75,6 +76,7 @@ window.QASS_PORTFOLIO = {
       repoLabel: '도구 열기 ↗',
       demo: 'assets/prd2tc.webm',
       demoType: 'video',
+      poster: 'assets/prd2tc-poster.webp',
       demoLabel: '실제 도구 동작 · 기획서(pptx) 입력 → 테스트케이스 표 생성',
       badge: 'PRD → TC',
       status: 'verified',
@@ -93,6 +95,7 @@ window.QASS_PORTFOLIO = {
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/playwright',
       demo: 'assets/playwright.webm',
       demoType: 'video',
+      poster: 'assets/playwright-poster.webp',
       demoLabel: '',
       badge: '레퍼런스',
       status: 'verified',
@@ -106,6 +109,7 @@ window.QASS_PORTFOLIO = {
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/selenium',
       demo: 'assets/selenium.webm',
       demoType: 'video',
+      poster: 'assets/selenium-poster.webp',
       demoLabel: '',
       badge: 'Playwright 비교',
       status: 'verified',

@@ -72,6 +72,17 @@ cd appium && pip install -r requirements.txt && appium driver install uiautomato
 - **데모 산출물**: 쇼케이스는 `web/config.js` 의 `demoType` 으로 분기합니다 — Playwright/
   Selenium 은 `video`(webm), API 는 `json`(FlowResult), Appium 은 `pending`. 파일이 없으면
   플레이스홀더를 보여줍니다.
+- **데모 영상 손질**: 슬라이드에 들어가자마자 화면이 보여야 하므로, 녹화 앞부분의 빈 화면·대기
+  구간(브라우저가 뜨기 전 검은/흰 화면, 앱 시작 화면 등)은 잘라 냅니다. 같은 구간을 mp4(1순위
+  · H.264 · faststart)와 webm 에서 함께 자르고, 첫 프레임을 포스터 `web/assets/<id>-poster.webp`
+  로 뽑아 `config.js` 의 `poster` 에 적습니다. 다시 녹화하면 이 손질도 다시 해야 합니다.
+  ```bash
+  # x-raw.webm = 녹화 원본 (record.sh 등이 만든 파일을 이 이름으로 옮겨 두고 시작)
+  ffmpeg -i x-raw.webm -vf "trim=start=<빈 구간 끝(초)>,setpts=PTS-STARTPTS" -an -c:v libx264 -crf 23 \
+    -preset slow -pix_fmt yuv420p -profile:v high -movflags +faststart x.mp4
+  ffmpeg -i x-raw.webm -vf "trim=start=<같은 값>,setpts=PTS-STARTPTS" -an -c:v libvpx-vp9 -crf 32 -b:v 0 x.webm
+  ffmpeg -i x.mp4 -vf "select='eq(n\,0)'" -frames:v 1 -c:v libwebp -quality 80 x-poster.webp
+  ```
 - **Appium 미실행**: 안드로이드 에뮬레이터가 필요해 이번 산출물은 동일 계약 골격까지.
   PC 에서 `appium/README.md` 절차로 실행·녹화 후 `web/assets/appium.webm` 을 추가하고
   `config.js` 의 appium 항목만 `pending → video` 로 바꾸면 됩니다.

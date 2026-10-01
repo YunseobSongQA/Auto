@@ -34,7 +34,8 @@
           <h2 class="rv" style="--i:1">${esc(card.title)}</h2>
           <p class="desc rv" style="--i:2">${esc(card.desc)}</p>
 
-          <div class="demo rv" style="--i:2" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">
+          <!-- 데모는 차례 연출(rv)에서 뺀다 — 장이 켜지는 순간 영상이 바로 보이도록 -->
+          <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">
             <div class="demo-ph">${esc(card.demoLabel || '데모 준비 중')}<br><small>${esc(card.tool)} 실행 결과</small></div>
           </div>
 
@@ -117,67 +118,141 @@
     setInterval(step, 1100);
   }
 
-  // video: 파일이 있으면 <video>로 교체하고 클릭 없이 자동재생(muted+playsinline+play()).
-  // 모바일은 화면 밖이거나 로드 타이밍이 어긋나면 자동재생이 막혀 재생버튼이 뜨므로,
-  // canplay·화면 노출(IntersectionObserver)·첫 사용자 제스처마다 play()를 재시도한다.
-  // 릴에서는 슬라이드가 모두 같은 자리에 겹쳐 있어 "화면에 보임"으로 가릴 수 없다 → 켜진
-  // 슬라이드의 영상만 틀고 나머지는 멈춘다(syncVideos). 그래서 autoplay 속성은 두지 않는다.
+  // video: <video> 를 렌더 즉시 만든다 — 파일 확인(HEAD)을 한 번 더 기다리지 않는다. 파일이 없으면
+  // 마지막 <source> 의 error 로 알아채 플레이스홀더로 되돌린다.
+  // 포스터는 영상의 첫 프레임(config.js poster) — 데이터가 오기 전에도 같은 화면이 바로 보이고,
+  // 재생이 시작되면 그 화면에서 그대로 이어진다.
+  // 재생 규칙: 릴에서는 켜진 슬라이드의 영상만, 평소 문서에서는 화면에 보이는 영상만 튼다(syncVideo).
+  // 슬라이드가 모두 같은 자리에 겹쳐 있어 "화면에 보임"으로는 가릴 수 없어 autoplay 속성은 두지 않는다.
   // 코덱: MP4(H.264)를 첫 번째 <source>로 둔다. WebKit(아이폰)은 canPlayType('video/webm')에
   // "재생 가능"이라 답해 놓고 실제로는 VP9 디코딩을 못 해 멈추므로, webm을 앞에 두면
   // mp4 폴백이 영원히 발동하지 않는다. H.264는 전 브라우저 재생 가능 → mp4 우선.
-  // webm은 폴백(2순위)으로 유지하고, 그래도 못 틀면 poster(실행 스크린샷)라도 보이게 한다.
+  // webm은 폴백(2순위)으로 유지한다.
   function renderVideo(el, src) {
     if (!src) return;
-    fetch(src, { method: 'HEAD' })
-      .then(r => {
-        if (!r.ok) return;
-        const v = document.createElement('video');
-        v.muted = true; v.defaultMuted = true; v.loop = true;
-        v.playsInline = true; v.preload = 'auto';
-        v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-        v.setAttribute('loop', '');
-        const poster = el.getAttribute('data-poster');
-        if (poster) v.poster = poster;
-        [['video/mp4', src.replace(/\.webm$/, '.mp4')], ['video/webm', src]].forEach(([type, s]) => {
-          const source = document.createElement('source');
-          source.src = s; source.type = type;
-          v.appendChild(source);
-        });
-        el.innerHTML = '';
-        el.appendChild(v);
+    const placeholder = el.innerHTML;
+    const v = document.createElement('video');
+    v.muted = true; v.defaultMuted = true; v.loop = true;
+    v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.setAttribute('loop', '');
+    const poster = el.getAttribute('data-poster');
+    if (poster) v.poster = poster;
+    const sources = [['video/mp4', src.replace(/\.webm$/, '.mp4')], ['video/webm', src]].map(([type, s]) => {
+      const source = document.createElement('source');
+      source.src = s; source.type = type;
+      v.appendChild(source);
+      return source;
+    });
+    // 마지막 소스까지 실패 = 틀 수 있는 파일이 없음 → 플레이스홀더로
+    sources[sources.length - 1].addEventListener('error', () => {
+      el.classList.remove('is-blocked');
+      el.innerHTML = placeholder;
+    });
+    el.innerHTML = '';
+    el.appendChild(v);
 
-        const sync = () => syncVideo(v);
+    // 데이터가 늦게 와도 받는 즉시 다시 맞춘다 (once 아님 — 끊겼다 이어져도 다시 시도)
+    const sync = () => syncVideo(v);
+    v.addEventListener('loadeddata', sync);
+    v.addEventListener('canplay', sync);
+    v.addEventListener('playing', () => { unlocked.add(v); el.classList.remove('is-blocked'); });
+
+    // 평소 문서(릴 꺼짐)에서는 화면에 들어오고 나갈 때마다 재생/정지. 첫 재생 판단도 여기서 —
+    // 렌더 직후엔 릴이 아직 안 켜져 있어 바로 sync 하면 모든 영상이 한꺼번에 틀어졌다 멈춘다.
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        entries.forEach(e => { v.dataset.inview = e.isIntersecting ? '1' : '0'; });
         sync();
-        v.addEventListener('canplay', sync, { once: true });
-        v.addEventListener('loadeddata', sync, { once: true });
-
-        // 스크롤로 화면에 들어오고 나갈 때마다 재생/정지 (릴이 꺼진 평소 문서에서 쓰임)
-        if ('IntersectionObserver' in window) {
-          new IntersectionObserver(entries => {
-            entries.forEach(e => { v.dataset.inview = e.isIntersecting ? '1' : '0'; });
-            sync();
-          }, { threshold: 0.25 }).observe(v);
-        }
-      })
-      .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
+      }, { threshold: 0.25 }).observe(v);
+    }
   }
 
   // 지금 보여야 할 영상인가 — 릴에서는 켜진 슬라이드 안, 평소에는 화면 안.
-  function syncVideo(v) {
-    const want = document.documentElement.classList.contains('has-reel')
+  function wantsPlay(v) {
+    return document.documentElement.classList.contains('has-reel')
       ? !!v.closest('.slide.is-on')
       : v.dataset.inview !== '0';
-    if (want) { const p = v.play(); if (p) p.catch(() => {}); }
-    else if (!v.paused) v.pause();
+  }
+
+  // 보여야 하면 틀고, 아니면 멈춘다. 브라우저가 재생을 막으면(NotAllowedError — 아이폰 저전력
+  // 모드 등) 데모 위에 재생 버튼을 띄워 한 번 눌러 달라고 알린다(.is-blocked).
+  // 사파리는 숨겨진 동안 받은 play() 를 "재생 중(paused=false)"이라 해 놓고 시간이 멈춘 채로
+  // 두기도 한다(보인 뒤에도 안 풀림). 재생 위치가 0.2초 넘게 그대로면 멈췄다 다시 틀어 깨운다.
+  // seen: 영상별로 지금 위치를 처음 본 시각 — 위치가 바뀌면 새로 적는다.
+  const seen = new WeakMap();
+  // 한 번이라도 실제로 재생된 영상 — 잠금 해제(initVideoUnlock)를 다시 할 필요가 없다.
+  const unlocked = new WeakSet();
+  function syncVideo(v) {
+    if (!wantsPlay(v)) { if (!v.paused) v.pause(); return; }
+    const now = performance.now();
+    if (!v.paused) {
+      const last = seen.get(v);
+      if (!last || v.currentTime !== last.t) { seen.set(v, { t: v.currentTime, at: now }); return; }
+      if (v.readyState < 3 || now - last.at < 200) return; // 데이터를 기다리는 중이거나 아직 이르다
+      v.pause();
+    }
+    seen.delete(v);
+    const box = v.closest('.demo');
+    const p = v.play();
+    if (p) p.catch(err => { if (err && err.name === 'NotAllowedError' && box) box.classList.add('is-blocked'); });
   }
   function syncVideos() {
     document.querySelectorAll('.demo video').forEach(syncVideo);
   }
 
-  // 자동재생이 끝내 막혔을 때, 사용자의 첫 터치/클릭/스크롤 한 번으로 보여야 할 영상을 재생.
-  function initGestureFallback() {
-    ['touchstart', 'click', 'scroll'].forEach(ev =>
-      document.addEventListener(ev, syncVideos, { once: true, passive: true }));
+  // 슬라이드가 막 켜졌을 때: play() 는 그 장이 실제로 화면에 그려진 뒤(두 프레임 뒤)에 부르고,
+  // 시간을 두고 몇 번 더 맞춘다(멈춘 채 남은 재생도 이때 깨운다). 사파리는 아직 숨겨진
+  // (visibility:hidden) 영상의 재생을 받아 놓고 멈춰 두기도 해서, 보인 뒤에 다시 봐야 확실하다.
+  let retries = [];
+  function playSoon() {
+    retries.forEach(clearTimeout);
+    requestAnimationFrame(() => requestAnimationFrame(syncVideos));
+    retries = [120, 260, 500, 900, 2000, 3500].map(ms => setTimeout(syncVideos, ms));
+  }
+
+  // 장이 바뀔 때: 떠난 장의 영상은 바로 멈추고, 들어온 장의 영상은 처음부터 다시 튼다.
+  // 이미 처음 위치면 되감지 않는다 — 재생 직전에 쓸데없는 seek 이 끼면 사파리가 멈추기도 한다.
+  function enterVideos(slide) {
+    document.querySelectorAll('.demo video').forEach(v => {
+      if (!slide.contains(v)) { if (!v.paused) v.pause(); return; }
+      seen.delete(v);
+      if (v.currentTime > 0.05) { try { v.currentTime = 0; } catch (e) { /* 아직 데이터 없음 */ } }
+    });
+    playSoon();
+  }
+
+  // 아이폰은 사용자가 한 번 건드리기 전까지 영상을 미리 받지 않고, 저전력 모드에서는 재생까지
+  // 막는다. 제스처 안에서 play() 를 한 번 받은 영상은 이 제한이 풀리므로, 탭(click)·키 입력 때
+  // 아직 안 풀린 숨은 영상을 한 번씩 틀었다가 곧 멈춰 둔다(잠금 해제). 그 뒤로는 장을 넘길 때
+  // 바로 재생된다. 재생에 성공한 영상만 풀린 것으로 치므로, 제스처로 인정되지 않는 입력
+  // (Shift 같은 키)이 먼저 와도 다음 입력에서 다시 시도한다.
+  // pointerup·touchend 는 쓰지 않는다 — 레일을 누른 탭에서 click 보다 먼저 와, 화면을 옮기기도
+  // 전에 곧 켜질 장의 영상까지 숨긴 채로 틀어 버린다(사파리는 그 재생을 멈춘 채로 붙잡는다).
+  function initVideoUnlock() {
+    const onGesture = () => {
+      // 레일을 누른 탭이면 스크롤은 이미 옮겨졌다 — 켤 장부터 맞춰 두고 판단한다
+      const before = document.querySelector('.slide.is-on');
+      syncReel();
+      const moved = document.querySelector('.slide.is-on') !== before;
+      document.querySelectorAll('.demo video').forEach(v => {
+        if (unlocked.has(v) || wantsPlay(v) || !v.paused) return;
+        const p = v.play();
+        if (!p) return;
+        // 멈추는 건 두 프레임 뒤 — 해제용으로 막 튼 영상을 같은 순간 멈추면 사파리가 그 영상을
+        // 멈춘 채로 붙잡아, 나중에 그 장에 들어가도 바로 돌지 않는다.
+        p.then(() => {
+          unlocked.add(v);
+          requestAnimationFrame(() => requestAnimationFrame(() => syncVideo(v)));
+        }, () => { /* 제스처로 인정되지 않음 → 다음 입력에서 다시 */ });
+      });
+      // 장이 그대로면 지금 보여야 할 영상을 이 제스처로 튼다(막힌 재생 풀기). 장이 막 바뀌었으면
+      // 그 장이 화면에 그려진 뒤 enterVideos 가 튼다 — 숨김이 덜 풀린 채 틀면 사파리가 멈춘다.
+      if (!moved) document.querySelectorAll('.demo video').forEach(v => { if (wantsPlay(v)) syncVideo(v); });
+    };
+    ['click', 'keydown'].forEach(ev => document.addEventListener(ev, onGesture, { passive: true }));
+    // 다른 탭에 다녀오면 멈춰 있던 영상을 다시 맞춘다
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) playSoon(); });
   }
 
   // perf: 부하 테스트 결과(api-perf.json)를 간결한 판정 + 핵심 수치 + 그래프로 (영상 아님).
@@ -250,6 +325,9 @@
   // 동작 줄이기(prefers-reduced-motion)를 켠 사용자에게는 같은 마크업을 평범한 세로 문서로 보인다.
   const FLIP = 0.85; // 한 장을 넘기는 데 드는 스크롤 (화면 높이 배수)
   const HOLD = 0.08; // 경계에서 오르내려도 깜빡이지 않도록 더 넘겨야 바뀌는 여유 (화면 높이 배수)
+  // 지금 스크롤 위치로 켤 장을 곧바로 맞춘다 — 다음 프레임을 기다리지 않아야 할 때(탭 처리) 쓴다.
+  // initReel 이 채운다.
+  let syncReel = () => {};
 
   function initReel() {
     const root = document.documentElement;
@@ -325,7 +403,7 @@
         d.classList.toggle('is-on', k === i);
         d.setAttribute('aria-current', k === i ? 'true' : 'false');
       });
-      syncVideos();
+      enterVideos(slides[i]);
       setHash(i);
     }
 
@@ -346,6 +424,7 @@
       });
     }
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    syncReel = () => { if (on) update(); };
 
     // 크기가 바뀌면(창 크기·회전·글꼴 로드·성능표 로드) 다시 재고, 보던 장·읽던 위치를 지킨다.
     function relayout() {
@@ -495,6 +574,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    render(); initReel(); initTheme(); initViewportToggle(); initGestureFallback();
+    render(); initReel(); initTheme(); initViewportToggle(); initVideoUnlock();
   });
 })();
