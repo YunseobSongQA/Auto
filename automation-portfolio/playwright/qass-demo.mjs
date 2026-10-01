@@ -7,7 +7,7 @@
  * 랜딩 → 로그인 → 방 목록 → 방 → 검색 → 1차 자동 점검까지 순서대로 보여 줍니다.
  *
  * 실행:  node qass-demo.mjs
- * 산출물: ../web/assets/qass.webm  (+ 포스터 ../web/assets/qass-run.png)
+ * 산출물: ../web/assets/qass.webm  (포스터는 README 의 ffmpeg 명령으로 영상 첫 프레임에서 뽑음)
  *         mp4 변환은 README 의 ffmpeg 명령 참고 (모바일 재생용 1순위 소스).
  */
 import { chromium } from '@playwright/test';
@@ -126,7 +126,6 @@ async function main() {
   }, { timeout: 20_000 });
   await say(page, '5', '업로더 이름과 캡처 시각이 자동으로 기록됩니다');
   await wait(page, 3000);
-  await page.screenshot({ path: path.join(OUT_DIR, 'qass-run.png') }); // 카드 포스터
   await smoothScroll(page, 700, 1500);
   await wait(page, 2400);
   await smoothScroll(page, 0, 1200);

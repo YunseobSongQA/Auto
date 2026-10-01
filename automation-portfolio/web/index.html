@@ -4,9 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>품질 관리 중 생기는 문제를, 바로 도구로 — QA Automation</title>
-  <meta name="description" content="QA를 하며 마주치는 반복 업무를 자동화합니다. 증적 수집부터 기획서 기반 테스트케이스 작성, 자동화 테스트까지 필요한 도구를 직접 만들어 실무에 쓰고, 실행 영상과 측정 수치까지 공개합니다." />
+  <meta name="description" content="QA를 하며 마주치는 반복 업무를 자동화합니다. 증적 수집부터 기획서 기반 테스트케이스 작성, 자동화 테스트까지 필요한 도구를 직접 만들어 실무에 활용하고, 실행 영상과 측정 수치까지 공개합니다." />
+  <link rel="canonical" href="https://auto-x2o.pages.dev/" />
+  <!-- 링크 공유 미리보기 (카카오톡·슬랙·링크드인 등). 이미지는 절대 주소여야 크롤러가 읽는다. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="QA Automation" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:url" content="https://auto-x2o.pages.dev/" />
+  <meta property="og:title" content="품질 관리 중 생기는 문제를, 바로 도구로 — QA Automation" />
+  <meta property="og:description" content="QA 반복 업무를 도구로 자동화합니다. 증적 수집·테스트케이스 작성·자동화 테스트 — 실무 적용 시간 60분 → 5분." />
+  <meta property="og:image" content="https://auto-x2o.pages.dev/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="QA Automation — 품질 관리 중 생기는 문제를 바로 도구로 만듭니다" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon.ico" sizes="32x32" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <!-- 테마 깜빡임 방지: CSS 적용 전에 저장된 테마를 먼저 반영 (기본 라이트) -->
   <script>(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+  <!-- 릴(고정 화면) 모드를 첫 화면이 그려지기 전에 켠다. 스크립트가 나중에 켜면 이미 그려진 화면이
+       한 번 밀린다(CLS). 동작 줄이기를 켠 사용자는 평범한 세로 문서 그대로 둔다. -->
+  <script>(function(){try{if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('has-reel');}catch(e){}})();</script>
   <!-- 본문용 한글 가변 폰트. 막히면 시스템 폰트로 자연히 내려갑니다(styles.css 의 --font). -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
@@ -38,31 +57,45 @@
     <!-- 릴 — 화면은 고정해 두고 스크롤 위치에 맞춰 슬라이드를 바꿔 끼웁니다 (main.js initReel).
          첫 장은 여기, 도구 슬라이드는 config.js 카드로 main.js 가 뒤에 이어 붙입니다. -->
     <div class="reel" id="reel">
-      <section class="slide slide--intro" id="top" data-id="top" data-name="소개">
-        <div class="slide-inner">
-          <h1 class="intro-title rv" style="--i:0">품질 관리 중 생기는 문제를<br />바로 도구로 만듭니다</h1>
-          <p class="lede rv" style="--i:1">
-            <span>QA를 하며 마주치는 반복 업무를 자동화합니다.</span>
-            <span>증적 수집부터 기획서 기반 테스트케이스 작성, 자동화 테스트까지 필요한 도구를 직접 만들어 실무에 씁니다.</span>
-            <span class="lede-key">반복은 줄이고, 아낀 시간은 목표한 품질에 투자합니다.</span>
-          </p>
-
-          <!-- 소개 — 누가 만들었고 무엇을 하는 사람인지 짧게 -->
-          <div class="bio rv" style="--i:2">
-            <div class="bio-head">
-              <h2>송윤섭</h2>
-              <span class="bio-role">QA Engineer</span>
-            </div>
-            <p>
-              업무 흐름에서 병목이 생기는 지점을 파악하고, 자동화 도구를 직접 만들어 운영하며
-              실무에 활용합니다.
+      <!-- is-on: 첫 장은 처음부터 켜진 상태로 그린다 (릴이 켜진 채 첫 화면이 그려지므로) -->
+      <section class="slide slide--intro is-on" id="top" data-id="top" data-name="소개">
+        <div class="slide-inner intro">
+          <div class="intro-main">
+            <h1 class="intro-title rv" style="--i:0">품질 관리 중 생기는 문제를<br />바로 도구로 만듭니다</h1>
+            <p class="lede rv" style="--i:1">
+              <span>QA를 하며 마주치는 반복 업무를 자동화합니다.</span>
+              <span>증적 수집부터 기획서 기반 테스트케이스 작성, 자동화 테스트까지 필요한 도구를 직접 만들어 실무에 활용합니다.</span>
+              <span class="lede-key">반복은 줄이고, 아낀 시간은 목표한 품질에 투자합니다.</span>
             </p>
+
+            <!-- 소개 — 누가 만들었고 어디서 무엇을 해 왔는지 짧게 -->
+            <div class="bio rv" style="--i:2">
+              <div class="bio-head">
+                <h2>송윤섭</h2>
+                <span class="bio-role">QA Engineer</span>
+              </div>
+              <dl class="bio-career">
+                <div><dt>소속</dt><dd>컴즈</dd></div>
+                <div><dt>前</dt><dd>LG CNS 배포 담당 QA</dd></div>
+                <div><dt>現</dt><dd>KB국민은행 여신 파트 QA</dd></div>
+              </dl>
+              <p>
+                업무 흐름에서 병목이 생기는 지점을 파악하고, 자동화 도구를 직접 만들어 운영하며
+                실무에 활용합니다.
+              </p>
+            </div>
+
+            <a class="slide-next rv" style="--i:3" href="#qass" data-next>
+              도구 둘러보기
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" /></svg>
+            </a>
           </div>
 
-          <a class="slide-next rv" style="--i:3" href="#qass" data-next>
-            도구 둘러보기
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" /></svg>
-          </a>
+          <!-- 한눈에 보기 — 도구마다 실무 적용 시간을 바로 보여 준다(넓은 화면). 줄은 main.js 가 채운다. -->
+          <nav class="intro-index rv" style="--i:2" aria-label="도구 한눈에 보기">
+            <p class="ix-head">한눈에 보기 <span>실무 적용 시간</span></p>
+            <ol data-index></ol>
+          </nav>
         </div>
       </section>
     </div>

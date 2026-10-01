@@ -50,8 +50,8 @@ node qass-demo.mjs        # → ../web/assets/qass.webm (+ 포스터는 아래 �
 ffmpeg -i qass.webm -vf "scale=1152:720:flags=lanczos,fps=24" -c:v libx264 -crf 28 -preset slow -pix_fmt yuv420p -movflags +faststart -an qass.mp4
 # webm 도 같은 규격으로 다시 눌러 용량을 맞춥니다 (VP9 · 원본 녹화본에서)
 ffmpeg -i qass-raw.webm -vf "scale=1152:720:flags=lanczos,fps=24" -c:v libvpx-vp9 -crf 36 -b:v 0 -row-mt 1 -an qass.webm
-# 포스터 — 아이폰에서 재생이 막혔을 때 대신 보이는 한 장 (방 화면 프레임)
-ffmpeg -i qass.mp4 -vf "select='eq(n\,690)'" -frames:v 1 -q:v 4 qass-run.jpg
+# 포스터 — 영상 첫 프레임 (재생이 시작될 때 화면이 튀지 않게 · config.js 의 poster)
+ffmpeg -i qass.mp4 -vf "select='eq(n\,0)'" -frames:v 1 -c:v libwebp -quality 80 qass-poster.webp
 ```
 
 ## 핵심 플로우 결정 근거 (라이브 DOM inspect)

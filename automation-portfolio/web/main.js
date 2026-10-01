@@ -7,10 +7,25 @@
 (function () {
   const cfg = window.QASS_PORTFOLIO;
 
-  // ── 순수 함수: 카드 데이터 → 슬라이드 HTML 문자열 (DOM/네트워크 없음) ─────────
+  // ── 순수 함수: 데이터 → HTML 문자열 (DOM/네트워크 없음) ───────────────────────
+  const pad = n => String(n).padStart(2, '0');
+
+  // 실무 적용 시간: 기존 → 지금, 감소율은 여기서 계산한다 (config 에는 분만 적는다).
+  function savingRate(s) {
+    return Math.round((s.before - s.after) / s.before * 100);
+  }
+  function buildSaving(s, i) {
+    const label = `${s.what} 시간 ${s.before}${s.unit}에서 ${s.after}${s.unit}으로, ${savingRate(s)}% 감소`;
+    return `
+          <div class="saving rv" style="--i:${i}" role="group" aria-label="${esc(label)}">
+            <p class="saving-num" aria-hidden="true"><span>${esc(s.before)}${esc(s.unit)}</span><i>→</i><b>${esc(s.after)}${esc(s.unit)}</b><em>${savingRate(s)}% 감소</em></p>
+            <p class="saving-what" aria-hidden="true">${esc(s.what)} · 실무 적용 기준</p>
+          </div>`;
+  }
+
   // 카드 한 장이 릴의 슬라이드 한 장이 됩니다. no 는 화면에 붙는 순번(1부터).
   // rv 는 슬라이드가 켜질 때 차례로 떠오르는 요소, --i 는 그 순서(지연)입니다.
-  function buildCard(card, shared, no) {
+  function buildCard(card, no) {
     const statusClass = card.status === 'verified' ? 'st-done' : 'st-stub';
     const statusText = card.statusLabel || (card.status === 'verified' ? '검증완료' : 'PC에서 실행예정');
     // 알약 칩을 여러 줄로 깔면 카드가 시끄러워진다 → 가운뎃점으로 이은 한 줄.
@@ -18,7 +33,7 @@
     const repoLabel = card.repoLabel || 'GitHub에서 코드 보기 ↗';
     // note: 선택 필드. 있으면 포인트 아래에 '제언' 블록으로 — 한계/다음 과제를 숨기지 않고 적는다.
     const note = card.note
-      ? `<div class="note rv" style="--i:4"><span class="note-tag">${esc(card.note.label || '제언')}</span>` +
+      ? `<div class="note rv" style="--i:5"><span class="note-tag">${esc(card.note.label || '제언')}</span>` +
         `<p>${esc(card.note.text)}</p></div>`
       : '';
     // 슬라이드에는 id 대신 data-id 를 둔다. id 가 있으면 브라우저가 #주소를 보고 그 요소(릴 맨 위에
@@ -27,22 +42,23 @@
       <section class="slide slide--tool" data-id="${esc(card.id)}" data-name="${esc(card.tool)}">
         <article class="card slide-inner" data-tool="${esc(card.id)}">
           <div class="card-top rv" style="--i:0">
-            <span class="card-no">${String(no).padStart(2, '0')}</span>
+            <span class="card-no">${pad(no)}</span>
             <span class="tool">${esc(card.tool)}</span>
             <span class="chip">${esc(card.badge)}</span>
           </div>
           <h2 class="rv" style="--i:1">${esc(card.title)}</h2>
-          <p class="desc rv" style="--i:2">${esc(card.desc)}</p>
+          ${card.saving ? buildSaving(card.saving, 2) : ''}
+          <p class="desc rv" style="--i:3">${esc(card.desc)}</p>
 
           <!-- 데모는 차례 연출(rv)에서 뺀다 — 장이 켜지는 순간 영상이 바로 보이도록 -->
           <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">
             <div class="demo-ph">${esc(card.demoLabel || '데모 준비 중')}<br><small>${esc(card.tool)} 실행 결과</small></div>
           </div>
 
-          <ul class="points rv" style="--i:3">${points}</ul>
+          <ul class="points rv" style="--i:4">${points}</ul>
           ${note}
 
-          <div class="card-foot rv" style="--i:5">
+          <div class="card-foot rv" style="--i:6">
             <span class="status ${statusClass}">${icoMark(card.status === 'verified')}${statusText}</span>
             <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">${esc(repoLabel)}</a>
           </div>
@@ -50,23 +66,71 @@
       </section>`;
   }
 
+  // 첫 화면 '한눈에 보기' — 도구마다 한 줄(이름 · 한 줄 소개 · 단축 수치), 누르면 그 장으로.
+  function buildIndex(cards, compare) {
+    const rows = cards.map((c, i) => {
+      const metric = c.saving
+        ? `${esc(c.saving.before)}→${esc(c.saving.after)}${esc(c.saving.unit)} <b>${savingRate(c.saving)}%↓</b>`
+        : esc(c.highlight || '');
+      return `<li><a href="#${esc(c.id)}"><span class="ix-no">${pad(i + 1)}</span>` +
+        `<span class="ix-tool">${esc(c.tool)}</span><span class="ix-short">${esc(c.short || '')}</span>` +
+        `<span class="ix-metric">${metric}</span></a></li>`;
+    });
+    if (compare) {
+      rows.push(`<li><a href="#${esc(compare.id)}"><span class="ix-no">${pad(cards.length + 1)}</span>` +
+        `<span class="ix-tool">${esc(compare.name)}</span><span class="ix-short">${esc(compare.title)}</span>` +
+        `<span class="ix-metric">${esc(compare.tools.length)}종</span></a></li>`);
+    }
+    return rows.join('');
+  }
+
+  // 마지막 장 — 같은 8단계를 네 도구로 짠 결과 비교 (단계 · 비교표 · 배운 점)
+  function buildCompare(c, no) {
+    const steps = c.steps.map(s => `<li>${esc(s)}</li>`).join('');
+    // role 은 좁은 화면용 — styles.css 가 표의 display 를 바꿔도 스크린리더가 표로 읽게 한다.
+    const head = `<tr role="row"><th scope="col" role="columnheader"><span class="sr">항목</span></th>` +
+      `${c.tools.map(t => `<th scope="col" role="columnheader">${esc(t)}</th>`).join('')}</tr>`;
+    const body = c.rows.map(([k, ...vals]) =>
+      `<tr role="row"><th scope="row" role="rowheader">${esc(k)}</th>` +
+      `${vals.map(v => `<td role="cell">${esc(v)}</td>`).join('')}</tr>`).join('');
+    const lessons = c.lessons.map(l => `<li>${esc(l)}</li>`).join('');
+    return `
+      <section class="slide slide--compare" data-id="${esc(c.id)}" data-name="${esc(c.name)}">
+        <div class="compare slide-inner">
+          <div class="card-top rv" style="--i:0">
+            <span class="card-no">${pad(no)}</span>
+            <span class="tool">${esc(c.name)}</span>
+            <span class="chip">${esc(c.badge)}</span>
+          </div>
+          <h2 class="rv" style="--i:1">${esc(c.title)}</h2>
+          <p class="desc rv" style="--i:2">${esc(c.desc)}</p>
+          <div class="steps-box rv" style="--i:3">
+            <p class="box-h">공통 8단계 검사</p>
+            <ol class="steps">${steps}</ol>
+          </div>
+          <div class="cmp-box rv" style="--i:2">
+            <table class="cmp" role="table"><thead role="rowgroup">${head}</thead><tbody role="rowgroup">${body}</tbody></table>
+          </div>
+          <div class="lessons-box rv" style="--i:4">
+            <p class="box-h">비교해서 알게 된 것</p>
+            <ul class="lessons">${lessons}</ul>
+          </div>
+        </div>
+      </section>`;
+  }
+
   // ── 부수효과: 화면에 반영 ──────────────────────────────────────────────────
   function render() {
-    const fill = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-    fill('shared-flow', cfg.sharedFlow);
-    const link = document.getElementById('target-link');
-    if (link) {
-      link.href = cfg.sharedTarget.url;
-      link.textContent = `${cfg.sharedTarget.name} 열기 ↗`;
-    }
-
-    // 첫 장(소개)은 index.html 에 있고, 도구 슬라이드를 그 뒤에 잇는다.
+    // 첫 장(소개)은 index.html 에 있고, 도구 슬라이드와 비교 장을 그 뒤에 잇는다.
     const reel = document.getElementById('reel');
     reel.insertAdjacentHTML('beforeend',
-      cfg.cards.map((c, i) => buildCard(c, cfg.sharedTarget, i + 1)).join(''));
+      cfg.cards.map((c, i) => buildCard(c, i + 1)).join('') +
+      (cfg.compare ? buildCompare(cfg.compare, cfg.cards.length + 1) : ''));
     // '도구 둘러보기'는 카드 순서가 바뀌어도 첫 도구 슬라이드를 가리키게.
     const next = document.querySelector('[data-next]');
     if (next && cfg.cards[0]) next.setAttribute('href', '#' + cfg.cards[0].id);
+    const index = document.querySelector('[data-index]');
+    if (index) index.innerHTML = buildIndex(cfg.cards, cfg.compare);
 
     reel.querySelectorAll('.demo').forEach(renderDemo);
   }
@@ -77,45 +141,7 @@
     const src = el.getAttribute('data-demo');
     if (type === 'video') return renderVideo(el, src);
     if (type === 'perf') return renderPerf(el, src);
-    if (type === 'mockup') return renderMockup(el);
     // 'pending' → 플레이스홀더 유지
-  }
-
-  // (D) mockup: 실제 실행 영상이 아니라 "예시 프리뷰(데모)"임을 명확히 라벨링하되,
-  //     자동 재생으로 플로우 단계가 순서대로 진행되는 동적 프리뷰로 보여준다.
-  function renderMockup(el) {
-    const label = el.getAttribute('data-label') || '예시 프리뷰 · 실제 시연 준비 중';
-    const steps = (cfg.sharedFlow || '').split('→').map(s => s.trim()).filter(Boolean);
-    const check =
-      '<svg class="mk-ok" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    const cells = steps
-      .map((s, i) =>
-        `<div class="mk-screen"><span class="mk-idx">${i + 1}</span><span class="mk-txt">${esc(s)}</span>${check}</div>`)
-      .join('<span class="mk-arrow" aria-hidden="true">→</span>');
-    el.classList.add('is-mockup');
-    el.innerHTML =
-      `<div class="mockup">
-         <div class="mk-head"><span class="mk-tag">DEMO · 예시</span><span class="mk-dev">모바일 크롬 · UiAutomator2</span><span class="mk-live" aria-hidden="true"><i></i>자동 재생</span></div>
-         <div class="mk-strip">${cells}</div>
-         <div class="mk-bar" aria-hidden="true"><span class="mk-bar-fill"></span></div>
-         <div class="mk-note">${esc(label)}</div>
-       </div>`;
-
-    // 동적 프리뷰: 단계별로 active/done 상태가 순서대로 이동 (자동 재생 · 무한 반복)
-    const screens = el.querySelectorAll('.mk-screen');
-    const fill = el.querySelector('.mk-bar-fill');
-    if (!screens.length) return;
-    let i = 0;
-    const step = () => {
-      screens.forEach((s, idx) => {
-        s.classList.toggle('is-active', idx === i);
-        s.classList.toggle('is-done', idx < i);
-      });
-      if (fill) fill.style.width = ((i + 1) / screens.length * 100).toFixed(0) + '%';
-      i = (i + 1) % screens.length;
-    };
-    step();
-    setInterval(step, 1100);
   }
 
   // video: <video> 를 렌더 즉시 만든다 — 파일 확인(HEAD)을 한 번 더 기다리지 않는다. 파일이 없으면
@@ -258,7 +284,6 @@
   // perf: 부하 테스트 결과(api-perf.json)를 간결한 판정 + 핵심 수치 + 그래프로 (영상 아님).
   function renderPerf(el, src) {
     if (!src) return;
-    const label = el.getAttribute('data-label') || '성능·부하 테스트';
     fetch(src)
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(d => {
@@ -266,16 +291,18 @@
         const s = d.summary, L = s.latencyMs, ax = s.apdex || {};
         const pass = d.verdict === 'PASS';
 
+        // 합격선(p95 300ms 이하 등)은 직접 정한 목표 수치다. 표준(ISO/IEC 25010·Apdex)은 "무엇을 잴지"
+        // 고르는 데 썼을 뿐 합격선을 정해 주지 않으므로, "국제 표준 기준 통과"라고 쓰지 않는다.
         const verdict =
           `<div class="pverdict ${pass ? 'is-pass' : 'is-fail'}">` +
           `<span class="pv-badge">${pass ? 'PASS' : 'FAIL'}</span>` +
-          `<span class="pv-sub">국제 표준(ISO/IEC 25010 · Apdex) 기준 ${pass ? '통과' : '미달'}</span></div>`;
+          `<span class="pv-sub">${pass ? '직접 정한 목표 수치를 모두 통과' : '직접 정한 목표 수치에 못 미침'}</span></div>`;
 
         const tiles = [
           ['총 요청', s.totalRequests],
-          ['체감 성능', (ax.score != null ? ax.score : '-') + (ax.rating ? ' ' + ax.rating : '')],
+          ['체감 점수 (Apdex)', (ax.score != null ? ax.score : '-') + (ax.rating ? ' ' + ax.rating : '')],
           ['성공률', (s.okRate * 100).toFixed(1) + '%'],
-          ['응답 p95', L.p95 + 'ms'],
+          ['응답 시간 (95%)', L.p95 + 'ms'],
         ].map(([k, v]) => `<div class="ptile"><b>${esc(String(v))}</b><span>${esc(k)}</span></div>`).join('');
 
         // 기준별 통과/실패 (한 줄, 깔끔한 아이콘)
@@ -285,8 +312,8 @@
           `<span class="pchk-n">${esc(c.name)}</span>` +
           `<span class="pchk-v">${esc(fmt(c.actual, c.unit))} <i>${esc(c.op)} ${esc(fmt(c.threshold, c.unit))}</i></span></div>`).join('');
 
-        // 응답속도 분포 막대 (p50/p95/p99)
-        const pcts = [['p50', L.p50], ['p95', L.p95], ['p99', L.p99]];
+        // 응답 시간 분포 막대 — 요청의 50%·95%·99%가 이 시간 안에 응답 (p50/p95/p99 를 쉬운 말로)
+        const pcts = [['50%', L.p50], ['95%', L.p95], ['99%', L.p99]];
         const pmax = Math.max(...pcts.map(p => p[1])) || 1;
         const bars = pcts.map(([k, v]) =>
           `<div class="pbar"><span class="pbar-k">${k}</span>` +
@@ -297,8 +324,8 @@
           `<div class="perf">
              ${verdict}
              <div class="ptiles">${tiles}</div>
-             <details class="pblock"><summary>합격 기준 ${(d.checks || []).length}개 보기</summary>${checks}</details>
-             <div class="pblock"><div class="pblock-h">응답속도 분포 (ms · 낮을수록 빠름)</div>${bars}</div>
+             <details class="pblock"><summary>판정 기준 ${(d.checks || []).length}개 보기</summary>${checks}</details>
+             <div class="pblock"><div class="pblock-h">응답 시간 — 요청의 몇 %가 이 시간 안에 왔나 (낮을수록 빠름)</div>${bars}</div>
            </div>`;
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });
