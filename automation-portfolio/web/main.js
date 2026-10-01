@@ -10,24 +10,60 @@
   // ── 순수 함수: 데이터 → HTML 문자열 (DOM/네트워크 없음) ───────────────────────
   const pad = n => String(n).padStart(2, '0');
 
-  // 실무 적용 시간: config 에는 '2시간' · '5분' · '10초'처럼 적고, 감소율은 여기서 초로 바꿔 계산한다.
+  // 실무 적용 시간: config 에는 '2시간' · '5분' · '10초'처럼 적고, 단축률은 여기서 초로 바꿔 계산한다.
   const SEC = { 시간: 3600, 분: 60, 초: 1 };
   function toSec(t) {
     const m = /^(\d+(?:\.\d+)?)(시간|분|초)$/.exec(String(t).trim());
     return m ? Number(m[1]) * SEC[m[2]] : NaN;
   }
-  // 감소율(%) — 시간을 읽지 못하면 null 이고, 그때는 감소율 없이 그린다.
+  // 단축률(%) — 시간을 읽지 못하면 null 이고, 그때는 단축률 없이 그린다.
   function savingRate(s) {
     const before = toSec(s.before), after = toSec(s.after);
     return before > 0 && after >= 0 ? Math.round((before - after) / before * 100) : null;
   }
-  function buildSaving(s, i) {
-    const rate = savingRate(s);
-    const label = `${s.what}: 기존 ${s.before}, 지금 ${s.after}` + (rate == null ? '' : `, ${rate}% 감소`);
+
+  // 카드 제목 아래 핵심 수치 — 단축 시간(saving: 2시간 → 1시간, 50% 단축) 또는 다른 수치(stat: 성공률 100%).
+  function buildKpi(card, i) {
+    let num, what, label;
+    if (card.saving) {
+      const s = card.saving, rate = savingRate(s);
+      num = `<span>${esc(s.before)}</span><i>→</i><b>${esc(s.after)}</b>` + (rate == null ? '' : `<em>${rate}% 단축</em>`);
+      what = `${s.what} 기준`;
+      label = `${s.what}: 기존 ${s.before}, 적용 후 ${s.after}` + (rate == null ? '' : `, ${rate}% 단축`);
+    } else if (card.stat) {
+      const t = card.stat;
+      num = `<span>${esc(t.label)}</span><b>${esc(t.value)}</b>`;
+      what = t.sub;
+      label = `${t.label} ${t.value}, ${t.sub}`;
+    } else {
+      return '';
+    }
     return `
           <div class="saving rv" style="--i:${i}" role="group" aria-label="${esc(label)}">
-            <p class="saving-num" aria-hidden="true"><span>${esc(s.before)}</span><i>→</i><b>${esc(s.after)}</b>${rate == null ? '' : `<em>${rate}% 감소</em>`}</p>
-            <p class="saving-what" aria-hidden="true">${esc(s.what)} · 실무 적용 기준</p>
+            <p class="saving-num" aria-hidden="true">${num}</p>
+            <p class="saving-what" aria-hidden="true">${esc(what)}</p>
+          </div>`;
+  }
+
+  // 사양 — [이름, 내용] 줄(언어 · 환경 · 대상 등). 사실만 짧게.
+  function buildSpecs(specs, i) {
+    if (!specs || !specs.length) return '';
+    const rows = specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+    return `
+          <dl class="specs rv" style="--i:${i}">${rows}</dl>`;
+  }
+
+  // 비교표 — 열은 도구, 행은 장점·단점. 첫 열(구분)은 위 사양 목록의 이름 칸과 폭을 맞춘다.
+  function buildVs(vs, i) {
+    if (!vs) return '';
+    const head = `<tr><th scope="col"><span class="sr">구분</span></th>` +
+      vs.head.map(h => `<th scope="col">${esc(h)}</th>`).join('') + '</tr>';
+    const body = vs.rows.map(([name, ...cells]) =>
+      `<tr><th scope="row">${esc(name)}</th>${cells.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+    return `
+          <div class="vs rv" style="--i:${i}">
+            <p class="vs-title">${esc(vs.title)}</p>
+            <table class="vs-tbl"><thead>${head}</thead><tbody>${body}</tbody></table>
           </div>`;
   }
 
@@ -35,15 +71,8 @@
   // rv 는 슬라이드가 켜질 때 차례로 떠오르는 요소, --i 는 그 순서(지연)입니다.
   function buildCard(card, no) {
     const statusClass = card.status === 'verified' ? 'st-done' : 'st-stub';
-    const statusText = card.statusLabel || (card.status === 'verified' ? '검증완료' : 'PC에서 실행예정');
-    // 알약 칩을 여러 줄로 깔면 카드가 시끄러워진다 → 가운뎃점으로 이은 한 줄.
-    const points = card.points.map(p => `<li>${esc(p)}</li>`).join('<li aria-hidden="true">·</li>');
+    const statusText = card.statusLabel || (card.status === 'verified' ? '검증 완료' : 'PC에서 실행 예정');
     const repoLabel = card.repoLabel || 'GitHub에서 코드 보기 ↗';
-    // note: 선택 필드. 있으면 포인트 아래에 '제언' 블록으로 — 한계/다음 과제를 숨기지 않고 적는다.
-    const note = card.note
-      ? `<div class="note rv" style="--i:5"><span class="note-tag">${esc(card.note.label || '제언')}</span>` +
-        `<p>${esc(card.note.text)}</p></div>`
-      : '';
     // 슬라이드에는 id 대신 data-id 를 둔다. id 가 있으면 브라우저가 #주소를 보고 그 요소(릴 맨 위에
     // 겹쳐 있는 슬라이드)로 스스로 스크롤해 버려, 릴이 계산한 자리와 어긋난다.
     return `
@@ -55,16 +84,14 @@
             <span class="chip">${esc(card.badge)}</span>
           </div>
           <h2 class="rv" style="--i:1">${esc(card.title)}</h2>
-          ${card.saving ? buildSaving(card.saving, 2) : ''}
+          ${buildKpi(card, 2)}
           <p class="desc rv" style="--i:3">${esc(card.desc)}</p>
 
           <!-- 데모는 차례 연출(rv)에서 뺀다 — 장이 켜지는 순간 영상이 바로 보이도록 -->
           <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">
             <div class="demo-ph">${esc(card.demoLabel || '데모 준비 중')}<br><small>${esc(card.tool)} 실행 결과</small></div>
           </div>
-
-          <ul class="points rv" style="--i:4">${points}</ul>
-          ${note}
+          ${buildSpecs(card.specs, 4)}${buildVs(card.vs, 5)}
 
           <div class="card-foot rv" style="--i:6">
             <span class="status ${statusClass}">${icoMark(card.status === 'verified')}${statusText}</span>
@@ -74,17 +101,21 @@
       </section>`;
   }
 
-  // 첫 화면 '한눈에 보기' — 도구마다 한 줄(이름 · 한 줄 소개 · 단축 수치), 누르면 그 장으로.
+  // 첫 화면 '요약' — 도구마다 한 줄(이름 · 한 줄 소개 · 핵심 수치), 누르면 그 장으로.
   function buildIndex(cards, plan) {
-    const rows = cards.map((c, i) => {
-      const rate = c.saving ? savingRate(c.saving) : null;
-      const metric = c.saving
-        ? `${esc(c.saving.before)}→${esc(c.saving.after)}` + (rate == null ? '' : ` <b>${rate}%↓</b>`)
-        : esc(c.highlight || '');
-      return indexRow(c.id, i + 1, c.tool, c.short || '', metric);
-    });
+    const rows = cards.map((c, i) => indexRow(c.id, i + 1, c.tool, c.short || '', indexMetric(c)));
     if (plan) rows.push(indexRow(plan.id, cards.length + 1, plan.name, plan.title, ''));
     return rows.join('');
+  }
+  // 단축 시간은 "2시간 → 1시간 · 50% 단축", 다른 수치는 "성공률 · 100%"
+  function indexMetric(c) {
+    if (c.saving) {
+      const rate = savingRate(c.saving);
+      return `<span class="ix-time">${esc(c.saving.before)} → ${esc(c.saving.after)}</span>` +
+        (rate == null ? '' : `<b>${rate}% 단축</b>`);
+    }
+    if (c.stat) return `<span class="ix-time">${esc(c.stat.label)}</span><b>${esc(c.stat.value)}</b>`;
+    return '';
   }
   function indexRow(id, no, name, short, metricHtml) {
     return `<li><a href="#${esc(id)}"><span class="ix-no">${pad(no)}</span>` +
@@ -92,27 +123,33 @@
       `<span class="ix-metric">${metricHtml}</span></a></li>`;
   }
 
-  // 마지막 장 — 도구별 현재 효과 · 한계 · 다음 단계를 한 표로 (제언).
-  // '현재 효과' 첫 줄은 from 카드의 실무 적용 시간에서 가져온다 — 수치는 카드 한 곳에서만 고친다.
+  // 마지막 장 — 도구별 효과 · 한계 · 개선 방향 (제언). 칸마다 짧은 한 줄.
+  // 효과 칸의 수치는 from 카드의 saving(단축률) · stat 에서 가져온다 — 수치는 카드 한 곳에서만 고친다.
   function buildPlan(p, no, cards) {
-    const lines = list => list.map(t => `<p>${esc(t)}</p>`).join('');
-    const metric = row => {
-      const card = row.from ? cards.find(c => c.id === row.from) : null;
-      if (!card || !card.saving) return esc(row.metric || '');
-      const rate = savingRate(card.saving);
-      return `<span>${esc(card.saving.before)} → ${esc(card.saving.after)}</span>` + (rate == null ? '' : `<em>${rate}% 감소</em>`);
+    const effect = row => {
+      const c = cards.find(x => x.id === row.from);
+      if (c && c.saving) {
+        const rate = savingRate(c.saving);
+        return (rate == null ? '' : `<p class="plan-metric"><b>${rate}%</b> 단축</p>`) +
+          `<p class="plan-sub">${esc(c.saving.before)} → ${esc(c.saving.after)}</p>`;
+      }
+      if (c && c.stat) {
+        return `<p class="plan-metric">${esc(c.stat.label)} <b>${esc(c.stat.value)}</b></p>` +
+          `<p class="plan-sub">${esc(c.stat.sub)}</p>`;
+      }
+      return '';
     };
     // role 은 좁은 화면용 — styles.css 가 표를 칸 대신 도구별 묶음으로 쌓아도 스크린리더가 표로 읽게 한다.
-    // data-label 은 그 묶음에서 칸 이름(현재 효과 등)을 값 앞에 붙이는 데 쓴다.
-    const [effect, limit, next] = p.columns;
+    // data-label 은 그 묶음에서 칸 이름(효과 등)을 값 앞에 붙이는 데 쓴다.
+    const [cEffect, cLimit, cNext] = p.columns;
     const head = `<tr role="row"><th scope="col" role="columnheader"><span class="sr">도구</span></th>` +
       p.columns.map(c => `<th scope="col" role="columnheader">${esc(c)}</th>`).join('') + '</tr>';
     const body = p.rows.map(r => `
                 <tr role="row">
                   <th scope="row" role="rowheader"><b>${esc(r.name)}</b><span>${esc(r.sub)}</span></th>
-                  <td role="cell" data-label="${esc(effect)}"><p class="plan-metric">${metric(r)}</p>${lines(r.effect)}</td>
-                  <td role="cell" data-label="${esc(limit)}">${lines(r.limit)}</td>
-                  <td role="cell" data-label="${esc(next)}">${lines(r.next)}</td>
+                  <td role="cell" data-label="${esc(cEffect)}">${effect(r)}</td>
+                  <td role="cell" data-label="${esc(cLimit)}"><p>${esc(r.limit)}</p></td>
+                  <td role="cell" data-label="${esc(cNext)}"><p>${esc(r.next)}</p></td>
                 </tr>`).join('');
     return `
       <section class="slide slide--plan" data-id="${esc(p.id)}" data-name="${esc(p.name)}">
@@ -120,10 +157,10 @@
           <div class="card-top rv" style="--i:0">
             <span class="card-no">${pad(no)}</span>
             <span class="tool">${esc(p.name)}</span>
-            <span class="chip">${esc(p.badge)}</span>
+            ${p.badge ? `<span class="chip">${esc(p.badge)}</span>` : ''}
           </div>
           <h2 class="rv" style="--i:1">${esc(p.title)}</h2>
-          <p class="desc rv" style="--i:2">${esc(p.desc)}</p>
+          ${p.desc ? `<p class="desc rv" style="--i:2">${esc(p.desc)}</p>` : ''}
           <div class="plan-box rv" style="--i:3">
             <table class="plan-tbl" role="table">
               <thead role="rowgroup">${head}</thead>
@@ -131,6 +168,7 @@
               </tbody>
             </table>
           </div>
+          ${p.note ? `<p class="plan-note rv" style="--i:4">${esc(p.note)}</p>` : ''}
         </div>
       </section>`;
   }
@@ -306,23 +344,26 @@
         el.classList.add('is-perf');
         const s = d.summary, L = s.latencyMs, ax = s.apdex || {};
         const pass = d.verdict === 'PASS';
+        const nChecks = (d.checks || []).length, nPass = (d.checks || []).filter(c => c.pass).length;
 
         // 합격선(p95 300ms 이하 등)은 직접 정한 목표 수치다. 표준(ISO/IEC 25010·Apdex)은 "무엇을 잴지"
         // 고르는 데 썼을 뿐 합격선을 정해 주지 않으므로, "국제 표준 기준 통과"라고 쓰지 않는다.
         const verdict =
           `<div class="pverdict ${pass ? 'is-pass' : 'is-fail'}">` +
           `<span class="pv-badge">${pass ? 'PASS' : 'FAIL'}</span>` +
-          `<span class="pv-sub">${pass ? '직접 정한 목표 수치를 모두 통과' : '직접 정한 목표 수치에 못 미침'}</span></div>`;
+          `<span class="pv-sub">${pass ? `목표 기준 ${nChecks}개 모두 충족` : `목표 기준 ${nChecks - nPass}개 미달`}</span></div>`;
 
+        // 수치는 짧게: 1,000 · 100% · 171ms · 0.98 (소수점 아래 0 은 떼어 낸다)
+        const pct = v => +(v * 100).toFixed(1) + '%';
         const tiles = [
-          ['총 요청', s.totalRequests],
-          ['체감 점수 (Apdex)', (ax.score != null ? ax.score : '-') + (ax.rating ? ' ' + ax.rating : '')],
-          ['성공률', (s.okRate * 100).toFixed(1) + '%'],
-          ['응답 시간 (95%)', L.p95 + 'ms'],
+          ['요청 수', s.totalRequests.toLocaleString('en-US')],
+          ['성공률', pct(s.okRate)],
+          ['95% 응답', L.p95 + 'ms'],
+          ['Apdex 점수', ax.score != null ? ax.score : '-'],
         ].map(([k, v]) => `<div class="ptile"><b>${esc(String(v))}</b><span>${esc(k)}</span></div>`).join('');
 
         // 기준별 통과/실패 (한 줄, 깔끔한 아이콘)
-        const fmt = (v, unit) => unit === 'rate' ? (v * 100).toFixed(1) + '%' : unit === 'ms' ? v + 'ms' : String(v);
+        const fmt = (v, unit) => unit === 'rate' ? pct(v) : unit === 'ms' ? v + 'ms' : String(v);
         const checks = (d.checks || []).map(c =>
           `<div class="pchk ${c.pass ? 'ok' : 'no'}">${icoMark(c.pass)}` +
           `<span class="pchk-n">${esc(c.name)}</span>` +
@@ -340,8 +381,8 @@
           `<div class="perf">
              ${verdict}
              <div class="ptiles">${tiles}</div>
-             <details class="pblock"><summary>판정 기준 ${(d.checks || []).length}개 보기</summary>${checks}</details>
-             <div class="pblock"><div class="pblock-h">응답 시간 — 요청의 몇 %가 이 시간 안에 왔나 (낮을수록 빠름)</div>${bars}</div>
+             <details class="pblock"><summary>판정 기준 ${nChecks}개</summary>${checks}</details>
+             <div class="pblock"><div class="pblock-h">요청 비율별 응답 시간 (ms)</div>${bars}</div>
            </div>`;
       })
       .catch(() => { /* 파일 없음 → 플레이스홀더 유지 */ });

@@ -41,13 +41,18 @@ test('첫 화면에 제목·소개·경력이 보인다', async ({ page }) => {
   await expect(career).toContainText('KB국민은행 여신 파트 QA');
 });
 
-test('넓은 화면 첫 화면에 도구별 단축 수치가 바로 보인다', async ({ page, isMobile }) => {
+test('넓은 화면 첫 화면 요약에 도구별 핵심 수치가 바로 보인다', async ({ page, isMobile }) => {
   test.skip(isMobile, '좁은 화면에서는 각 장에서 보여 준다');
   await page.goto('/');
   await expect(page.locator('.intro-index li')).toHaveCount(SLIDES.length - 1);
   for (const [id, [before, after, rate]] of Object.entries(SAVINGS)) {
-    await expect(page.locator(`.intro-index a[href="#${id}"] .ix-metric`)).toHaveText(`${before}→${after} ${rate}↓`);
+    const metric = page.locator(`.intro-index a[href="#${id}"] .ix-metric`);
+    await expect(metric.locator('.ix-time')).toHaveText(`${before} → ${after}`);
+    await expect(metric.locator('b')).toHaveText(`${rate} 단축`);
   }
+  const api = page.locator('.intro-index a[href="#api"] .ix-metric');
+  await expect(api.locator('.ix-time')).toHaveText('성공률');
+  await expect(api.locator('b')).toHaveText('100%');
 });
 
 test('도구 장마다 그 도구의 실무 적용 시간이 보인다 (2시간 → 1시간 · 1시간 → 5분 · 1분 → 10초)', async ({ page }) => {
@@ -57,21 +62,36 @@ test('도구 장마다 그 도구의 실무 적용 시간이 보인다 (2시간 
     const num = page.locator(`.slide[data-id="${id}"] .saving-num`);
     await expect(num.locator('span')).toHaveText(before);
     await expect(num.locator('b')).toHaveText(after);
-    await expect(num.locator('em')).toHaveText(`${rate} 감소`);
+    await expect(num.locator('em')).toHaveText(`${rate} 단축`);
   }
 });
 
-test('마지막 장은 도구별 현재 효과 · 한계 · 다음 단계 표다', async ({ page }) => {
+test('Selenium 장에 Playwright 대비 장단점 표가 있다', async ({ page }) => {
+  await page.goto('/');
+  await goTo(page, 'selenium');
+  const vs = page.locator('.slide[data-id="selenium"] .vs-tbl');
+  await expect(vs.locator('thead th')).toHaveText(['구분', 'Playwright', 'Selenium']);
+  await expect(vs.locator('tbody th')).toHaveText(['장점', '단점']);
+  await expect(vs.locator('tbody tr').nth(0).locator('td')).toHaveCount(2);
+});
+
+test('API 장에 테스트한 서버와 범위(조회만)가 적혀 있다', async ({ page }) => {
+  await page.goto('/');
+  await goTo(page, 'api');
+  const specs = page.locator('.slide[data-id="api"] .specs');
+  await expect(specs).toContainText('QASS 백엔드 (Supabase REST API)');
+  await expect(specs).toContainText('조회(GET) 2종, 총 1,000건, 읽기 전용');
+});
+
+test('마지막 장은 도구별 효과 · 한계 · 개선 방향 표다', async ({ page }) => {
   await page.goto('/');
   await goTo(page, 'plan');
   const table = page.locator('.slide[data-id="plan"] .plan-tbl');
-  await expect(table.locator('thead th')).toHaveText(['도구', '현재 효과', '한계', '다음 단계']);
-  await expect(table.locator('tbody th b')).toHaveText(['QASS', 'PRD2TC', '자동 검사', 'API']);
-  // 효과 칸 첫 줄의 수치는 카드의 실무 적용 시간에서 가져온다 — 카드와 어긋나면 안 된다
-  const metrics = table.locator('.plan-metric');
-  await expect(metrics.locator('span')).toHaveText(['2시간 → 1시간', '1시간 → 5분', '1분 → 10초']);
-  await expect(metrics.locator('em')).toHaveText(['50% 감소', '92% 감소', '83% 감소']);
-  await expect(metrics.nth(3)).toHaveText('요청 1,000번 · 성공률 100%');
+  await expect(table.locator('thead th')).toHaveText(['도구', '효과', '한계', '개선 방향']);
+  await expect(table.locator('tbody th b')).toHaveText(['QASS', 'PRD2TC', 'UI 자동화', 'API']);
+  // 효과 칸 수치는 카드의 실무 적용 시간 · 성공률에서 가져온다 — 카드와 어긋나면 안 된다
+  await expect(table.locator('.plan-metric b')).toHaveText(['50%', '92%', '83%', '100%']);
+  await expect(table.locator('.plan-sub')).toHaveText(['2시간 → 1시간', '1시간 → 5분', '1분 → 10초', '1,000건 중 실패 0건']);
 });
 
 test('레일을 누르면 그 장이 켜지고 주소가 바뀐다', async ({ page }) => {
@@ -125,7 +145,7 @@ test('열 때 화면이 밀리지 않는다 (CLS < 0.1)', async ({ page, browser
   expect(await page.evaluate(() => window.__cls)).toBeLessThan(0.1);
 });
 
-test('글자 대비가 기준(4.5:1)을 넘는다 — 첫 화면 · 도구 장 · 결과표 · 다크 모드', async ({ page }) => {
+test('글자 대비가 기준(4.5:1)을 넘는다 — 첫 화면 · 도구 장 · 비교표 · 결과표 · 다크 모드', async ({ page }) => {
   const check = async where => {
     // 장 전환·떠오르는 연출이 모두 끝난 뒤에 잰다 — 도중에 재면 반투명 글자를 재서 실패한다.
     // 정해 둔 시간만 기다리면 느린 기계(CI)에서 연출이 덜 끝나 들쭉날쭉했다.
@@ -139,6 +159,8 @@ test('글자 대비가 기준(4.5:1)을 넘는다 — 첫 화면 · 도구 장 �
   await check('첫 화면');
   await goTo(page, 'qass');
   await check('QASS');
+  await goTo(page, 'selenium');
+  await check('Selenium 비교표');
   await goTo(page, 'api');
   await expect(page.locator('.slide[data-id="api"] .perf')).toBeVisible();
   await check('API 결과표');

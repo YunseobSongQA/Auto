@@ -17,7 +17,7 @@ QA를 하며 마주치는 반복 업무를 도구로 만들어 자동화하고, 
 | Playwright | 같은 8단계 검사를 PC 크롬에서 자동 실행 (JavaScript) | 1분 → 10초 (83% 감소) | [코드](automation-portfolio/playwright) |
 | Selenium | 같은 검사를 Selenium으로 — Playwright와 비교 (Python) | 1분 → 10초 (83% 감소) | [코드](automation-portfolio/selenium) |
 | Appium | 같은 검사를 안드로이드 크롬에서 (Python) | 1분 → 10초 (83% 감소) | [코드](automation-portfolio/appium) |
-| API | 서버 속도·부하 측정 — 요청 1,000번 (Postman · Newman) | — | [코드](automation-portfolio/api) |
+| API | QASS 백엔드(Supabase REST) 부하 테스트 — 조회 요청 1,000건, 읽기 전용 (Postman · Newman) | — | [코드](automation-portfolio/api) |
 
 ## 폴더
 

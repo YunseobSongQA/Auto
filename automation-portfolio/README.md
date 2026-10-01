@@ -17,11 +17,11 @@ automation-portfolio/
   web/          # Vanilla JS 쇼케이스 (Cloudflare Pages 배포 대상 → https://auto-x2o.pages.dev/)
   showcase-tests/  # 쇼케이스 자동 테스트 (Playwright · 크롬·사파리·아이폰 · GitHub Actions)
   # PRD2TC (설계 도구)는 별도 배포 웹앱 → https://qaprd2tc.pages.dev/ (이 저장소에 코드 폴더 없음)
-  playwright/   # ✅ 레퍼런스 완전 구현 (JS/TS · 헤드리스 + video 녹화)
-  selenium/     # ✅ 동일 플로우 실제 실행 (Python · Xvfb/ffmpeg 녹화 selenium.webm)
-  api/          # ✅ Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
-  appium/       # ✅ 안드로이드 크롬 — Python · pytest (Android Studio 에뮬레이터 Pixel 8 에서 8/8 통과 · 실행은 PC)
-  CODE_GUIDE.md     # 📖 한 파일로 보는 코드 가이드 (흐름 + 주요 함수 10가지)
+  playwright/   # 레퍼런스 완전 구현 (JS/TS · 헤드리스 + video 녹화)
+  selenium/     # 동일 플로우 실제 실행 (Python · Xvfb/ffmpeg 녹화 selenium.webm)
+  api/          # Supabase REST 읽기 + Postman/Newman 부하·성능 테스트 (수치·그래프)
+  appium/       # 안드로이드 크롬 — Python · pytest (Android Studio 에뮬레이터 Pixel 8 에서 8/8 통과 · 실행은 PC)
+  CODE_GUIDE.md     # 한 파일로 보는 코드 가이드 (흐름 + 주요 함수 10가지)
   FLOW_CONTRACT.md  # 단일 진실 공급원: 공통 플로우 + 결과 계약
   README.md
 ```

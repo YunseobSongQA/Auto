@@ -1,4 +1,4 @@
-# 📖 코드 가이드 — 이 파일 하나만 보면 됩니다
+# 코드 가이드 — 이 파일 하나만 보면 됩니다
 
 > **GitHub에서 코드 내용을 확인하려는 분께:**
 > 폴더를 다 열어볼 필요 없이 **이 파일(`CODE_GUIDE.md`) 하나**만 보세요.
@@ -86,7 +86,7 @@ Appium 만 실기기(안드로이드)가 필요해 실행이 PC에 의존하므�
 > 각 함수: ① 어디에 있는지 ② 무슨 역할인지 ③ 왜 그렇게 짰는지 순서로 정리했습니다.
 
 ### ① `runFlow(page, opts)` — 핵심 플로우 실행기 (레퍼런스)
-📍 [`playwright/qass-flow.js`](./playwright/qass-flow.js)
+위치: [`playwright/qass-flow.js`](./playwright/qass-flow.js)
 
 8스텝을 순서대로 실행하고, 도구 공통 출력인 `FlowResult` 하나로 모아 반환합니다.
 **나머지 3개 도구는 이 구조를 그대로 복제**합니다 — 같은 스텝 id, 같은 반환 형태.
@@ -107,7 +107,7 @@ export async function runFlow(page, opts = {}) {
 ```
 
 ### ② `step(id, fn)` — 스텝 래퍼 (4개 도구 공통 패턴)
-📍 각 도구의 플로우 파일에 동일 구조로 존재 (Playwright/API 는 JS `step()`, Selenium/Appium 은 Python `step()` — 아래는 Playwright 레퍼런스)
+위치: 각 도구의 플로우 파일에 동일 구조로 존재 (Playwright/API 는 JS `step()`, Selenium/Appium 은 Python `step()` — 아래는 Playwright 레퍼런스)
 
 각 스텝의 **소요시간(ms) 측정 + 통과/실패 기록 + 실패 격리**를 한 곳에서 처리합니다.
 던지지(throw) 않고 결과만 수집하므로, 한 스텝이 실패해도 전체가 멈추지 않고
@@ -129,12 +129,12 @@ async function step(id, fn) {
 }
 ```
 
-> 💡 **왜 4번 복붙했나?** Playwright/API 는 JS(npm), Selenium/Appium 은 Python(pip) — 각각
+> **왜 4번 복붙했나?** Playwright/API 는 JS(npm), Selenium/Appium 은 Python(pip) — 각각
 > 독립 프로젝트라 코드를 공유할 수 없습니다. "세 번째에 추출" 원칙보다 **런타임 경계**가
 > 우선이라 의도적으로 복제했습니다.
 
 ### ③ `searchCaptures(captures, term)` — 순수 함수 (검색 로직 격리)
-📍 [`api/qass-api.js`](./api/qass-api.js)
+위치: [`api/qass-api.js`](./api/qass-api.js)
 
 UI의 `#search` 동작과 **똑같은 규칙**을 DOM·네트워크 없이 입출력만으로 구현했습니다.
 순수 함수라 단위 테스트가 쉽고([`qass-api.test.js`](./api/qass-api.test.js)), 화면을 갈아엎어도 이 함수는 안 건드립니다.
@@ -149,7 +149,7 @@ export function searchCaptures(captures, term) {
 ```
 
 ### ④ `restGet(pathAndQuery)` — 네트워크 계층
-📍 [`api/qass-api.js`](./api/qass-api.js)
+위치: [`api/qass-api.js`](./api/qass-api.js)
 
 Supabase REST 호출을 한 곳에 모았습니다. 인증 헤더를 붙이고, 200이 아니면 에러를 던집니다.
 "방 목록 읽기"·"캡처 읽기"는 이 함수를 재사용합니다 → 호출 방식이 한 군데로 통일됩니다.
@@ -163,7 +163,7 @@ async function restGet(pathAndQuery) {
 ```
 
 ### ⑤ `summarize(samples)` — 응답속도 통계 (p50/p95/p99)
-📍 [`api/qass-perf.js`](./api/qass-perf.js)
+위치: [`api/qass-perf.js`](./api/qass-perf.js)
 
 지연시간(ms) 배열을 받아 **백분위 통계**를 냅니다. p95 = "100번 중 95번이 이 시간 안에 응답".
 평균만 보면 느린 꼬리(tail)가 숨으므로, 현업에선 p95/p99 를 함께 봅니다.
@@ -178,7 +178,7 @@ export function summarize(samples) {
 ```
 
 ### ⑥ `apdex(samples, t)` — 체감 성능 점수 (산업 표준)
-📍 [`api/qass-perf.js`](./api/qass-perf.js)
+위치: [`api/qass-perf.js`](./api/qass-perf.js)
 
 Apdex = 사용자가 **체감하는** 빠름을 0~1로 나타내는 업계 표준 지표입니다.
 목표시간 T 이하는 "만족", 4T 이하는 "허용(0.5점)", 그 위는 "불만". → 단순 평균보다 직관적입니다.
@@ -193,7 +193,7 @@ export function apdex(samples, t) {
 ```
 
 ### ⑦ `evaluate(summary, slo)` — SLO 대비 PASS/FAIL 판정
-📍 [`api/qass-perf.js`](./api/qass-perf.js)
+위치: [`api/qass-perf.js`](./api/qass-perf.js)
 
 측정값을 **합격 기준(SLO)**과 비교해 항목별 통과/실패 + 종합 판정을 냅니다.
 무엇을 잴지는 **표준**(ISO/IEC 25010·25023·Apdex)을 따랐고, 합격선(목표 수치)은 서비스에 맞게 직접 정했습니다.
@@ -215,7 +215,7 @@ export function evaluate(summary, slo = SLO) {
 ```
 
 ### ⑧ `runVU(iterationCount)` — 가상 사용자 1명 (동시 부하 단위)
-📍 [`api/loadtest.js`](./api/loadtest.js)
+위치: [`api/loadtest.js`](./api/loadtest.js)
 
 Postman 컬렉션을 Newman으로 반복 실행하는 "가상 사용자 1명"입니다.
 이걸 `Promise.all` 로 N명 **동시 실행**하면 N 동시성 부하가 됩니다 (기본 10명 × 50회 = 1000건).
@@ -232,7 +232,7 @@ const runs = await Promise.all(Array.from({ length: vus }, () => runVU(iteration
 ```
 
 ### ⑨ `buildCard(card, no)` — 쇼케이스 카드 렌더 (순수 변환)
-📍 [`web/main.js`](./web/main.js)
+위치: [`web/main.js`](./web/main.js)
 
 `config.js`의 카드 데이터 하나를 받아 **HTML 문자열로만** 변환합니다(DOM 조작 없음).
 순수 변환과 부수효과(`render`)를 나눠, 데이터만 바꾸면 화면이 바뀌도록 했습니다.
@@ -253,7 +253,7 @@ function buildCard(card, no) {
 ```
 
 ### ⑩ `renderPerf(el, src)` — 부하 결과를 수치·그래프로
-📍 [`web/main.js`](./web/main.js)
+위치: [`web/main.js`](./web/main.js)
 
 API 부하 결과(`api-perf.json`)를 읽어 **PASS/FAIL 판정 + 핵심 수치 타일 + 응답속도 막대그래프**로
 그립니다 (영상이 아니라 데이터 시각화). "API로 뭘 했는지"가 화면에서 바로 보이게 하는 함수입니다.
@@ -282,7 +282,7 @@ function renderPerf(el, src) {
 | 실행 | 헤드리스 크롬 | Xvfb + ffmpeg 녹화 | 모바일 크롬(에뮬레이터, PC) | 브라우저 불필요 |
 | 산출 | `playwright.webm` | `selenium.webm` | `appium.webm`(에뮬레이터 녹화) | `api-perf.json`(수치·그래프) |
 
-> 💡 **Selenium 함정 사례:** QASS는 테스트 방 비밀번호를 미리 채워두는데, Selenium `send_keys()`는
+> **Selenium 함정 사례:** QASS는 테스트 방 비밀번호를 미리 채워두는데, Selenium `send_keys()`는
 > 기존 값에 **덧붙이기** 때문에 `clear()` 없이는 인증이 깨집니다. → [`selenium/qass_flow.py`](./selenium/qass_flow.py) `enter_room` 스텝 주석 참고.
 
 ---
