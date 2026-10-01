@@ -22,7 +22,8 @@
  *   - status:   'verified'(검증 완료) | 'pending'(PC에서 실행 예정)
  *   - statusLabel: (선택) status 기본 문구 대신 쓸 라벨. 색/아이콘은 status 를 따릅니다.
  *
- * 문구 원칙: 짧고 담백하게. desc 는 한 문장, specs 는 서너 줄. 수치는 숫자로 적고,
+ * 문구 원칙: 짧고 담백하게. desc 는 만든 계기(현장에서 겪은 문제 → 그래서 만든 것)를 두세 문장으로,
+ *   친근하되 공손한 합니다체로. specs 는 서너 줄. 수치는 숫자로 적고,
  *   어려운 용어 대신 쉬운 말을 쓰되 언어·도구 이름은 그대로 씁니다.
  *   가운뎃점(·)은 낱말을 나열할 때만 붙여 쓰고, 문장 구분에는 쓰지 않습니다.
  */
@@ -35,7 +36,10 @@ window.QASS_PORTFOLIO = {
       tool: 'QASS',
       short: '증적 수집 자동화',
       title: 'QA 증적 자동 수집 서비스',
-      desc: '탭을 옮길 때마다 전체 화면을 캡처해 팀 공유 방에 자동으로 모읍니다.',
+      desc: '2026년 7월, SI 프로젝트의 품질 관리를 맡으면서 근무 시간의 절반 이상이 증적에 쓰인다는 걸 알게 됐습니다. '
+        + '2~3시간씩 화면을 캡처하고, 놓친 곳을 다시 찾고, 한곳에 모아 정리해 보고하기까지 시간도 사람도 많이 들었죠. '
+        + '그래서 테스트만 하면 증적이 자동으로 모이는 서비스를 만들었습니다. '
+        + '앞으로는 PC뿐 아니라 모바일 캡처도 지원하고, PPT 보고서까지 만들어 주는 도구로 키워 갈 계획입니다.',
       saving: { before: '2시간', after: '1시간', what: '증적 수집·정리' },
       specs: [
         ['구성', '웹 서비스, 크롬 확장 프로그램'],
@@ -59,7 +63,8 @@ window.QASS_PORTFOLIO = {
       tool: 'Appium',
       short: '모바일 웹 자동 검사',
       title: 'QASS 모바일 웹 자동 검사',
-      desc: '웹 검사와 같은 8단계를 안드로이드 크롬에서 자동 실행해 모두 통과했습니다.',
+      desc: '운영 서버의 품질을 관리하다 보면 모바일에서도 같은 리그레션 테스트를 몇 번이고 반복하게 됩니다. '
+        + '매번 손으로 하던 이 반복을 Appium에 맡기려고 만들었습니다.',
       saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       specs: [
         ['언어', 'Python (pytest)'],
@@ -80,7 +85,9 @@ window.QASS_PORTFOLIO = {
       tool: 'PRD2TC',
       short: '기획서 기반 TC 생성',
       title: '기획서 기반 테스트케이스 자동 생성',
-      desc: '기획서를 넣으면 테스트케이스 초안을 표로 만들어 엑셀로 내보냅니다.',
+      desc: 'SI 프로젝트의 테스트 기간에는 기획서가 자주 바뀝니다. '
+        + '그때마다 내용을 따라가며 테스트케이스를 고치느라 적지 않은 시간이 들어, 이를 줄이려고 만들었습니다. '
+        + '수정된 기획서를 넣으면 TC 초안이 바로 나와 작성 시간을 크게 줄여 줍니다.',
       saving: { before: '1시간', after: '5분', what: '기획서 1건 TC 초안' },
       specs: [
         ['입력', '기획서 (pptx)'],
@@ -102,7 +109,8 @@ window.QASS_PORTFOLIO = {
       tool: 'Playwright',
       short: '웹 자동 검사 (기준 구현)',
       title: 'QASS 웹 자동 검사',
-      desc: '로그인부터 검색까지 QASS 핵심 흐름 8단계를 자동 실행하는 기준 구현입니다.',
+      desc: '운영 서버 리그레션 테스트를 PC에서 할 때마다 같은 확인을 손으로 반복해야 했습니다. '
+        + '이 반복을 줄이려고 로그인부터 검색까지 핵심 흐름 8단계를 자동으로 확인하도록 만들었습니다.',
       saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       specs: [
         ['언어', 'JavaScript'],
@@ -124,7 +132,8 @@ window.QASS_PORTFOLIO = {
       tool: 'Selenium',
       short: '웹 자동 검사 (비교 구현)',
       title: 'Selenium 구현과 Playwright 비교',
-      desc: '같은 8단계 검사를 Selenium으로 다시 구현해 두 도구의 차이를 비교했습니다.',
+      desc: 'Playwright와 같은 PC 리그레션 테스트를 Selenium으로도 만들었습니다. '
+        + '현장에서 많이 쓰는 두 도구를 같은 조건에서 직접 비교해 보고 싶었습니다.',
       saving: { before: '1분', after: '10초', what: '8단계 검사 1회' },
       specs: [
         ['언어', 'Python'],
@@ -155,7 +164,8 @@ window.QASS_PORTFOLIO = {
       tool: 'API',
       short: '백엔드 부하 테스트',
       title: 'QASS 백엔드 부하 테스트',
-      desc: 'QASS 실서비스 백엔드에 조회 요청 1,000건을 보내 응답 속도와 안정성을 측정했습니다.',
+      desc: '운영 서버 리그레션 테스트와, SI 프로젝트 중 병목이 생기는 구간의 부하 테스트에 언제든 대비하려고 만들었습니다. '
+        + 'QASS 실서비스 백엔드에 조회 요청 1,000건을 보내 속도와 안정성을 확인했습니다.',
       stat: { value: '100%', label: '성공률', sub: '1,000건 중 실패 0건' },
       specs: [
         ['대상', 'QASS 백엔드 (Supabase REST API)'],
@@ -180,7 +190,7 @@ window.QASS_PORTFOLIO = {
     title: '성과와 개선 방향',
     columns: ['효과', '한계', '개선 방향'],
     rows: [
-      { name: 'QASS', sub: '증적 수집', from: 'qass', limit: 'PC 크롬 전용', next: '모바일 캡처 지원' },
+      { name: 'QASS', sub: '증적 수집', from: 'qass', limit: 'PC 크롬 전용', next: '모바일 캡처, PPT 보고서 자동화' },
       { name: 'PRD2TC', sub: 'TC 설계', from: 'prd2tc', limit: '결과 검수 필요', next: '검수 피드백 반영' },
       { name: 'UI 자동화', sub: 'Playwright, Selenium, Appium', from: 'selenium', limit: '핵심 흐름 8단계만', next: 'GitHub Actions 정기 실행' },
       { name: 'API', sub: '부하 테스트', from: 'api', limit: '조회 API 2종만', next: '쓰기 API·부하 확대' },
