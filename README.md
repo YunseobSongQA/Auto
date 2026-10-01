@@ -2,7 +2,7 @@
 
 [![showcase](https://github.com/YunseobSongQA/Auto/actions/workflows/showcase.yml/badge.svg)](https://github.com/YunseobSongQA/Auto/actions/workflows/showcase.yml)
 
-**품질 관리 중 생기는 문제를 바로 도구로 만듭니다.**
+**직접 발견하고 해결한 QA 자동화 도구들을 소개합니다.**
 QA를 하며 마주치는 반복 업무를 도구로 만들어 자동화하고, 실무에 활용합니다.
 
 - 소개 사이트: **https://auto-x2o.pages.dev/**

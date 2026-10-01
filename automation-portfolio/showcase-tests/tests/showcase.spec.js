@@ -27,7 +27,7 @@ const playing = (page, id) => page.evaluate(id => {
 
 test('첫 화면에 제목·소개·경력이 보인다', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('h1')).toContainText('품질 관리 중 생기는 문제를');
+  await expect(page.locator('h1')).toHaveText(/^직접 발견하고 해결한\s*QA 자동화 도구들을 소개합니다$/);
   await expect(page.locator('.lede')).toContainText('실무에 활용합니다');
   // 마무리 문장은 소개(송윤섭) 아래에 한 번만 — 위 소개 문단에서 되풀이하지 않는다
   const motto = '반복은 줄이고, 아낀 시간은 목표한 품질에 투자합니다.';
