@@ -43,9 +43,9 @@
       </a>
       <nav class="site-nav">
         <a href="https://github.com/YunseobSongQA/Auto" target="_blank" rel="noopener">GitHub</a>
-        <button class="theme-toggle" type="button" aria-label="라이트/다크 모드 전환" aria-pressed="false">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
+        <!-- 테마 단추 — 상자 없이 반쯤 칠한 원 하나. 누르면 원이 반 바퀴 돌며 칠한 쪽이 바뀐다(styles.css). -->
+        <button class="theme-toggle" type="button" aria-label="라이트/다크 모드 전환" aria-pressed="false" title="다크 모드로 보기">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.75" fill="none" stroke="currentColor" stroke-width="1.4" /><path d="M10 3.25a6.75 6.75 0 0 0 0 13.5Z" fill="currentColor" /></svg>
         </button>
       </nav>
     </div>
@@ -82,9 +82,10 @@
               <p>반복은 줄이고, 아낀 시간은 목표한 품질에 투자합니다.</p>
             </div>
 
+            <!-- 둥근 테 안의 화살표가 천천히 아래로 빠져나갔다 다시 내려온다 — 아래로 넘겨 보라는 신호 -->
             <a class="slide-next rv" style="--i:3" href="#qass" data-next>
               도구 둘러보기
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" /></svg>
+              <span class="cue" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v12M7 13l5 5 5-5" /></svg></span>
             </a>
           </div>
 

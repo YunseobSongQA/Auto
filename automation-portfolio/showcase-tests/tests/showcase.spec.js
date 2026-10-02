@@ -41,6 +41,37 @@ test('첫 화면에 제목·소개·경력이 보인다', async ({ page }) => {
   await expect(career).toContainText('KB국민은행 여신 파트 QA');
 });
 
+// '도구 둘러보기' 화살표가 지금 끝없이 돌고 있는가 (첫 화면이 켜져 있을 때만 돈다)
+const cueLoops = page => page.locator('.slide-next .cue svg').evaluate(el =>
+  el.getAnimations().some(a => a.playState === 'running' && a.effect.getTiming().iterations === Infinity));
+
+test('첫 화면의 "도구 둘러보기"는 화살표가 천천히 움직여 아래로 넘기게 이끌고, 누르면 첫 도구 장으로 간다', async ({ page }) => {
+  await page.goto('/');
+  await expect.poll(() => cueLoops(page)).toBe(true);
+  await page.locator('.slide-next').click();
+  await expect(page.locator('.slide[data-id="qass"]')).toHaveClass(/is-on/);
+  // 첫 화면을 떠나면 멈춘다 — 안 보이는 곳에서 계속 돌지 않게
+  await expect.poll(() => cueLoops(page)).toBe(false);
+});
+
+test('테마 단추를 누르면 다크 ↔ 라이트로 바뀌고, 다시 열어도 고른 테마가 남는다', async ({ page }) => {
+  await page.goto('/');
+  const html = page.locator('html');
+  const btn = page.locator('.theme-toggle');
+  await expect(html).not.toHaveAttribute('data-theme', 'dark');
+  await expect(btn).toHaveAttribute('aria-pressed', 'false');
+  await btn.click();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
+  await expect(btn).toHaveAttribute('title', '라이트 모드로 보기');
+  await page.reload();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
+  await btn.click();
+  await expect(html).toHaveAttribute('data-theme', 'light');
+  await expect(btn).toHaveAttribute('title', '다크 모드로 보기');
+});
+
 test('넓은 화면 첫 화면 요약에 도구별 핵심 수치가 바로 보인다', async ({ page, isMobile }) => {
   test.skip(isMobile, '좁은 화면에서는 각 장에서 보여 준다');
   await page.goto('/');
@@ -66,13 +97,19 @@ test('도구 장마다 그 도구의 실무 적용 시간이 보인다 (2시간 
   }
 });
 
-test('Selenium 장에 Playwright 대비 장단점 표가 있다', async ({ page }) => {
+test('Selenium 장에 Playwright와 다른 점이 쉬운 말로 정리돼 있다 (속도 · 현장 · 강점 → 결론)', async ({ page }) => {
   await page.goto('/');
   await goTo(page, 'selenium');
-  const vs = page.locator('.slide[data-id="selenium"] .vs-tbl');
+  const box = page.locator('.slide[data-id="selenium"] .vs');
+  // 둘 다 PC 웹 자동화라는 것부터 짚는다
+  await expect(box.locator('.vs-lead')).toContainText('둘 다 PC');
+  const vs = box.locator('.vs-tbl');
   await expect(vs.locator('thead th')).toHaveText(['구분', 'Playwright', 'Selenium']);
-  await expect(vs.locator('tbody th')).toHaveText(['장점', '단점']);
-  await expect(vs.locator('tbody tr').nth(0).locator('td')).toHaveCount(2);
+  await expect(vs.locator('tbody th')).toHaveText(['속도', '현장', '강점']);
+  const row = name => vs.locator('tbody tr', { has: page.locator(`th:text-is("${name}")`) }).locator('td');
+  await expect(row('속도')).toHaveText(['빠름', '상대적으로 느림']);
+  await expect(row('현장').nth(1)).toContainText('레거시');
+  await expect(box.locator('.vs-note')).toHaveText(/^결론\s*둘 다 상황에 맞게 쓰는 게 중요합니다\.$/);
 });
 
 test('API 장에 테스트한 서버와 범위(조회만)가 적혀 있다', async ({ page }) => {
@@ -149,8 +186,10 @@ test('글자 대비가 기준(4.5:1)을 넘는다 — 첫 화면 · 도구 장 �
   const check = async where => {
     // 장 전환·떠오르는 연출이 모두 끝난 뒤에 잰다 — 도중에 재면 반투명 글자를 재서 실패한다.
     // 정해 둔 시간만 기다리면 느린 기계(CI)에서 연출이 덜 끝나 들쭉날쭉했다.
+    // 끝없이 도는 연출('도구 둘러보기' 화살표 — 글자 없는 장식)은 끝나지 않으므로 기다리지 않는다.
     await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-    await page.waitForFunction(() => document.getAnimations().every(a => a.playState !== 'running'));
+    await page.waitForFunction(() => document.getAnimations()
+      .every(a => a.playState !== 'running' || a.effect.getTiming().iterations === Infinity));
     const r = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
     const bad = r.violations.flatMap(v => v.nodes.map(n => `${where}: ${n.target.join(' ')}`));
     expect(bad).toEqual([]);
@@ -217,5 +256,7 @@ test.describe('동작 줄이기를 켠 사용자', () => {
     await page.goto('/');
     await expect(page.locator('html')).not.toHaveClass(/has-reel/);
     for (const id of SLIDES) await expect(page.locator(`.slide[data-id="${id}"]`)).toBeVisible();
+    // '도구 둘러보기' 화살표도 움직이지 않는다
+    expect(await cueLoops(page)).toBe(false);
   });
 });

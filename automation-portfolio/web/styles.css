@@ -7,7 +7,9 @@
    3. 자간은 역할로 나눈다 — 한글 제목은 좁히고(-0.03em), 라틴 대문자 약물은 넓힌다(+0.14em~).
    4. 고정폭 글꼴은 라틴·수치 전용. 한글을 태우면 대체 글꼴로 떨어져 자간이 뜬다.
    5. 스크롤 연출(릴)은 클래스 두 개로만 켠다 — html.has-reel(릴 모드), .slide.is-on(지금 장).
-      JS 가 없거나 동작 줄이기를 켠 사용자는 같은 마크업을 평범한 세로 문서로 본다. */
+      JS 가 없거나 동작 줄이기를 켠 사용자는 같은 마크업을 평범한 세로 문서로 본다.
+   6. 표와 수치 묶음은 상자(테두리·둥근 모서리·회색 머리줄) 대신 선으로 짓는다 — 맨 위 굵은 선(--rule),
+      줄 사이 가는 선(--border). 헤더의 메뉴·테마 단추도 상자 없이 글자·기호만 둔다. */
 
 :root {
   color-scheme: light;
@@ -16,6 +18,7 @@
   --surface-2: #f4f4f1;
   --border: #e6e5e0;
   --border-strong: #d3d1ca;
+  --rule: #17171a;       /* 표 맨 위 굵은 선 — 상자 대신 선 하나로 표의 시작을 알린다 */
   --text: #17171a;
   --muted: #5f5f66;
   --faint: #6f6f76;      /* 바탕·카드·회색 칸 어디서나 4.5:1 이상 — 작은 글자 대비 기준(WCAG AA) */
@@ -42,6 +45,7 @@
   --surface-2: #1a1a1d;
   --border: #262629;
   --border-strong: #3a3a40;
+  --rule: #b4b4bc;       /* 어두운 바탕의 흰 선은 더 굵어 보여 한 단계 낮춘다 */
   --text: #ededf0;
   --muted: #9a9aa2;
   --faint: #82828b;      /* 바탕·카드·회색 칸 어디서나 4.5:1 이상 */
@@ -80,7 +84,7 @@ a { color: inherit; }
 /* 라틴 약물과 수치만 고정폭으로 — 본문과 결이 다른 "데이터"라는 신호.
    한글을 고정폭에 태우면 대체 글꼴로 떨어져 자간이 뜬다("직 접  만 든"). 아래 한글
    라벨들은 본문 글꼴을 그대로 쓰고, 크기와 색으로만 본문과 구분한다. */
-.card-no, .bio-role, .pv-badge, .ptile b, .pchk-v, .pbar-k, .pbar-v, .ix-no {
+.card-no, .bio-role, .pv-badge, .pchk-v, .pbar-k, .pbar-v, .ix-no {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
 }
@@ -120,24 +124,30 @@ a { color: inherit; }
 .brand-word { font-weight: 420; color: var(--muted); margin-right: -.22em; transition: color .2s ease; }
 .brand:hover .brand-word { color: var(--text); }
 
-.site-nav { display: flex; align-items: center; gap: 4px; }
+/* 메뉴는 상자·배경 없이 글자만 — 올리면 진해지고 가는 밑줄이 붙는다 */
+.site-nav { display: flex; align-items: center; gap: 14px; }
 .site-nav > a {
-  font-size: 13.5px; font-weight: 550; color: var(--muted);
-  text-decoration: none; padding: 6px 10px; border-radius: var(--radius-sm);
+  padding: 8px 0; font-size: 13px; font-weight: 500; color: var(--muted);
+  text-decoration: none; text-underline-offset: 5px; text-decoration-thickness: 1px;
+  transition: color .2s ease;
 }
-.site-nav > a:hover { color: var(--text); background: var(--surface-2); }
+.site-nav > a:hover { color: var(--text); text-decoration-line: underline; }
+/* 테마 단추 — 테두리·배경 없이 반쯤 칠한 원(◐) 하나. 다크에서는 원이 반 바퀴 돌아 칠한 쪽이 바뀐다.
+   누를 자리는 34px 로 넉넉히 두고, 오른쪽 음수 여백으로 원의 끝을 본문 오른쪽 선에 맞춘다. */
 .theme-toggle {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; padding: 0; cursor: pointer;
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--surface); color: var(--muted);
+  display: inline-grid; place-items: center;
+  width: 34px; height: 34px; margin-right: -8px; padding: 0; cursor: pointer;
+  border: 0; border-radius: 999px; background: none; color: var(--muted);
+  transition: color .2s ease;
 }
-.theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
-.theme-toggle svg { width: 16px; height: 16px; }
-.theme-toggle .icon-sun { display: none; }
-.theme-toggle .icon-moon { display: inline; }
-[data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
-[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+.theme-toggle:hover { color: var(--text); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.theme-toggle svg { width: 17px; height: 17px; transition: transform .7s var(--ease); }
+[data-theme="dark"] .theme-toggle svg { transform: rotate(180deg); }
+/* 테마를 바꿀 때 화면 전체를 짧게 겹쳐 넘긴다 (main.js initTheme · View Transitions) */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: .45s; animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
 
 /* ── 위치 레일 ─────────────────────────────────────────────────────────── */
 /* 넓은 화면: 왼쪽에 눈금 + 지금 장 이름. 좁은 화면: 오른쪽 끝에 눈금만 (아래 반응형). */
@@ -234,23 +244,21 @@ main { overflow-x: clip; }
 .intro-title { font-size: clamp(25px, 7.6vw, 54px); letter-spacing: -.042em; line-height: 1.24; }
 @media (min-width: 1100px) { .intro-title { font-size: clamp(25px, 3.6vw, 50px); } }
 
-.intro-index {
-  padding: 16px 20px 8px; border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--surface);
-}
+/* 상자 없이 선만 — 맨 위 굵은 선(--rule) 아래 '요약', 줄 사이는 가는 선, 맨 아래 한 번 더 선. */
+.intro-index { border-block: 1px solid var(--rule); border-bottom-color: var(--border-strong); }
 .ix-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  margin: 0 0 4px; font-size: 12.5px; font-weight: 650; color: var(--text);
+  margin: 0; padding: 12px 0 9px; font-size: 12px; font-weight: 600; color: var(--muted);
 }
 .ix-head span { font-size: 11.5px; font-weight: 500; color: var(--faint); }
 .intro-index ol { list-style: none; margin: 0; padding: 0; }
-.intro-index li + li { border-top: 1px solid var(--border); }
+.intro-index li { border-top: 1px solid var(--border); }
 /* 한 줄: 번호 · 도구 이름 · 수치 / 아랫줄: 한 줄 소개.
    위아래 여백은 1100px 폭에서도 왼쪽 소개보다 30px 가까이 짧게 남도록 잡았다(위 CLS 주석). */
 .intro-index a {
-  display: grid; grid-template-columns: 24px minmax(0, 1fr) auto;
+  display: grid; grid-template-columns: 26px minmax(0, 1fr) auto;
   grid-template-areas: "no tool metric" "no short short";
-  column-gap: 8px; padding: 7px 2px; text-decoration: none; color: var(--text);
+  column-gap: 8px; padding: 8px 0; text-decoration: none; color: var(--text);
 }
 .ix-no { grid-area: no; font-size: 11px; color: var(--faint); line-height: 1.9; }
 .ix-tool { grid-area: tool; font-size: 12px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; }
@@ -277,13 +285,35 @@ main { overflow-x: clip; }
 .bio-career dt { flex: none; width: 2.4em; font-size: 12.5px; font-weight: 600; color: var(--faint); }
 .bio-career dd { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--text); }
 
+/* '도구 둘러보기' — 글자 옆 작은 둥근 테(.cue) 안에서 화살표가 천천히 아래로 빠져나갔다가 위에서 다시
+   내려와 멈춘다. 아래로 넘겨 보라는 신호를 크지 않게 준다. 첫 화면이 켜져 있는 동안만, 떠오르는 연출이
+   끝난 뒤부터 돈다. 릴이 꺼진 문서(동작 줄이기 등)에서는 멈춘 화살표만 보인다.
+   위아래 안쪽 여백(8px)은 누를 자리를 넓히려는 것 — 바깥 여백으로 되돌려 자리는 그대로 둔다. */
 .slide-next {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 44px;
-  font-size: 13px; font-weight: 550; color: var(--faint); text-decoration: none;
-  transition: color .2s ease;
+  display: inline-flex; align-items: center; gap: 12px;
+  margin: 36px 0 -8px; padding-block: 8px;
+  font-size: 13px; font-weight: 550; color: var(--muted); text-decoration: none;
+  transition: color .25s ease;
 }
+.slide-next .cue {
+  display: inline-grid; place-items: center; flex: none;
+  width: 28px; height: 28px; border-radius: 999px; overflow: hidden;
+  border: 1px solid var(--border-strong); color: var(--text);
+  transition: background-color .3s ease, border-color .3s ease, color .3s ease;
+}
+.slide-next .cue svg { width: 14px; height: 14px; }
 .slide-next:hover { color: var(--text); }
-.slide-next svg { width: 16px; height: 16px; }
+.slide-next:hover .cue { background: var(--text); border-color: var(--text); color: var(--bg); }
+.slide-next:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+@keyframes cue {
+  0%, 18% { transform: translateY(0); opacity: 1; }
+  42% { transform: translateY(15px); opacity: 0; }
+  43% { transform: translateY(-15px); opacity: 0; }
+  68%, 100% { transform: translateY(0); opacity: 1; }
+}
+.has-reel .slide--intro.is-on .slide-next .cue svg {
+  animation: cue 2.8s cubic-bezier(.65, 0, .35, 1) 1.4s infinite;
+}
 
 /* ── 도구 슬라이드 (카드) ──────────────────────────────────────────────── */
 /* 좁은 화면: 한 줄로 — 머리 · 제목 · 설명 · 데모 · 포인트 · 제언 · 푸터.
@@ -333,32 +363,38 @@ main { overflow-x: clip; }
 /* ── 제언 장 (도구별 효과 · 한계 · 개선 방향) ──────────────────────────── */
 .plan { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; }
 .slide--plan .tool { letter-spacing: .06em; } /* 한글 이름은 자간을 덜 벌린다 ("제 언" 방지) */
+/* 표는 상자·회색 머리줄 없이 선으로만 짓는다 — 맨 위 굵은 선(--rule), 머리줄 아래와 줄 사이는 가는 선,
+   맨 아래는 한 단계 진한 선. 첫 칸은 왼쪽 여백 없이 제목과 같은 세로선에서 시작한다. */
 .plan-box {
-  margin-top: 24px; overflow: hidden;
-  border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+  margin-top: 28px;
   container-type: inline-size; /* 아래 @container 가 화면 폭이 아니라 이 상자 폭으로 표 배치를 고른다 */
 }
-.plan-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13.5px; line-height: 1.6; }
+.plan-tbl {
+  width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13.5px; line-height: 1.6;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--border-strong);
+}
 .plan-tbl th, .plan-tbl td {
-  padding: 14px 16px; text-align: left; vertical-align: top; border-top: 1px solid var(--border);
+  padding: 18px 24px 18px 0; text-align: left; vertical-align: top; border-top: 1px solid var(--border);
   word-break: keep-all; overflow-wrap: break-word; /* 한글 단어 중간에서 줄을 바꾸지 않는다 */
 }
+.plan-tbl tr > :last-child { padding-right: 0; }
 .plan-tbl thead th {
-  padding-block: 10px; border-top: 0; background: var(--surface-2);
-  font-size: 12px; font-weight: 650; color: var(--text);
+  padding-block: 12px 10px; border-top: 0;
+  font-size: 12px; font-weight: 600; color: var(--muted);
 }
-.plan-tbl thead th:first-child { width: 20%; } /* 1100px 이상에서 "Playwright, Selenium, Appium"이 한 줄에 들어가는 폭 */
+.plan-tbl thead th:first-child { width: 21%; } /* 1100px 이상에서 "Playwright, Selenium, Appium"이 한 줄에 들어가는 폭 */
 .plan-tbl tbody th b {
   display: block; font-size: 12.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase;
   color: var(--text);
 }
-.plan-tbl tbody th span { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 400; color: var(--muted); }
+.plan-tbl tbody th span { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 400; color: var(--muted); }
 .plan-tbl td { color: var(--text); }
 .plan-tbl td p { margin: 0; }
-.plan-metric { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.plan-metric b { font-size: 17px; font-weight: 750; letter-spacing: -.01em; color: var(--text); }
-.plan-sub { margin-top: 1px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.plan-note { margin: 10px 0 0; font-size: 12px; color: var(--faint); }
+/* 효과 칸 — 수치는 크게, 단위·설명은 작게. 숫자 폭을 맞춰(tabular) 줄마다 자리가 흔들리지 않게 */
+.plan-metric { font-size: 12.5px; line-height: 1.3; color: var(--muted); font-variant-numeric: tabular-nums; }
+.plan-metric b { margin-right: 2px; font-size: 22px; font-weight: 650; letter-spacing: -.025em; color: var(--text); }
+.plan-sub { margin-top: 5px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.plan-note { margin: 12px 0 0; font-size: 12px; color: var(--faint); }
 /* 상자가 760px 보다 좁으면(휴대폰 · 세로 태블릿) 네 칸을 옆으로 늘어놓지 않고 도구별 묶음으로 쌓는다 —
    도구 이름 아래에 칸 이름(효과 등)을 왼쪽에 두고 내용을 오른쪽에. 표의 display 를 바꾸면
    사파리가 표로 읽지 않아 main.js 가 role 을 붙여 둔다. */
@@ -366,18 +402,23 @@ main { overflow-x: clip; }
   .plan-tbl, .plan-tbl tbody, .plan-tbl tr, .plan-tbl th, .plan-tbl td { display: block; }
   .plan-tbl thead { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .plan-tbl thead th { padding: 0; white-space: nowrap; } /* 스크린리더만 읽는 머리글 — .sr 과 같은 처리 */
-  .plan-tbl tbody tr { padding: 14px 16px 16px; }
+  .plan-tbl tbody tr { padding: 16px 0 18px; }
   .plan-tbl tbody tr + tr { border-top: 1px solid var(--border); }
   .plan-tbl tbody th, .plan-tbl td { padding: 0; border: 0; }
-  .plan-tbl tbody th { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-bottom: 8px; }
+  .plan-tbl tbody th { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-bottom: 10px; }
   .plan-tbl tbody th span { margin-top: 0; }
-  .plan-tbl td { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); column-gap: 10px; font-size: 13px; }
-  .plan-tbl td + td { margin-top: 6px; }
+  /* 칸 이름은 첫 줄(grid-row 1)에만 두고 내용 첫 줄과 글자 밑선(baseline)을 맞춘다 — 큰 수치 옆에서도 */
+  .plan-tbl td {
+    display: grid; grid-template-columns: 4.6em minmax(0, 1fr); column-gap: 10px; align-items: baseline;
+    font-size: 13px;
+  }
+  .plan-tbl td + td { margin-top: 7px; }
   .plan-tbl td::before {
-    content: attr(data-label); grid-column: 1; grid-row: 1 / span 3;
+    content: attr(data-label); grid-column: 1; grid-row: 1;
     font-size: 12px; line-height: 1.75; color: var(--faint);
   }
   .plan-tbl td > * { grid-column: 2; }
+  .plan-metric b { font-size: 19px; }
 }
 
 /* 화면에는 안 보이고 스크린리더만 읽는 글 */
@@ -418,18 +459,36 @@ main { overflow-x: clip; }
 .specs dt { font-size: 12.5px; color: var(--faint); }
 .specs dd { margin: 0; color: var(--text); }
 
-/* 비교표 — Selenium 장의 Playwright 대비 장단점(열 = 도구, 행 = 장점·단점). 상자 없이 가는 줄만.
-   첫 열은 위 사양 목록의 이름 칸(3.2em + 12px)과 폭을 맞춰 세로줄이 이어지게 한다. */
-.vs-title { margin: 0 0 6px; font-size: 12.5px; font-weight: 650; color: var(--text); }
-.vs-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; line-height: 1.55; }
+/* 비교표 — Selenium 장의 Playwright 와 다른 점(열 = 도구, 행 = 속도 · 현장 · 강점). 상자 없이 선만:
+   맨 위 굵은 선, 줄 사이 가는 선, 맨 아래 결론 줄 위에 한 단계 진한 선.
+   첫 열은 위 사양 목록의 이름 칸(3.2em + 12px)과 폭을 맞춰 세로줄이 이어지게 한다 — 결론 줄의 이름도 같은 선. */
+/* 머리 — 제목(굵게)과 한 줄 설명(옅게)을 한 줄에. 폭이 모자라면 설명이 아래 줄로 내려간다 */
+.vs-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
+.vs-title { margin: 0; font-size: 12.5px; font-weight: 650; color: var(--text); }
+.vs-lead { margin: 0; font-size: 12.5px; color: var(--muted); }
+.vs-tbl {
+  width: 100%; margin-top: 9px; border-collapse: collapse; table-layout: fixed;
+  font-size: 13px; line-height: 1.55; border-top: 1px solid var(--rule);
+}
 .vs-tbl th, .vs-tbl td {
   padding: 7px 12px 7px 0; text-align: left; vertical-align: top; border-top: 1px solid var(--border);
   word-break: keep-all; overflow-wrap: break-word;
 }
-.vs-tbl thead th { padding-top: 0; border-top: 0; font-size: 12.5px; font-weight: 650; color: var(--text); }
+/* 머리줄은 도구 이름 — 장 머리의 도구 라벨(.tool)과 같은 라틴 대문자 · 넓은 자간 */
+.vs-tbl thead th {
+  padding-block: 9px 7px; border-top: 0;
+  font-size: 11px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; color: var(--text);
+}
 .vs-tbl thead th:first-child { width: calc(3.2 * 13px + 12px); } /* = 사양 이름 칸 3.2em(13px 기준) + 사이 12px */
 .vs-tbl tbody th { font-size: 12.5px; font-weight: 400; color: var(--faint); }
-.vs-tbl td { color: var(--muted); }
+.vs-tbl td { color: var(--text); }
+.vs-note {
+  display: grid; grid-template-columns: calc(3.2 * 13px) minmax(0, 1fr); column-gap: 12px;
+  margin: 0; padding-top: 9px; border-top: 1px solid var(--border-strong);
+  font-size: 13px; line-height: 1.55;
+}
+.vs-note b { font-size: 12.5px; font-weight: 400; color: var(--faint); }
+.vs-note span { font-weight: 600; color: var(--text); }
 
 /* 카드 푸터 */
 .card-foot {
@@ -447,30 +506,29 @@ main { overflow-x: clip; }
 .repo:hover { text-decoration: underline; }
 
 /* ── 성능 리포트 (API 카드 · 영상 아님) ────────────────────────────────── */
+/* 판정 · 핵심 수치도 상자 대신 선으로 — 판정 줄 아래 가는 선, 수치 넷은 세로 가는 선으로만 나눈다 */
 .demo.is-perf { aspect-ratio: auto; display: block; background: var(--surface); }
-.perf { padding: 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.perf { padding: 20px 22px 18px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .pverdict {
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
-  padding: 11px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding-bottom: 14px; border-bottom: 1px solid var(--border);
 }
-.pverdict.is-pass { border-color: color-mix(in srgb, var(--good) 40%, var(--border)); }
-.pverdict.is-fail { border-color: color-mix(in srgb, var(--bad) 40%, var(--border)); }
-.pv-badge { font-size: 12px; font-weight: 700; letter-spacing: .1em; }
-.is-pass .pv-badge { color: var(--good); }
+/* 판정 앞 작은 점 — 통과는 초록, 실패는 빨강 (글자색을 따른다) */
+.pv-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; }
+.pv-badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+.is-pass .pv-badge { color: var(--good-ink); }
 .is-fail .pv-badge { color: var(--bad); }
-.pv-sub { font-size: 11.5px; color: var(--faint); }
+.pv-sub { font-size: 12px; color: var(--muted); }
 
-.ptiles {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-  background: var(--border); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); overflow: hidden;
-}
-.ptile { background: var(--surface); padding: 11px 12px; min-width: 0; }
+.ptiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 16px; }
+.ptile { padding: 1px 14px; border-left: 1px solid var(--border); min-width: 0; }
+.ptile:first-child { padding-left: 0; border-left: 0; }
+/* 큰 수치는 비례 숫자로 — 고정폭 숫자(tabular)는 '1'의 좌우가 비어 큰 글자에서 "17 1ms"처럼 벌어진다 */
 .ptile b {
-  display: block; font-size: 16px; font-weight: 600; letter-spacing: -.02em;
-  font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.3; overflow-wrap: anywhere;
+  display: block; font-size: 21px; font-weight: 650; letter-spacing: -.025em;
+  color: var(--text); line-height: 1.2; overflow-wrap: anywhere;
 }
-.ptile span { display: block; margin-top: 3px; font-size: 11px; color: var(--faint); }
+.ptile span { display: block; margin-top: 5px; font-size: 11.5px; color: var(--faint); }
 
 .pblock-h { font-size: 11px; color: var(--faint); margin-bottom: 8px; }
 /* 합격 기준은 접어 둔다 — PASS 판정과 핵심 수치가 먼저 읽히도록 */
@@ -493,8 +551,8 @@ main { overflow-x: clip; }
 
 .pbar { display: flex; align-items: center; gap: 10px; font-size: 11px; margin: 5px 0; }
 .pbar-k { width: 28px; color: var(--faint); }
-.pbar-track { flex: 1; height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; min-width: 0; }
-.pbar-fill { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.pbar-track { flex: 1; height: 4px; background: var(--surface-2); border-radius: 999px; overflow: hidden; min-width: 0; }
+.pbar-fill { display: block; height: 100%; border-radius: 999px; background: var(--text); }
 .pbar-v { width: 52px; text-align: right; color: var(--text); }
 
 /* ── 푸터 ──────────────────────────────────────────────────────────────── */
@@ -548,12 +606,13 @@ main { overflow-x: clip; }
   .has-reel .slide-inner { padding-block: 24px 76px; padding-right: 40px; }
   .lede { margin-top: 22px; }
   .bio { margin-top: 32px; }
-  .slide-next { margin-top: 30px; }
+  .slide-next { margin-top: 22px; }
   .card h2, .plan h2 { margin-top: 12px; font-size: 22px; }
   .saving-num b { font-size: 26px; }
   .desc { font-size: 14.5px; }
   .card > .demo { margin-top: 22px; }
-  .ptiles { grid-template-columns: repeat(2, 1fr); }
+  .ptiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ptile:nth-child(odd) { padding-left: 0; border-left: 0; } /* 두 칸씩 놓이면 줄마다 첫 칸은 선 없이 */
   .site-footer-inner { flex-direction: column; align-items: flex-start; gap: 10px; }
 }
 
@@ -563,4 +622,6 @@ main { overflow-x: clip; }
     animation-duration: .001ms !important; animation-delay: 0s !important;
     transition-duration: .001ms !important;
   }
+  /* 끝없이 도는 화살표는 길이만 줄이면 아주 빠르게 깜빡이므로 아예 멈춘다 */
+  .slide-next .cue svg { animation: none !important; }
 }

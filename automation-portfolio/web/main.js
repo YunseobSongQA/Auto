@@ -53,17 +53,20 @@
           <dl class="specs rv" style="--i:${i}">${rows}</dl>`;
   }
 
-  // 비교표 — 열은 도구, 행은 장점·단점. 첫 열(구분)은 위 사양 목록의 이름 칸과 폭을 맞춘다.
+  // 비교표 — 열은 도구, 행은 비교 항목(속도 · 현장 등). 첫 열(구분)은 위 사양 목록의 이름 칸과 폭을 맞춘다.
+  // lead 는 제목 옆 한 줄(좁으면 아래로), note([이름, 내용])는 표 아래 결론 한 줄 — 이름이 첫 열과 같은 세로선에 선다.
   function buildVs(vs, i) {
     if (!vs) return '';
     const head = `<tr><th scope="col"><span class="sr">구분</span></th>` +
       vs.head.map(h => `<th scope="col">${esc(h)}</th>`).join('') + '</tr>';
     const body = vs.rows.map(([name, ...cells]) =>
       `<tr><th scope="row">${esc(name)}</th>${cells.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+    const lead = vs.lead ? `<p class="vs-lead">${esc(vs.lead)}</p>` : '';
+    const note = vs.note ? `<p class="vs-note"><b>${esc(vs.note[0])}</b><span>${esc(vs.note[1])}</span></p>` : '';
     return `
           <div class="vs rv" style="--i:${i}">
-            <p class="vs-title">${esc(vs.title)}</p>
-            <table class="vs-tbl"><thead>${head}</thead><tbody>${body}</tbody></table>
+            <div class="vs-head"><p class="vs-title">${esc(vs.title)}</p>${lead}</div>
+            <table class="vs-tbl"><thead>${head}</thead><tbody>${body}</tbody></table>${note}
           </div>`;
   }
 
@@ -621,18 +624,29 @@
     }
   }
 
-  // 라이트/다크 테마 토글 (QASS 방식: data-theme + localStorage, 기본 라이트)
+  // 라이트/다크 테마 토글 (QASS 방식: data-theme + localStorage, 기본 라이트).
+  // 바꾸는 순간 화면 전체를 짧게 겹쳐 넘긴다(View Transitions) — 색이 한 번에 툭 바뀌지 않게.
+  // 지원하지 않는 브라우저나 동작 줄이기를 켠 사용자는 그대로 바로 바뀐다.
   function initTheme() {
     const KEY = 'portfolio-theme';
     const root = document.documentElement;
     const btn = document.querySelector('.theme-toggle');
     if (!btn) return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const cur = () => (root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-    btn.setAttribute('aria-pressed', cur() === 'dark' ? 'true' : 'false');
+    // 단추에는 지금 상태(aria-pressed)와, 누르면 무엇이 되는지(title)를 적어 둔다
+    const mark = t => {
+      btn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+      btn.title = t === 'dark' ? '라이트 모드로 보기' : '다크 모드로 보기';
+    };
+    mark(cur());
+    // 고른 테마는 여기서 바로 바꿔 둔다 — 겹쳐 넘기는 동안(화면 반영 전) 한 번 더 눌러도 거꾸로 잘 돌아가게
+    let theme = cur();
     btn.addEventListener('click', () => {
-      const next = cur() === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+      const next = theme = theme === 'dark' ? 'light' : 'dark';
+      const apply = () => { root.setAttribute('data-theme', next); mark(next); };
+      if (document.startViewTransition && !motion.matches) document.startViewTransition(apply);
+      else apply();
       try { localStorage.setItem(KEY, next); } catch (e) { /* 무시 */ }
     });
   }

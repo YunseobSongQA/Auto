@@ -13,7 +13,8 @@
  *               숫자+단위(시간·분·초)로 적습니다. 단축률(%)은 main.js 가 초로 바꿔 계산합니다.
  *   - stat:     (선택) saving 대신 보일 핵심 수치 { value, label, sub } — 예: 성공률 100%.
  *   - specs:    [이름, 내용] 줄 목록 — 언어 · 환경 · 대상처럼 사실만 짧게.
- *   - vs:       (선택) 비교표 { title, head: [도구…], rows: [[구분, 값…]…] } — 열이 도구, 행이 장점·단점.
+ *   - vs:       (선택) 비교표 { title, lead, head: [도구…], rows: [[구분, 값…]…], note: [이름, 내용] }
+ *               — 열이 도구, 행이 비교 항목. lead(제목 옆 한 줄)와 note(표 아래 결론 한 줄)는 없어도 됩니다.
  *   - demoType: 'video' | 'perf' | 'pending'  ← main.js 가 이 값으로 렌더를 분기 (딱 3분기)
  *   - demo:     산출물 경로(상대). 'pending' 이면 null.
  *   - demoLabel: 영상·결과가 아직 없을 때 데모 자리에 보일 안내.
@@ -76,7 +77,7 @@ window.QASS_PORTFOLIO = {
       demoType: 'video',
       poster: 'assets/appium-poster.webp',
       demoLabel: '실행 녹화, Android Studio 에뮬레이터 (Pixel 8)',
-      badge: '모바일 자동화',
+      badge: '모바일 웹 자동화',
       status: 'verified',
     },
     // QA 흐름의 앞단(설계) 도구.
@@ -122,10 +123,11 @@ window.QASS_PORTFOLIO = {
       demoType: 'video',
       poster: 'assets/playwright-poster.webp',
       demoLabel: '실행 녹화',
-      badge: '웹 자동화',
+      badge: 'PC 웹 자동화',
       status: 'verified',
     },
-    // Selenium — Playwright 와 같은 8단계를 다시 짜 본 비교 구현. 장단점은 vs 표에 아주 짧게.
+    // Selenium — Playwright 와 같은 8단계를 다시 짜 본 비교 구현. 둘 다 PC 웹 자동화라 "무엇이 다른지"를
+    // vs 표에 쉬운 말로만 적는다 (속도 · 현장 · 강점 → 결론). 자세한 코드 차이는 selenium/README.md.
     // 코드 줄 수는 흐름 구현 파일에서 빈 줄·주석을 뺀 값 (playwright/qass-flow.js · selenium/qass_flow.py).
     {
       id: 'selenium',
@@ -142,18 +144,21 @@ window.QASS_PORTFOLIO = {
       ],
       vs: {
         title: 'Playwright와 비교',
+        lead: '둘 다 PC 웹 자동화 도구입니다.',
         head: ['Playwright', 'Selenium'],
         rows: [
-          ['장점', '자동 대기·녹화 내장, 88줄', 'W3C 표준, 언어와 브라우저 폭넓음'],
-          ['단점', '모바일은 에뮬레이션 중심', '대기·입력 직접 처리, 98줄'],
+          ['속도', '빠름', '상대적으로 느림'],
+          ['현장', '새 프로젝트에 많음', '레거시 프로젝트에 많음'],
+          ['강점', '자동 대기·녹화 기본 제공', '업계 표준, 언어·브라우저 폭넓음'],
         ],
+        note: ['결론', '둘 다 상황에 맞게 쓰는 게 중요합니다.'],
       },
       repo: 'https://github.com/YunseobSongQA/Auto/tree/main/automation-portfolio/selenium',
       demo: 'assets/selenium.webm',
       demoType: 'video',
       poster: 'assets/selenium-poster.webp',
       demoLabel: '실행 녹화',
-      badge: '웹 자동화',
+      badge: 'PC 웹 자동화',
       status: 'verified',
     },
     // API — QASS 실서비스 백엔드(Supabase REST, snjexfohyklviarxprvm.supabase.co)에 QASS 웹과 같은 공개
