@@ -70,6 +70,12 @@
           </div>`;
   }
 
+  // 소개글 — 배열이면 항목마다 한 문단(줄 바꿈), 문자열이면 그대로 한 문단.
+  function descHtml(desc) {
+    const paras = Array.isArray(desc) ? desc : [desc || ''];
+    return paras.map((t) => `<span class="desc-p">${esc(t)}</span>`).join('');
+  }
+
   // 카드 한 장이 릴의 슬라이드 한 장이 됩니다. no 는 화면에 붙는 순번(1부터).
   // rv 는 슬라이드가 켜질 때 차례로 떠오르는 요소, --i 는 그 순서(지연)입니다.
   function buildCard(card, no) {
@@ -88,7 +94,7 @@
           </div>
           <h2 class="rv" style="--i:1">${esc(card.title)}</h2>
           ${buildKpi(card, 2)}
-          <p class="desc rv" style="--i:3">${esc(card.desc)}</p>
+          <p class="desc rv" style="--i:3">${descHtml(card.desc)}</p>
 
           <!-- 데모는 차례 연출(rv)에서 뺀다 — 장이 켜지는 순간 영상이 바로 보이도록 -->
           <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">
@@ -99,6 +105,7 @@
           <div class="card-foot rv" style="--i:6">
             <span class="status ${statusClass}">${icoMark(card.status === 'verified')}${statusText}</span>
             <a class="repo" href="${esc(card.repo)}" target="_blank" rel="noopener">${esc(repoLabel)}</a>
+            ${card.repo2 ? `<a class="repo" href="${esc(card.repo2)}" target="_blank" rel="noopener">${esc(card.repo2Label || 'GitHub에서 코드 보기 ↗')}</a>` : ''}
           </div>
         </article>
       </section>`;

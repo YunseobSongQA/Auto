@@ -325,6 +325,8 @@ main { overflow-x: clip; }
 .chip { margin-left: auto; font-size: 12px; color: var(--faint); white-space: nowrap; }
 .card h2, .plan h2 { margin-top: 14px; font-size: clamp(23px, 2.4vw, 32px); letter-spacing: -.035em; line-height: 1.3; }
 .desc { margin: 14px 0 0; max-width: 38em; font-size: 15px; line-height: 1.8; color: var(--muted); text-wrap: pretty; } /* 마지막 줄에 한 낱말만 남지 않게 */
+.desc-p { display: block; }
+.desc-p + .desc-p { margin-top: 0.6em; } /* 문단 사이를 살짝 띄워 뜻 단위로 읽히게 */
 .card > .demo { margin-top: 26px; }
 .card > .specs { margin-top: 20px; }
 .card > .vs { margin-top: 18px; }
@@ -504,6 +506,7 @@ main { overflow-x: clip; }
   font-size: 13px; font-weight: 550; white-space: nowrap; text-underline-offset: 3px;
 }
 .repo:hover { text-decoration: underline; }
+.repo + .repo { margin-left: 0; }
 
 /* ── 성능 리포트 (API 카드 · 영상 아님) ────────────────────────────────── */
 /* 판정 · 핵심 수치도 상자 대신 선으로 — 판정 줄 아래 가는 선, 수치 넷은 세로 가는 선으로만 나눈다 */

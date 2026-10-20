@@ -12,7 +12,7 @@ QA를 하며 마주치는 반복 업무를 도구로 만들어 자동화하고, 
 
 | 도구 | 하는 일 | 실무 적용 시간 | 바로 가기 |
 |---|---|---|---|
-| QASS | 테스트 증적을 자동으로 모아 팀과 공유 | 2시간 → 1시간 (50% 감소) | [서비스](https://qass1.pages.dev/) |
+| QASS | 테스트 증적을 자동으로 모아 팀과 공유 (PC 크롬 + 안드로이드 앱) | 2시간 → 1시간 (50% 감소) | [서비스](https://qass1.pages.dev/) · [안드로이드 앱](https://github.com/YunseobSongQA/QA-Mobile-Auto-Capture) (설치·실행 방법은 해당 GitHub에 안내) |
 | PRD2TC | 기획서(pptx)로 테스트케이스 초안(xlsx) 만들기 | 1시간 → 5분 (92% 감소) | [도구](https://qaprd2tc.pages.dev/) |
 | Playwright | 같은 8단계 검사를 PC 크롬에서 자동 실행 (JavaScript) | 1분 → 10초 (83% 감소) | [코드](automation-portfolio/playwright) |
 | Selenium | 같은 검사를 Selenium으로 — Playwright와 비교 (Python) | 1분 → 10초 (83% 감소) | [코드](automation-portfolio/selenium) |
