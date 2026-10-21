@@ -74,11 +74,23 @@
   function dotList(items) {
     return `<ul class="dot-list">${items.map((li) => `<li>${esc(li)}</li>`).join('')}</ul>`;
   }
+  // 흐름 칸 — 단계를 둥근 칸으로 그리고 사이를 화살표로 잇는다. 칸의 작은 숫자는 실제 단계 번호.
+  function flowHtml({ label, steps }) {
+    const items = steps.map(([name, no]) =>
+      `<li><span class="flow-step">${no ? `<small>${esc(no)}</small>` : ''}${esc(name)}</span></li>`).join('');
+    return `<div class="flow">${label ? `<p class="flow-label">${esc(label)}</p>` : ''}` +
+      `<ol aria-label="${esc(label || '흐름')}">${items}</ol></div>`;
+  }
   // 소개글 — 배열이면 항목마다 한 문단(줄 바꿈), 문자열이면 그대로 한 문단.
-  // 항목이 다시 배열이면 점 목록이 된다.
+  // 항목이 배열이면 점 목록, { key } 는 진하게 보일 핵심 문장, { flow } 는 흐름 칸.
   function descHtml(desc) {
     const paras = Array.isArray(desc) ? desc : [desc || ''];
-    return paras.map((t) => Array.isArray(t) ? dotList(t) : `<p class="desc-p">${esc(t)}</p>`).join('');
+    return paras.map((t) => {
+      if (Array.isArray(t)) return dotList(t);
+      if (t && t.key) return `<p class="desc-p is-key">${esc(t.key)}</p>`;
+      if (t && t.flow) return flowHtml(t.flow);
+      return `<p class="desc-p">${esc(t)}</p>`;
+    }).join('');
   }
   // 제언 표 칸 — 문자열은 한 줄, 배열은 점 목록
   function cellHtml(v) {
@@ -670,10 +682,13 @@
   // (A) PC/모바일 강제 전환 토글 — 모바일에서 데스크탑 레이아웃을 미리 검증하기 위한 버튼.
   // 켜면 viewport content 를 width=1200 으로 바꿔 데스크탑 미디어쿼리를 발동시키고,
   // 끄면 원래 content(width=device-width …)로 정확히 원복한다. viewport 태그의 content 만 교체.
+  // 방문자에게는 본문을 가리기만 하므로 평소엔 숨기고, 주소에 ?dev 를 붙였을 때만 보인다.
   function initViewportToggle() {
     const btn = document.getElementById('viewport-toggle');
     const meta = document.querySelector('meta[name="viewport"]');
     if (!btn || !meta) return;
+    if (!new URLSearchParams(location.search).has('dev')) return;
+    btn.hidden = false;
     const MOBILE = meta.getAttribute('content'); // 원본 보존 (기본 width=device-width)
     const DESKTOP = 'width=1200';
     const label = btn.querySelector('.vt-label');

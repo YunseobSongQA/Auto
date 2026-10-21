@@ -109,8 +109,9 @@
     </div>
   </footer>
 
-  <!-- (A) PC/모바일 강제 전환 토글 — 모바일에서 데스크탑 레이아웃을 미리 검증하기 위한 버튼 -->
-  <button id="viewport-toggle" class="viewport-toggle" type="button" aria-pressed="false" title="데스크탑 레이아웃 미리보기 (viewport 강제 전환)">
+  <!-- (A) PC/모바일 강제 전환 토글 — 모바일에서 데스크탑 레이아웃을 미리 검증하기 위한 버튼.
+       방문자 화면을 가리지 않게 평소엔 숨기고, 주소에 ?dev 를 붙이면 main.js 가 보여 준다. -->
+  <button id="viewport-toggle" class="viewport-toggle" type="button" hidden aria-pressed="false" title="데스크탑 레이아웃 미리보기 (viewport 강제 전환)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
     <span class="vt-label">PC 화면으로 보기</span>
   </button>

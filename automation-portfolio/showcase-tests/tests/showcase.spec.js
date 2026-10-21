@@ -139,11 +139,13 @@ test('도구 소개글은 뜻 단위 문단으로 줄이 나뉘어 있다', asyn
   await expect(page.locator('.slide[data-id="qass"] .desc .desc-p')).toHaveCount(3);
 });
 
-test('도구 소개글마다 점(•) 목록이 있어 무엇을 하는지 한눈에 보인다', async ({ page }) => {
+test('도구 소개글마다 진한 핵심 문장 하나와, 무엇을 하는지 보여 주는 점(•) 목록이나 흐름 칸이 있다', async ({ page }) => {
   await page.goto('/');
   for (const id of SLIDES.slice(1, -1)) {
-    const items = page.locator(`.slide[data-id="${id}"] .desc .dot-list li`);
-    expect(await items.count(), id).toBeGreaterThanOrEqual(2);
+    const desc = page.locator(`.slide[data-id="${id}"] .desc`);
+    await expect(desc.locator('.desc-p.is-key'), id).toHaveCount(1);
+    const shapes = await desc.locator('.dot-list li, .flow-step').count();
+    expect(shapes, id).toBeGreaterThanOrEqual(2);
   }
   await goTo(page, 'qass');
   const items = page.locator('.slide[data-id="qass"] .desc .dot-list').first().locator('li');
@@ -154,6 +156,24 @@ test('도구 소개글마다 점(•) 목록이 있어 무엇을 하는지 한�
     return { w: st.width, r: st.borderRadius };
   });
   expect(dot).toEqual({ w: '4px', r: '50%' });
+});
+
+test('UI 자동화 장은 8단계 흐름을 단계 번호가 붙은 둥근 칸 네 개로 보여 준다', async ({ page }) => {
+  await page.goto('/');
+  for (const id of ['appium', 'playwright']) {
+    const steps = page.locator(`.slide[data-id="${id}"] .flow .flow-step`);
+    await expect(steps, id).toHaveText(['1–3로그인', '4–6방 입장', '7증적 확인', '8검색']);
+    await expect(page.locator(`.slide[data-id="${id}"] .flow-label`), id).toContainText('8단계');
+  }
+});
+
+test('"PC 화면으로 보기" 버튼은 방문자에게 숨기고, 주소에 ?dev 를 붙이면 보인다', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#viewport-toggle')).toBeHidden();
+  await page.goto('/?dev');
+  const narrow = (page.viewportSize()?.width ?? 1280) <= 720;
+  if (narrow) await expect(page.locator('#viewport-toggle')).toBeVisible();
+  else await expect(page.locator('#viewport-toggle')).toBeHidden(); // 넓은 화면에선 쓸모가 없어 늘 숨김
 });
 
 test('마지막 장은 도구별 효과 · 한계 · 개선 방향 표다', async ({ page }) => {
