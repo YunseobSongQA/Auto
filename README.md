@@ -6,7 +6,7 @@
 QA를 하며 마주치는 반복 업무를 도구로 만들어 자동화하고, 실무에 활용합니다.
 
 - 소개 사이트: **https://auto-x2o.pages.dev/**
-- 송윤섭 · QA Engineer (컴즈) — 前 LG CNS 배포 담당 QA · 現 KB국민은행 여신 파트 QA
+- 송윤섭 · QA Engineer (컴즈) — 前 LG전자 글로벌 이커머스 배포 담당 QA · 現 KB국민은행 QA
 
 ## 도구
 

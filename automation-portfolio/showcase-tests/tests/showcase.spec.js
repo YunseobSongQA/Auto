@@ -36,9 +36,9 @@ test('첫 화면에 제목·소개·경력이 보인다', async ({ page }) => {
   const career = page.locator('.bio-career');
   await expect(career).toContainText('컴즈');
   await expect(career).toContainText('前');
-  await expect(career).toContainText('LG CNS 배포 담당 QA');
+  await expect(career).toContainText('LG전자 글로벌 이커머스 배포 담당 QA');
   await expect(career).toContainText('現');
-  await expect(career).toContainText('KB국민은행 여신 파트 QA');
+  await expect(career).toContainText('KB국민은행 QA');
 });
 
 // '도구 둘러보기' 화살표가 지금 끝없이 돌고 있는가 (첫 화면이 켜져 있을 때만 돈다)
