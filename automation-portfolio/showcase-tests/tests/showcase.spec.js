@@ -136,17 +136,24 @@ test('도구 소개글은 뜻 단위 문단으로 줄이 나뉘어 있다', asyn
     const paras = page.locator(`.slide[data-id="${id}"] .desc .desc-p`);
     expect(await paras.count(), id).toBeGreaterThanOrEqual(2);
   }
-  await expect(page.locator('.slide[data-id="qass"] .desc .desc-p')).toHaveCount(4);
+  await expect(page.locator('.slide[data-id="qass"] .desc .desc-p')).toHaveCount(3);
 });
 
-test('소개글의 짧은 나열은 \'-\' 글머리 목록으로 보인다', async ({ page }) => {
+test('도구 소개글마다 점(•) 목록이 있어 무엇을 하는지 한눈에 보인다', async ({ page }) => {
   await page.goto('/');
+  for (const id of SLIDES.slice(1, -1)) {
+    const items = page.locator(`.slide[data-id="${id}"] .desc .dot-list li`);
+    expect(await items.count(), id).toBeGreaterThanOrEqual(2);
+  }
   await goTo(page, 'qass');
-  const items = page.locator('.slide[data-id="qass"] .desc .desc-list').first().locator('li');
-  await expect(items).toHaveCount(3);
-  await expect(items.first()).toHaveText('화면 캡처에만 2~3시간');
-  const marker = await items.first().evaluate((li) => getComputedStyle(li, '::before').content);
-  expect(marker).toBe('"-"');
+  const items = page.locator('.slide[data-id="qass"] .desc .dot-list').first().locator('li');
+  await expect(items).toHaveText(['화면 캡처에만 2~3시간', '놓친 화면은 다시 찾아 캡처', '한곳에 모아 정리한 뒤 보고']);
+  // 글머리는 글자가 아니라 작은 원 — 줄이 넘어가도 글이 점 뒤에 맞춰 선다
+  const dot = await items.first().evaluate((li) => {
+    const st = getComputedStyle(li, '::before');
+    return { w: st.width, r: st.borderRadius };
+  });
+  expect(dot).toEqual({ w: '4px', r: '50%' });
 });
 
 test('마지막 장은 도구별 효과 · 한계 · 개선 방향 표다', async ({ page }) => {
@@ -158,6 +165,8 @@ test('마지막 장은 도구별 효과 · 한계 · 개선 방향 표다', asyn
   // 효과 칸 수치는 카드의 실무 적용 시간 · 성공률에서 가져온다 — 카드와 어긋나면 안 된다
   await expect(table.locator('.plan-metric b')).toHaveText(['50%', '92%', '83%', '100%']);
   await expect(table.locator('.plan-sub')).toHaveText(['2시간 → 1시간', '1시간 → 5분', '1분 → 10초', '1,000건 중 실패 0건']);
+  // 여러 항목인 칸은 점 목록으로 나눠 보인다
+  await expect(table.locator('tbody tr').first().locator('.dot-list li')).toHaveText(['iOS 캡처', 'PPT 보고서 자동화']);
 });
 
 test('레일을 누르면 그 장이 켜지고 주소가 바뀐다', async ({ page }) => {

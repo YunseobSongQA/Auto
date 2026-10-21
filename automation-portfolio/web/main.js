@@ -70,13 +70,19 @@
           </div>`;
   }
 
+  // 점(•) 목록 — 소개글과 제언 표 칸이 같이 쓴다 (styles.css .dot-list).
+  function dotList(items) {
+    return `<ul class="dot-list">${items.map((li) => `<li>${esc(li)}</li>`).join('')}</ul>`;
+  }
   // 소개글 — 배열이면 항목마다 한 문단(줄 바꿈), 문자열이면 그대로 한 문단.
-  // 항목이 다시 배열이면 '-' 로 시작하는 짧은 목록이 된다 (styles.css .desc-list).
+  // 항목이 다시 배열이면 점 목록이 된다.
   function descHtml(desc) {
     const paras = Array.isArray(desc) ? desc : [desc || ''];
-    return paras.map((t) => Array.isArray(t)
-      ? `<ul class="desc-list">${t.map((li) => `<li>${esc(li)}</li>`).join('')}</ul>`
-      : `<p class="desc-p">${esc(t)}</p>`).join('');
+    return paras.map((t) => Array.isArray(t) ? dotList(t) : `<p class="desc-p">${esc(t)}</p>`).join('');
+  }
+  // 제언 표 칸 — 문자열은 한 줄, 배열은 점 목록
+  function cellHtml(v) {
+    return Array.isArray(v) ? dotList(v) : `<p>${esc(v)}</p>`;
   }
 
   // 카드 한 장이 릴의 슬라이드 한 장이 됩니다. no 는 화면에 붙는 순번(1부터).
@@ -161,8 +167,8 @@
                 <tr role="row">
                   <th scope="row" role="rowheader"><b>${esc(r.name)}</b><span>${esc(r.sub)}</span></th>
                   <td role="cell" data-label="${esc(cEffect)}">${effect(r)}</td>
-                  <td role="cell" data-label="${esc(cLimit)}"><p>${esc(r.limit)}</p></td>
-                  <td role="cell" data-label="${esc(cNext)}"><p>${esc(r.next)}</p></td>
+                  <td role="cell" data-label="${esc(cLimit)}">${cellHtml(r.limit)}</td>
+                  <td role="cell" data-label="${esc(cNext)}">${cellHtml(r.next)}</td>
                 </tr>`).join('');
     return `
       <section class="slide slide--plan" data-id="${esc(p.id)}" data-name="${esc(p.name)}">

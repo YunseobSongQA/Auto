@@ -328,10 +328,15 @@ main { overflow-x: clip; }
 .desc-p { margin: 0; }
 /* 문단·목록 사이를 살짝 띄워 뜻 단위로 읽히게 */
 .desc > * + * { margin-top: 0.6em; }
-/* 짧은 목록 — 글머리는 '-'. 줄이 넘어가도 글이 '-' 뒤에 맞춰 선다. */
-.desc-list { margin: 0; padding: 0; list-style: none; }
-.desc-list li { position: relative; padding-left: 1.1em; }
-.desc-list li::before { content: '-'; position: absolute; left: 0.15em; color: var(--faint); }
+/* 점 목록 — 글머리는 작은 원. 첫 줄 가운데에 서고, 줄이 넘어가도 글이 점 뒤에 맞춰 선다. */
+.dot-list { margin: 0; padding: 0; list-style: none; }
+.dot-list li { position: relative; padding-left: 1em; }
+.dot-list li::before {
+  content: ''; position: absolute; left: .15em;
+  top: .7em; top: calc(.5lh - 2px); /* lh 를 모르는 브라우저는 .7em */
+  width: 4px; height: 4px; border-radius: 50%; background: var(--faint);
+}
+.dot-list li + li { margin-top: 1px; }
 .card > .demo { margin-top: 26px; }
 .card > .specs { margin-top: 20px; }
 .card > .vs { margin-top: 18px; }
