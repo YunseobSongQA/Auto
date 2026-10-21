@@ -71,9 +71,12 @@
   }
 
   // 소개글 — 배열이면 항목마다 한 문단(줄 바꿈), 문자열이면 그대로 한 문단.
+  // 항목이 다시 배열이면 '-' 로 시작하는 짧은 목록이 된다 (styles.css .desc-list).
   function descHtml(desc) {
     const paras = Array.isArray(desc) ? desc : [desc || ''];
-    return paras.map((t) => `<span class="desc-p">${esc(t)}</span>`).join('');
+    return paras.map((t) => Array.isArray(t)
+      ? `<ul class="desc-list">${t.map((li) => `<li>${esc(li)}</li>`).join('')}</ul>`
+      : `<p class="desc-p">${esc(t)}</p>`).join('');
   }
 
   // 카드 한 장이 릴의 슬라이드 한 장이 됩니다. no 는 화면에 붙는 순번(1부터).
@@ -94,7 +97,7 @@
           </div>
           <h2 class="rv" style="--i:1">${esc(card.title)}</h2>
           ${buildKpi(card, 2)}
-          <p class="desc rv" style="--i:3">${descHtml(card.desc)}</p>
+          <div class="desc rv" style="--i:3">${descHtml(card.desc)}</div>
 
           <!-- 데모는 차례 연출(rv)에서 뺀다 — 장이 켜지는 순간 영상이 바로 보이도록 -->
           <div class="demo" data-demo="${esc(card.demo || '')}" data-type="${esc(card.demoType)}" data-label="${esc(card.demoLabel || '')}" data-poster="${esc(card.poster || '')}">

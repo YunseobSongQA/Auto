@@ -120,13 +120,13 @@ test('API 장에 테스트한 서버와 범위(조회만)가 적혀 있다', asy
   await expect(specs).toContainText('조회(GET) 2종, 총 1,000건, 읽기 전용');
 });
 
-test('QASS 장에 안드로이드 앱이 소개되고, 실행 방법이 있는 GitHub로 가는 링크가 있다', async ({ page }) => {
+test('QASS 장에 안드로이드 APK가 소개되고, 설치·실행 방법이 있는 GitHub로 가는 링크가 있다', async ({ page }) => {
   await page.goto('/');
   await goTo(page, 'qass');
   const slide = page.locator('.slide[data-id="qass"]');
-  await expect(slide.locator('.desc')).toContainText('안드로이드 앱');
-  await expect(slide.locator('.specs')).toContainText('안드로이드 앱');
-  await expect(slide.locator('a.repo', { hasText: '안드로이드 앱 실행 방법' }))
+  await expect(slide.locator('.desc')).toContainText('안드로이드 APK');
+  await expect(slide.locator('.specs')).toContainText('안드로이드 APK');
+  await expect(slide.locator('a.repo', { hasText: 'APK 설치·실행 방법' }))
     .toHaveAttribute('href', 'https://github.com/YunseobSongQA/QA-Mobile-Auto-Capture');
 });
 
@@ -137,6 +137,16 @@ test('도구 소개글은 뜻 단위 문단으로 줄이 나뉘어 있다', asyn
     expect(await paras.count(), id).toBeGreaterThanOrEqual(2);
   }
   await expect(page.locator('.slide[data-id="qass"] .desc .desc-p')).toHaveCount(4);
+});
+
+test('소개글의 짧은 나열은 \'-\' 글머리 목록으로 보인다', async ({ page }) => {
+  await page.goto('/');
+  await goTo(page, 'qass');
+  const items = page.locator('.slide[data-id="qass"] .desc .desc-list').first().locator('li');
+  await expect(items).toHaveCount(3);
+  await expect(items.first()).toHaveText('화면 캡처에만 2~3시간');
+  const marker = await items.first().evaluate((li) => getComputedStyle(li, '::before').content);
+  expect(marker).toBe('"-"');
 });
 
 test('마지막 장은 도구별 효과 · 한계 · 개선 방향 표다', async ({ page }) => {
