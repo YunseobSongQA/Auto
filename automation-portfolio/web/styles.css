@@ -291,7 +291,7 @@ main { overflow-x: clip; }
 /* QA 프로세스 — 도구마다 QA 흐름의 어느 때에 쓰는지. 첫 화면 맨 아래, 소개와 요약 두 단을 가로질러 놓는다.
    단계는 테두리 칸을 화살표로 잇고(흐름), 그 단계에 쓰는 도구는 검은 알약을 화살촉 없는 선으로 단다(붙음).
    도구 장의 쓰임새 그림과 같은 약속 — 검은 알약이 도구다.
-   넓으면(상자 640px~) 가로 띠: 1행 되돌아가는 선 · 2행 단계 · 3행 도구. 좁으면 세로 목록: 왼쪽 단계 · 오른쪽 도구.
+   넓으면(상자 640px~) 가로 띠: 1행 단계 · 2행 도구. 좁으면 세로 목록: 왼쪽 단계 · 오른쪽 도구.
    단계 칸은 폭(가로)·높이(세로)가 같아서, 두 단계에 걸친 QASS 의 선을 % 로 두 칸 가운데에 맞출 수 있다. */
 .qp { grid-column: 1 / -1; margin: 36px 0 0; border-top: 1px solid var(--rule); container-type: inline-size; }
 .qp-map { --cg: 30px; --rg: 18px; display: grid; word-break: keep-all; overflow-wrap: break-word; }
@@ -315,20 +315,18 @@ main { overflow-x: clip; }
 .qp-tools a:hover, .qp-tools a:focus-visible { background: var(--accent); }
 .qp-tools a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* 선 — 흐름 화살표(단계 → 단계)와 붙음 선(단계 — 도구)은 모두 같은 옅은 색 1px */
-.qp-stage::before, .qp-stage::after, .qp-tools::before, .qp-tools::after, .qp-loop::before, .qp-loop::after {
+.qp-stage::before, .qp-stage::after, .qp-tools::before, .qp-tools::after {
   position: absolute; box-sizing: border-box;
 }
-.qp-loop-label { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--faint); }
 
 @container (min-width: 640px) {
-  /* 리그레션 칸만 조금 넓혀(1.45fr) 도구 셋이 넓은 화면에선 한 줄에 선다. 나머지 칸은 1fr 로 같다.
-     칸 폭 합이 5.45fr 이라 처음·끝 칸 가운데는 (100% - 틈 넷) / 10.9 — 되돌아가는 선이 여기에 닿는다. */
+  /* 리그레션 칸만 조금 넓혀(1.45fr) 도구 셋이 넓은 화면에선 한 줄에 선다. 나머지 칸은 1fr 로 같다. */
   .qp-map {
-    grid-template-columns: 1fr 1fr 1fr 1.45fr 1fr; grid-template-rows: 16px auto auto;
-    column-gap: var(--cg); row-gap: var(--rg); padding-top: 14px;
+    grid-template-columns: 1fr 1fr 1fr 1.45fr 1fr;
+    column-gap: var(--cg); row-gap: var(--rg); padding-top: 8px;
   }
-  .qp-stage { grid-row: 2; grid-column: var(--n); text-align: center; }
-  .qp-tools { grid-row: 3; grid-column: var(--n) / span var(--span, 1); justify-content: center; align-items: flex-start; }
+  .qp-stage { grid-row: 1; grid-column: var(--n); text-align: center; }
+  .qp-tools { grid-row: 2; grid-column: var(--n) / span var(--span, 1); justify-content: center; align-items: flex-start; }
   .qp-tools.is-group { justify-self: center; }
   /* 단계 → 다음 단계: 칸 사이 틈(--cg)을 가로지르는 화살표 */
   .qp-stage:not(.is-end)::after {
@@ -346,20 +344,6 @@ main { overflow-x: clip; }
   .qp-tools.is-span::before { left: calc((100% - var(--cg)) / 4); }
   .qp-tools.is-span::after { right: calc((100% - var(--cg)) / 4); margin-right: -.5px; }
   .qp-tools.is-group::before { top: calc(-1 * var(--rg) - 1px); } /* 묶음 테두리 바깥에서 닿게 */
-  /* 되돌아가는 선 — 끝 단계 가운데에서 위로 올라 처음 단계 가운데로 내려와 꽂힌다. 이름은 선 위 가운데. */
-  .qp-loop { grid-row: 1; grid-column: 1 / -1; position: relative; margin-bottom: calc(-1 * var(--rg)); }
-  .qp-loop::before {
-    content: ''; inset: 0 calc((100% - 4 * var(--cg)) / 10.9);
-    border: 1px solid var(--faint); border-bottom: 0; border-radius: 8px 8px 0 0;
-  }
-  .qp-loop::after {
-    content: ''; bottom: 0; left: calc((100% - 4 * var(--cg)) / 10.9 + .5px); transform: translateX(-50%);
-    border-top: 6px solid var(--faint); border-inline: 3.5px solid transparent;
-  }
-  .qp-loop-label {
-    grid-row: 1; grid-column: 1 / -1; justify-self: center; align-self: start;
-    position: relative; padding: 0 10px; background: var(--bg); transform: translateY(-50%);
-  }
 }
 
 @container (max-width: 639.98px) {
@@ -367,7 +351,7 @@ main { overflow-x: clip; }
   .qp-map {
     --tw: 20px;
     grid-template-columns: minmax(0, 1fr) var(--tw) minmax(0, .82fr);
-    grid-template-rows: auto 1fr 1fr auto auto auto; row-gap: var(--rg); padding-top: 14px;
+    grid-template-rows: auto 1fr 1fr auto auto; row-gap: var(--rg); padding-top: 14px;
   }
   .qp-stage { grid-column: 1; grid-row: var(--n); padding: 9px 12px; }
   .qp-tools { grid-column: 3; grid-row: var(--n) / span var(--span, 1); align-items: center; align-content: center; }
@@ -392,10 +376,6 @@ main { overflow-x: clip; }
   .qp-tools.is-span::after {
     content: ''; left: calc(-1 * var(--tw) / 2); width: calc(var(--tw) / 2); top: 50%; height: 1px; margin-top: -.5px; background: var(--faint);
   }
-  /* 되돌아가는 선은 세로 목록에선 글로만 — 맨 아래 한 줄 */
-  .qp-loop { display: none; }
-  .qp-loop-label { grid-column: 1 / -1; grid-row: 6; margin-top: -4px; }
-  .qp-loop-label::before { content: '↻ '; content: '↻ ' / ''; }
 }
 
 /* '도구 둘러보기' — 글자 옆 작은 둥근 테(.cue) 안에서 화살표가 천천히 아래로 빠져나갔다가 위에서 다시
