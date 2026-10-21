@@ -21,15 +21,15 @@ async function goTo(page, id) {
 
 // 좁은 화면에서 장이 화면보다 길면 영상이 처음엔 화면 아래에 있다. 사파리(WebKit)는 화면 밖 영상을
 // 멈춰 두었다가 보이면 스스로 튼다 — 방문자처럼 장 안에서 영상이 보일 때까지 넘긴다 (장은 그대로).
-async function showDemo(page, id) {
-  const below = await page.locator(`.slide[data-id="${id}"] .demo`).evaluate(el =>
-    Math.ceil(el.getBoundingClientRect().bottom - window.innerHeight + 16));
+async function reveal(page, id, sel) {
+  const target = page.locator(`.slide[data-id="${id}"] ${sel}`);
+  const below = await target.evaluate(el => Math.ceil(el.getBoundingClientRect().bottom - window.innerHeight + 16));
   if (below <= 0) return;
   await page.evaluate(d => window.scrollBy(0, d), below);
-  await expect.poll(() => page.locator(`.slide[data-id="${id}"] .demo`).evaluate(el =>
-    el.getBoundingClientRect().bottom <= window.innerHeight)).toBe(true);
+  await expect.poll(() => target.evaluate(el => el.getBoundingClientRect().bottom <= window.innerHeight)).toBe(true);
   await expect(page.locator(`.slide[data-id="${id}"]`)).toHaveClass(/is-on/);
 }
+const showDemo = (page, id) => reveal(page, id, '.demo');
 
 // 그 장의 영상이 실제로 돌고 있는가 (멈춤 아님 · 시간이 흐름)
 const playing = (page, id) => page.evaluate(id => {
@@ -96,6 +96,41 @@ test('넓은 화면 첫 화면 요약에 도구별 핵심 수치가 바로 보�
   const api = page.locator('.intro-index a[href="#api"] .ix-metric');
   await expect(api.locator('.ix-time')).toHaveText('성공률');
   await expect(api.locator('b')).toHaveText('100%');
+});
+
+test('첫 화면에 QA 프로세스 그림이 있고, 단계마다 쓰는 도구를 누르면 그 장으로 간다', async ({ page }) => {
+  await page.goto('/');
+  const qp = page.locator('.slide[data-id="top"] .qp');
+  await expect(qp.locator('.qp-stage b')).toHaveText(['테스트 설계', '테스트 수행', '결과 보고', '리그레션', '성능 점검']);
+  // 도구 알약은 도구 장을 빠짐없이 한 번씩 가리킨다
+  const hrefs = await qp.locator('.qp-tools a').evaluateAll(as => as.map(a => a.getAttribute('href')));
+  expect(hrefs.sort()).toEqual(SLIDES.slice(1, -1).map(id => `#${id}`).sort());
+  await reveal(page, 'top', '.qp a[href="#api"]');
+  await qp.locator('a[href="#api"]').click();
+  await expect(page.locator('.slide[data-id="api"]')).toHaveClass(/is-on/);
+});
+
+test('QA 프로세스 그림에서 도구는 제 단계 바로 아래(좁으면 옆)에 서고, QASS 는 수행·보고 두 단계에 걸친다', async ({ page }) => {
+  await page.goto('/');
+  const off = await page.evaluate(() => {
+    const box = el => el.getBoundingClientRect();
+    const stages = [...document.querySelectorAll('.qp-stage')].map(box);
+    const wide = Math.abs(stages[0].top - stages[1].top) < 1; // 단계가 한 줄이면 가로 띠
+    const bad = [];
+    document.querySelectorAll('.qp-tools').forEach((el) => {
+      const n = Number(getComputedStyle(el).getPropertyValue('--n'));
+      const first = stages[n - 1], last = stages[n - 1 + (el.classList.contains('is-span') ? 1 : 0)];
+      const t = box(el);
+      const ok = wide
+        ? Math.abs((t.left + t.right) / 2 - (first.left + last.right) / 2) < 1.5 && t.top > first.bottom
+        : Math.abs((t.top + t.bottom) / 2 - (first.top + last.bottom) / 2) < 1.5 && t.left > first.right;
+      if (!ok) bad.push(el.textContent);
+    });
+    return bad;
+  });
+  expect(off).toEqual([]);
+  // 두 단계(수행·보고)에 걸친 도구는 QASS 하나
+  await expect(page.locator('.qp-tools.is-span a')).toHaveText('QASS');
 });
 
 test('도구 장마다 그 도구의 실무 적용 시간이 보인다 (2시간 → 1시간 · 1시간 → 5분 · 1분 → 10초)', async ({ page }) => {

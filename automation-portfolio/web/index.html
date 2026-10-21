@@ -94,6 +94,27 @@
             <p class="ix-head">요약</p>
             <ol data-index></ol>
           </nav>
+
+          <!-- QA 프로세스 — 도구마다 QA 흐름의 어느 때에 쓰는지. 단계는 화살표로 잇고, 그 단계에 쓰는 도구(검은 알약,
+               누르면 그 장으로)를 아래에 단다. QASS 는 수행·보고 두 단계에 걸친다. 끝 단계에서 처음으로 돌아가는 선은
+               기획이 바뀌거나 다음 배포 때 다시 도는 것. 스크립트로 채우지 않고 여기 적는다 — 첫 화면이 그려진 뒤
+               끼워 넣으면 화면이 밀린다(CLS). 배치(가로 띠 ↔ 세로 목록)는 styles.css 가 폭을 보고 고른다. -->
+          <figure class="qp rv" style="--i:4" aria-labelledby="qp-title">
+            <figcaption class="ix-head" id="qp-title">QA 프로세스 속 도구<span>도구를 누르면 그 장으로</span></figcaption>
+            <div class="qp-map">
+              <span class="qp-loop" aria-hidden="true"></span>
+              <p class="qp-loop-label">기획이 바뀌거나 다음 배포 때 처음부터 다시</p>
+              <div class="qp-stage" style="--n:1"><b>테스트 설계</b><span>기획서로 TC 작성</span></div>
+              <div class="qp-tools" style="--n:1"><a href="#prd2tc">PRD2TC</a></div>
+              <div class="qp-stage" style="--n:2"><b>테스트 수행</b><span>화면마다 증적 남기기</span></div>
+              <div class="qp-tools is-span" style="--n:2"><a href="#qass">QASS</a></div>
+              <div class="qp-stage" style="--n:3"><b>결과 보고</b><span>증적 정리와 팀 공유</span></div>
+              <div class="qp-stage" style="--n:4"><b>리그레션</b><span>배포 후 핵심 기능 재확인</span></div>
+              <div class="qp-tools is-group" style="--n:4"><a href="#playwright">Playwright</a><a href="#selenium">Selenium</a><a href="#appium">Appium</a></div>
+              <div class="qp-stage is-end" style="--n:5"><b>성능 점검</b><span>부하와 병목 확인</span></div>
+              <div class="qp-tools" style="--n:5"><a href="#api">API</a></div>
+            </div>
+          </figure>
         </div>
       </section>
     </div>
