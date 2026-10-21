@@ -340,20 +340,58 @@ main { overflow-x: clip; }
 /* 핵심 문장 — "그래서 무엇을 만들었다"는 한 줄만 본문색으로 진하게, 훑어도 요점이 보이게 */
 .desc-p.is-key { color: var(--text); font-weight: 600; }
 
-/* 흐름 칸 — 둥근 칸을 화살표로 잇는다. 좁으면 칸 단위로 다음 줄로 넘어간다. */
-.flow-label { margin: 0 0 6px; font-size: 12.5px; color: var(--faint); }
-.flow ol { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0; }
-.flow li { display: flex; align-items: center; }
-.flow li + li::before {
-  content: '→'; content: '→' / ''; /* 화살표는 꾸밈 — 스크린리더는 읽지 않는다 */
-  padding-inline: 7px; font-size: 13px; color: var(--faint);
+/* 쓰임새 그림 — 상황 → 도구 → 결과 세 칸을 도형으로 잇는다. 이 도구를 언제 쓰고 무엇을 얻는지 한눈에.
+   칸마다 모양이 다르다 — 상황은 테두리만 두른 칸, 도구는 먹색으로 칠한 알약, 결과는 초록 테두리 칸.
+   이음선(어느 선을 그릴지)은 main.js useLink 가 앞뒤 칸의 도형 수로 고르고, 여기서는 그리기만 한다.
+   줄: 1행은 칸 이름, 2행은 도형. 열: 칸 · 이음선 · 칸 · 이음선 · 칸 (세 칸은 같은 폭). */
+.use {
+  --link: 28px;
+  margin: 0; display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--link) minmax(0, 1fr) var(--link) minmax(0, 1fr);
 }
-.flow-step {
-  display: inline-flex; align-items: baseline; gap: 6px;
-  padding: 3px 11px; border: 1px solid var(--border-strong); border-radius: 999px;
-  font-size: 13px; line-height: 1.6; color: var(--text); white-space: nowrap;
+.desc > .use { margin-top: 16px; }
+.desc > .use + * { margin-top: 16px; }
+.use-head {
+  grid-row: 1; grid-column: var(--c);
+  margin: 0 0 4px; font-size: 11.5px; line-height: 1.5; color: var(--faint); text-align: center;
 }
-.flow-step small { font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+/* 도형이 여럿인 칸은 높이를 똑같이 나눠 가진다 — 그래야 이음선을 % 로 도형 가운데에 맞출 수 있다.
+   도형 사이 틈은 칸 안쪽 위아래 여백(3px)으로 만든다 (gap 을 쓰면 가운데가 % 에서 어긋난다).
+   하나뿐인 칸은 제 높이로 세로 가운데에 선다 — 모으는·나누는 괄호의 가운데와 맞는다. */
+.use-col { grid-row: 2; display: grid; grid-auto-rows: 1fr; margin: 0; padding: 0; list-style: none; }
+.use-col[data-n="1"] { grid-auto-rows: auto; align-content: center; }
+.use-col li { display: flex; padding-block: 3px; }
+.use-node {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 6px;
+  background: var(--surface); color: var(--text);
+  font-size: 13px; font-weight: 500; line-height: 1.45; text-align: center;
+}
+/* 작은 글씨 줄 — 칠한 도형 위에서도 읽히도록 색 대신 투명도로 한 단계 낮춘다 */
+.use-node small { font-size: 11.5px; font-weight: 500; line-height: 1.4; opacity: .72; }
+.is-tool .use-node { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 600; border-radius: 999px; }
+.is-result .use-node {
+  border-color: var(--good);
+  background: color-mix(in srgb, var(--good) 7%, var(--surface));
+}
+/* 이음선 — 곧은 선(.ln)은 --y 높이에, 괄호(.br)는 첫·끝 도형 가운데(--e) 사이에 그린다.
+   .l/.r 은 이음선 칸의 왼쪽·오른쪽 반, .to 는 끝에 화살촉. 괄호 .in 은 모으고 .out 은 나눈다. */
+.use-link { grid-row: 2; position: relative; color: var(--faint); }
+.use-link i { position: absolute; }
+.use-link .ln { top: var(--y); left: 0; right: 0; height: 1px; margin-top: -.5px; background: currentColor; }
+.use-link .ln.l { right: 50%; }
+.use-link .ln.r { left: 50%; }
+.use-link .br { top: var(--e); bottom: var(--e); border: 1px solid currentColor; }
+.use-link .br.in { left: 0; right: 50%; border-left: 0; border-radius: 0 4px 4px 0; }
+.use-link .br.out { left: 50%; right: 0; border-right: 0; border-radius: 4px 0 0 4px; }
+/* 화살촉 — 작은 삼각형. 나누는 괄호는 위·아래 두 끝에 하나씩 (괄호 선 두께의 가운데에 맞춘다). */
+.use-link .to::after, .use-link .br.out::before, .use-link .br.out::after {
+  content: ''; position: absolute; right: 0;
+  border-left: 6px solid currentColor; border-block: 3.5px solid transparent;
+}
+.use-link .to::after { top: 50%; transform: translateY(-50%); }
+.use-link .br.out::before { top: -.5px; transform: translateY(-50%); }
+.use-link .br.out::after { bottom: -.5px; transform: translateY(50%); }
 .card > .demo { margin-top: 26px; }
 .card > .specs { margin-top: 20px; }
 .card > .vs { margin-top: 18px; }
@@ -640,6 +678,9 @@ main { overflow-x: clip; }
   .card h2, .plan h2 { margin-top: 12px; font-size: 22px; }
   .saving-num b { font-size: 26px; }
   .desc { font-size: 14.5px; }
+  .use { --link: 16px; }
+  .use-node { padding: 6px 7px; font-size: 12.5px; }
+  .use-node small { font-size: 11px; }
   .card > .demo { margin-top: 22px; }
   .ptiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ptile:nth-child(odd) { padding-left: 0; border-left: 0; } /* 두 칸씩 놓이면 줄마다 첫 칸은 선 없이 */

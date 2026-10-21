@@ -74,21 +74,48 @@
   function dotList(items) {
     return `<ul class="dot-list">${items.map((li) => `<li>${esc(li)}</li>`).join('')}</ul>`;
   }
-  // 흐름 칸 — 단계를 둥근 칸으로 그리고 사이를 화살표로 잇는다. 칸의 작은 숫자는 실제 단계 번호.
-  function flowHtml({ label, steps }) {
-    const items = steps.map(([name, no]) =>
-      `<li><span class="flow-step">${no ? `<small>${esc(no)}</small>` : ''}${esc(name)}</span></li>`).join('');
-    return `<div class="flow">${label ? `<p class="flow-label">${esc(label)}</p>` : ''}` +
-      `<ol aria-label="${esc(label || '흐름')}">${items}</ol></div>`;
+  // 쓰임새 그림 — 상황 → 도구 → 결과 세 칸을 도형으로 잇는다. 이 도구를 언제 쓰고 무엇을 얻는지.
+  const USE_COLS = [['when', '상황'], ['tool', '도구'], ['result', '결과']];
+  // 두 칸 사이 이음선 — 앞 칸 도형 m개, 뒤 칸 n개. 같으면 줄마다 곧은 화살표, 여럿 → 하나는 모으는 괄호,
+  // 하나 → 여럿은 나누는 괄호. 칸 안 도형은 높이를 똑같이 나눠 가지므로(styles.css .use-col) k번째 도형의
+  // 가운데는 (2k+1)/2n 지점이다 — 선 위치를 % 로만 맞춘다.
+  function useLink(m, n) {
+    const y = (k, c) => `${(2 * k + 1) * 50 / c}%`;
+    const line = (cls, k, c) => `<i class="${cls}" style="--y:${y(k, c)}"></i>`;
+    // 괄호는 첫 도형과 끝 도형만 잇는다. 그 사이 도형(셋 이상일 때)은 짧은 선으로 괄호에 붙인다.
+    const between = (cls, c) => Array.from({ length: Math.max(0, c - 2) }, (_, k) => line(cls, k + 1, c)).join('');
+    let s;
+    if (m === n) {
+      s = Array.from({ length: n }, (_, k) => line('ln to', k, n)).join('');
+    } else {
+      s = (m > 1 ? `<i class="br in" style="--e:${50 / m}%"></i>${between('ln l', m)}` : line('ln l', 0, 1)) +
+        (n > 1 ? `<i class="br out" style="--e:${50 / n}%"></i>${between('ln r to', n)}` : line('ln r to', 0, 1));
+    }
+    return `<span class="use-link" aria-hidden="true">${s}</span>`;
+  }
+  // 도형 하나 — '\n' 뒤는 작은 글씨 줄 (도구 이름 아래 실행 환경 등)
+  function useNode(t) {
+    const [main, ...sub] = String(t).split('\n');
+    return `<span class="use-node">${esc(main)}${sub.map((s) => `<small>${esc(s)}</small>`).join('')}</span>`;
+  }
+  function useHtml(use) {
+    const cols = USE_COLS.map(([k]) => use[k] || []);
+    const heads = USE_COLS.map(([, name], i) =>
+      `<p class="use-head" style="--c:${2 * i + 1}" aria-hidden="true">${esc(name)}</p>`).join('');
+    const body = cols.map((items, i) =>
+      (i ? useLink(cols[i - 1].length, items.length) : '') +
+      `<ul class="use-col is-${USE_COLS[i][0]}" data-n="${items.length}" aria-label="${USE_COLS[i][1]}">` +
+      items.map((t) => `<li>${useNode(t)}</li>`).join('') + '</ul>').join('');
+    return `<figure class="use" aria-label="쓰임새">${heads}${body}</figure>`;
   }
   // 소개글 — 배열이면 항목마다 한 문단(줄 바꿈), 문자열이면 그대로 한 문단.
-  // 항목이 배열이면 점 목록, { key } 는 진하게 보일 핵심 문장, { flow } 는 흐름 칸.
+  // 항목이 배열이면 점 목록, { key } 는 진하게 보일 핵심 문장, { use } 는 쓰임새 그림.
   function descHtml(desc) {
     const paras = Array.isArray(desc) ? desc : [desc || ''];
     return paras.map((t) => {
       if (Array.isArray(t)) return dotList(t);
       if (t && t.key) return `<p class="desc-p is-key">${esc(t.key)}</p>`;
-      if (t && t.flow) return flowHtml(t.flow);
+      if (t && t.use) return useHtml(t.use);
       return `<p class="desc-p">${esc(t)}</p>`;
     }).join('');
   }

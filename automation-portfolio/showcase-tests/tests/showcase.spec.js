@@ -19,6 +19,18 @@ async function goTo(page, id) {
   await expect(page.locator(`.slide[data-id="${id}"]`)).toHaveClass(/is-on/);
 }
 
+// 좁은 화면에서 장이 화면보다 길면 영상이 처음엔 화면 아래에 있다. 사파리(WebKit)는 화면 밖 영상을
+// 멈춰 두었다가 보이면 스스로 튼다 — 방문자처럼 장 안에서 영상이 보일 때까지 넘긴다 (장은 그대로).
+async function showDemo(page, id) {
+  const below = await page.locator(`.slide[data-id="${id}"] .demo`).evaluate(el =>
+    Math.ceil(el.getBoundingClientRect().bottom - window.innerHeight + 16));
+  if (below <= 0) return;
+  await page.evaluate(d => window.scrollBy(0, d), below);
+  await expect.poll(() => page.locator(`.slide[data-id="${id}"] .demo`).evaluate(el =>
+    el.getBoundingClientRect().bottom <= window.innerHeight)).toBe(true);
+  await expect(page.locator(`.slide[data-id="${id}"]`)).toHaveClass(/is-on/);
+}
+
 // 그 장의 영상이 실제로 돌고 있는가 (멈춤 아님 · 시간이 흐름)
 const playing = (page, id) => page.evaluate(id => {
   const v = document.querySelector(`.slide[data-id="${id}"] video`);
@@ -139,12 +151,12 @@ test('도구 소개글은 뜻 단위 문단으로 줄이 나뉘어 있다', asyn
   await expect(page.locator('.slide[data-id="qass"] .desc .desc-p')).toHaveCount(3);
 });
 
-test('도구 소개글마다 진한 핵심 문장 하나와, 무엇을 하는지 보여 주는 점(•) 목록이나 흐름 칸이 있다', async ({ page }) => {
+test('도구 소개글마다 진한 핵심 문장 하나와, 무엇을 하는지 보여 주는 점(•) 목록이나 쓰임새 그림이 있다', async ({ page }) => {
   await page.goto('/');
   for (const id of SLIDES.slice(1, -1)) {
     const desc = page.locator(`.slide[data-id="${id}"] .desc`);
     await expect(desc.locator('.desc-p.is-key'), id).toHaveCount(1);
-    const shapes = await desc.locator('.dot-list li, .flow-step').count();
+    const shapes = await desc.locator('.dot-list li, .use-node').count();
     expect(shapes, id).toBeGreaterThanOrEqual(2);
   }
   await goTo(page, 'qass');
@@ -158,13 +170,54 @@ test('도구 소개글마다 진한 핵심 문장 하나와, 무엇을 하는지
   expect(dot).toEqual({ w: '4px', r: '50%' });
 });
 
-test('UI 자동화 장은 8단계 흐름을 단계 번호가 붙은 둥근 칸 네 개로 보여 준다', async ({ page }) => {
+test('도구 장마다 언제 쓰는지 보여 주는 상황 → 도구 → 결과 그림이 있고, 단계 번호 흐름 칸은 없다', async ({ page }) => {
   await page.goto('/');
-  for (const id of ['appium', 'playwright']) {
-    const steps = page.locator(`.slide[data-id="${id}"] .flow .flow-step`);
-    await expect(steps, id).toHaveText(['1–3로그인', '4–6방 입장', '7증적 확인', '8검색']);
-    await expect(page.locator(`.slide[data-id="${id}"] .flow-label`), id).toContainText('8단계');
+  for (const id of SLIDES.slice(1, -1)) {
+    const use = page.locator(`.slide[data-id="${id}"] .desc .use`);
+    await expect(use, id).toHaveCount(1);
+    await expect(use.locator('.use-head'), id).toHaveText(['상황', '도구', '결과']);
+    for (const col of ['when', 'tool', 'result']) {
+      expect(await use.locator(`.use-col.is-${col} .use-node`).count(), `${id} ${col}`).toBeGreaterThanOrEqual(1);
+    }
   }
+  await expect(page.locator('.flow, .flow-step')).toHaveCount(0);
+  // Selenium 은 비교표의 '현장' 줄처럼 어느 현장에서 어느 도구를 쓰는지 보여 준다
+  const selenium = page.locator('.slide[data-id="selenium"] .use');
+  await expect(selenium.locator('.is-when .use-node')).toHaveText(['새 프로젝트', '레거시 프로젝트']);
+  await expect(selenium.locator('.is-tool .use-node')).toHaveText(['Playwright', 'Selenium']);
+  // QASS 는 PC 와 안드로이드 두 갈래 — APK 는 증적을 기기에 저장한다
+  const qass = page.locator('.slide[data-id="qass"] .use');
+  await expect(qass.locator('.is-tool .use-node')).toHaveText(['크롬 확장 프로그램', '안드로이드 APK']);
+  await expect(qass.locator('.is-result .use-node').nth(1)).toHaveText('순서대로 사진 저장');
+});
+
+test('쓰임새 그림의 이음선은 앞뒤 도형의 가운데에 닿고, 허공에 뜬 선이 없다', async ({ page }) => {
+  await page.goto('/');
+  const off = await page.evaluate(() => {
+    const mid = (r) => r.top + r.height / 2;
+    const ys = (ul) => [...ul.querySelectorAll('.use-node')].map((n) => mid(n.getBoundingClientRect()));
+    const near = (a, b) => Math.abs(a - b) < 1.5;
+    const bad = [];
+    document.querySelectorAll('.use-link').forEach((link, i) => {
+      const left = ys(link.previousElementSibling), right = ys(link.nextElementSibling);
+      // 선 끝이 닿는 높이 — 왼쪽 끝(L)과 오른쪽 끝(R). 괄호는 위·아래 선 두께의 가운데.
+      const L = [], R = [];
+      link.querySelectorAll('.ln').forEach((el) => {
+        const y = mid(el.getBoundingClientRect());
+        if (!el.classList.contains('r')) L.push(y);
+        if (!el.classList.contains('l')) R.push(y);
+      });
+      link.querySelectorAll('.br').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        (el.classList.contains('in') ? L : R).push(r.top + 0.5, r.bottom - 0.5);
+      });
+      // 도형마다 선이 하나는 닿고, 선 끝마다 닿는 도형이 있어야 한다
+      const ok = (ends, nodes) => nodes.every((y) => ends.some((e) => near(e, y))) && ends.every((e) => nodes.some((y) => near(e, y)));
+      if (!ok(L, left) || !ok(R, right)) bad.push(`${link.closest('.slide').dataset.id} #${i}`);
+    });
+    return bad;
+  });
+  expect(off).toEqual([]);
 });
 
 test('"PC 화면으로 보기" 버튼은 방문자에게 숨기고, 주소에 ?dev 를 붙이면 보인다', async ({ page }) => {
@@ -202,6 +255,7 @@ test('장에 들어가면 그 장의 영상만 재생된다', async ({ page }) =
   await page.goto('/');
   for (const id of VIDEOS) {
     await goTo(page, id);
+    await showDemo(page, id);
     await expect.poll(() => playing(page, id), { timeout: 10_000 }).toBe(true);
     const others = await page.evaluate(id => [...document.querySelectorAll('.demo video')]
       .filter(v => !v.closest(`.slide[data-id="${id}"]`) && !v.paused).length, id);
@@ -212,10 +266,12 @@ test('장에 들어가면 그 장의 영상만 재생된다', async ({ page }) =
 test('같은 장에 다시 들어오면 처음부터 다시 재생된다', async ({ page }) => {
   await page.goto('/');
   await goTo(page, 'qass');
+  await showDemo(page, 'qass');
   await expect.poll(() => playing(page, 'qass'), { timeout: 10_000 }).toBe(true);
   await page.waitForTimeout(1500);
   await goTo(page, 'appium');
   await goTo(page, 'qass');
+  await showDemo(page, 'qass');
   // 되감기가 끝나고(사파리는 서버의 Range 응답이 있어야 된다) 앞부분부터 다시 돈다
   await expect.poll(() => page.evaluate(() => {
     const v = document.querySelector('.slide[data-id="qass"] video');
